@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "askthew": {
+      "command": "npx",
+      "args": ["-y", "--package", "@askthew/mcp-plugin@0.4.27", "askthew-mcp"],
+      "env": {
+        "ASKTHEW_API_URL": "https://app.askthew.com",
+        "ASKTHEW_HOST_TYPE": "codex"
+      }
+    }
+  }
+}

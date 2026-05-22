@@ -1,0 +1,32 @@
+{
+  "name": "askthew",
+  "version": "0.1.0",
+  "description": "Capture coding-agent signals and decisions in Codex.",
+  "author": {
+    "name": "Ask The W",
+    "email": "team@askthew.com",
+    "url": "https://askthew.com"
+  },
+  "homepage": "https://askthew.com",
+  "repository": "https://github.com/askthew/codex-plugin",
+  "license": "MIT",
+  "keywords": ["observability", "decisions", "signals"],
+  "mcpServers": "./.mcp.json",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Ask The W",
+    "shortDescription": "Signals + decisions for coding agents.",
+    "longDescription": "Capture session signals, log durable decisions, recap and coach across Codex sessions.",
+    "developerName": "Ask The W",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "brandColor": "#0B5FFF",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/logo.png",
+    "screenshots": ["./assets/screenshot-1.png"],
+    "defaultPrompt": ["Recap what changed in this session and propose a next move."],
+    "websiteURL": "https://askthew.com",
+    "privacyPolicyURL": "https://askthew.com/privacy",
+    "termsOfServiceURL": "https://askthew.com/terms"
+  }
+}

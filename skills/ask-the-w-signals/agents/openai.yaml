@@ -1,0 +1,13 @@
+interface:
+  display_name: "Ask The W Signals"
+  short_description: "Capture session signals and decisions"
+  brand_color: "#0B5FFF"
+  default_prompt: "Recap this session and propose the next move."
+
+policy:
+  allow_implicit_invocation: true
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "askthew"
+      description: "Ask The W bundled MCP server"
