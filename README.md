@@ -9,7 +9,7 @@ The npm package remains the source of truth for the MCP server binary. This repo
 Add the repo-backed marketplace:
 
 ```bash
-codex plugin marketplace add askthew/codex-plugin --ref main
+codex plugin marketplace add AskTheWAI/codex-plugin --ref main
 ```
 
 Then install **Ask The W** from the Codex Plugins UI or from `/plugins` in the Codex REPL. `codex-cli 0.130.0` does not provide `codex plugin install <name>`.

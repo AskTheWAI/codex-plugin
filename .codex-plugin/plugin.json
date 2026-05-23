@@ -8,7 +8,7 @@
     "url": "https://askthew.com"
   },
   "homepage": "https://askthew.com",
-  "repository": "https://github.com/askthew/codex-plugin",
+  "repository": "https://github.com/AskTheWAI/codex-plugin",
   "license": "MIT",
   "keywords": ["observability", "decisions", "signals"],
   "mcpServers": "./.mcp.json",
