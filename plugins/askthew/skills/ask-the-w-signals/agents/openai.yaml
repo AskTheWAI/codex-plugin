@@ -1,0 +1,13 @@
+interface:
+  display_name: "Ask The W Signals"
+  short_description: "Session signals, decisions, recaps, and coaching"
+  brand_color: "#0B5FFF"
+  default_prompt: "Recap scoped history, capture decisions, and request coaching for the next step."
+
+policy:
+  allow_implicit_invocation: true
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "askthew"
+      description: "Ask The W Codex MCP server"

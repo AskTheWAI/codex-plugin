@@ -1,0 +1,43 @@
+{
+  "author": {
+    "email": "team@askthew.com",
+    "name": "Ask The W",
+    "url": "https://askthew.com"
+  },
+  "description": "Ask The W MCP tools for Codex session signals, decision logs, recaps, and coaching.",
+  "homepage": "https://askthew.com",
+  "interface": {
+    "brandColor": "#0B5FFF",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "category": "Productivity",
+    "composerIcon": "./assets/icon.png",
+    "defaultPrompt": [
+      "Recap scoped history, capture durable decisions, and request coaching for the next step."
+    ],
+    "developerName": "Ask The W",
+    "displayName": "Ask The W",
+    "logo": "./assets/logo.png",
+    "longDescription": "MCP tools capture setup, checkpoint, direction-change, implementation, verification, and final-summary signals; create and list decisions; list signal history; request recaps; request coaching; and connect Codex to an Ask The W workspace.",
+    "privacyPolicyURL": "https://askthew.com/privacy",
+    "screenshots": [
+      "./assets/brand/social/product-preview.png"
+    ],
+    "shortDescription": "Session signals, decision logs, recaps, and coaching.",
+    "termsOfServiceURL": "https://askthew.com/terms",
+    "websiteURL": "https://askthew.com"
+  },
+  "keywords": [
+    "observability",
+    "decisions",
+    "signals"
+  ],
+  "license": "MIT",
+  "mcpServers": "./.mcp.json",
+  "name": "askthew",
+  "repository": "https://github.com/AskTheWAI/codex-plugin",
+  "skills": "./skills/",
+  "version": "0.1.1"
+}

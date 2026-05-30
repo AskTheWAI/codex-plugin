@@ -1,20 +1,20 @@
 {
-  "name": "askthew",
   "interface": {
     "displayName": "Ask The W"
   },
+  "name": "askthew",
   "plugins": [
     {
+      "category": "Productivity",
       "name": "askthew",
-      "source": {
-        "source": "local",
-        "path": "./"
-      },
       "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_USE"
+        "authentication": "ON_USE",
+        "installation": "AVAILABLE"
       },
-      "category": "Productivity"
+      "source": {
+        "path": "./plugins/askthew",
+        "source": "local"
+      }
     }
   ]
 }

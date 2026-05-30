@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "askthew": {
+      "args": [
+        "./vendor/askthew-mcp/dist/cli.cjs"
+      ],
+      "command": "node",
+      "cwd": ".",
+      "env": {
+        "ASKTHEW_API_URL": "https://app.askthew.com",
+        "ASKTHEW_HOST_TYPE": "codex",
+        "ASKTHEW_PLUGIN_TIER": "paid",
+        "ASKTHEW_REQUIRE_PAID": "true"
+      }
+    }
+  }
+}
