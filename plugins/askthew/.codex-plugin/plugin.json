@@ -4,7 +4,7 @@
     "name": "Ask The W",
     "url": "https://askthew.com"
   },
-  "description": "Ask The W MCP tools for Codex session signals, decision logs, recaps, and coaching.",
+  "description": "Paid Ask The W MCP tools link Codex to your account for decisions, recaps, and server-side next moves.",
   "homepage": "https://askthew.com",
   "interface": {
     "brandColor": "#0B5FFF",
@@ -15,17 +15,19 @@
     "category": "Productivity",
     "composerIcon": "./assets/icon.png",
     "defaultPrompt": [
-      "Recap scoped history, capture durable decisions, and request coaching for the next step."
+      "Push this decision to Ask The W.",
+      "Retrieve my next moves from Ask The W.",
+      "Open Ask The W analytics and connected sources."
     ],
     "developerName": "Ask The W",
     "displayName": "Ask The W",
     "logo": "./assets/logo.png",
-    "longDescription": "MCP tools capture setup, checkpoint, direction-change, implementation, verification, and final-summary signals; create and list decisions; list signal history; request recaps; request coaching; and connect Codex to an Ask The W workspace.",
+    "longDescription": "Use the paid Ask The W Codex plugin after install and workspace binding to send authorized, compact coding-session signals to your Ask The W account: capture setup, checkpoints, direction changes, implementation updates, verification results, and final summaries; push durable decisions; review scoped signal and decision history; request server-backed recaps; retrieve next moves from Ask The W; and open the workspace to review analytics and connected sources. Signals are sanitized by the MCP package before queueing or sending: no transcripts, secrets, credentials, private tokens, or large copied content. Examples: push a product or architecture decision made in Codex; pull the next moves already tracked in your Ask The W workspace; open Ask The W when you want the broader dashboard view.",
     "privacyPolicyURL": "https://askthew.com/privacy",
     "screenshots": [
       "./assets/brand/social/product-preview.png"
     ],
-    "shortDescription": "Session signals, decision logs, recaps, and coaching.",
+    "shortDescription": "Account-linked Codex decisions, recaps, and server-side next moves.",
     "termsOfServiceURL": "https://askthew.com/terms",
     "websiteURL": "https://askthew.com"
   },

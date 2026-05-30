@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Ask The W — Logo & Icon Package</title>
+<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --canvas: #FAFAF9;
+    --surface: #FFFFFF;
+    --border: #E4E4E7;
+    --border-strong: #D4D4D8;
+    --ink-1: #18181B;
+    --ink-2: #3F3F46;
+    --ink-3: #71717A;
+    --cream: #F5EDE0;
+    --black: #0A0A0B;
+    --primary: #D4763A;
+    --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--canvas); color: var(--ink-1); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+  body { padding: 80px 56px 120px; max-width: 1280px; margin: 0 auto; }
+
+  /* ── Top header ── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 56px; }
+  .topbar .brand { display: flex; align-items: center; gap: 14px; }
+  .topbar .brand img { width: 36px; height: 36px; border-radius: 7px; }
+  .topbar .brand .name { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .topbar .meta { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); }
+
+  /* ── Hero ── */
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-bottom: 96px; padding: 64px; background: var(--cream); border-radius: 16px; border: 1px solid var(--border); }
+  .hero-icon { display: flex; justify-content: center; }
+  .hero-icon img { width: 320px; height: 320px; border-radius: 52px; box-shadow: 0 20px 50px rgba(0,0,0,0.12), 0 6px 14px rgba(0,0,0,0.06); }
+  .hero h1 { font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 18px; }
+  .hero h1 span { color: var(--primary); }
+  .hero p { font-size: 18px; line-height: 1.55; color: var(--ink-2); max-width: 38ch; margin-bottom: 24px; }
+  .hero .stats { display: flex; gap: 32px; }
+  .hero .stat { font-family: var(--font-mono); font-size: 13px; color: var(--ink-3); }
+  .hero .stat strong { display: block; font-family: var(--font-sans); font-size: 22px; font-weight: 700; color: var(--ink-1); margin-bottom: 2px; letter-spacing: -0.01em; }
+
+  /* ── Section ── */
+  section { margin-bottom: 88px; }
+  .sec-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .sec-head .label { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
+  .sec-head h2 { font-size: 28px; font-weight: 700; letter-spacing: -0.025em; }
+  .sec-head .desc { font-size: 14px; color: var(--ink-3); max-width: 36ch; text-align: right; }
+
+  /* ── Variant cards ── */
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card .preview {
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--canvas);
+    border-bottom: 1px solid var(--border);
+  }
+  .card .preview.bg-cream { background: var(--cream); }
+  .card .preview.bg-black { background: var(--black); }
+  .card .preview.bg-white { background: #fff; }
+  .card .preview.bg-checker {
+    background-image:
+      linear-gradient(45deg, #E4E4E7 25%, transparent 25%),
+      linear-gradient(-45deg, #E4E4E7 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #E4E4E7 75%),
+      linear-gradient(-45deg, transparent 75%, #E4E4E7 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-color: #fff;
+  }
+  .card .preview img { width: 60%; height: 60%; object-fit: contain; }
+  .card .meta { padding: 12px 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .card .meta .name { font-size: 13px; font-weight: 600; color: var(--ink-1); }
+  .card .meta .file { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  /* ── Size showcase ── */
+  .sizes-row {
+    display: flex; align-items: flex-end; gap: 32px;
+    padding: 40px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    overflow-x: auto;
+  }
+  .sizes-row .item { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
+  .sizes-row .item img { display: block; image-rendering: -webkit-optimize-contrast; }
+  .sizes-row .item .label { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  /* ── Lockups ── */
+  .lockup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .lockup-card .frame { padding: 64px 48px; display: flex; align-items: center; justify-content: center; min-height: 220px; }
+  .lockup-card .frame.bg-cream { background: var(--cream); }
+  .lockup-card .frame.bg-black { background: var(--black); }
+  .lockup-card .frame.bg-white { background: #fff; }
+  .lockup-card img { max-width: 100%; height: 96px; }
+  .lockup-card .meta { padding: 12px 16px; display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--border); }
+  .lockup-card .meta .name { font-size: 13px; font-weight: 600; }
+  .lockup-card .meta .file { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  /* ── Social header cards ── */
+  .social-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .social-card .frame { background: #2a2a2a; padding: 20px; display: flex; align-items: center; justify-content: center; }
+  .social-card .frame img { display: block; width: 100%; height: auto; max-height: 360px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+  .social-card .meta { padding: 12px 16px; display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--border); }
+  .social-card .meta .name { font-size: 13px; font-weight: 600; }
+  .social-card .meta .file { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+  .social-card .meta .dim { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  /* ── Color tokens ── */
+  .colors { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .swatch { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .swatch .chip { aspect-ratio: 16 / 9; }
+  .swatch .info { padding: 14px; }
+  .swatch .info .name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .swatch .info .hex { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); }
+
+  /* ── Usage rules ── */
+  .rules { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .rule {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .rule .head { display: flex; align-items: center; gap: 10px; }
+  .rule .head .badge {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 3px;
+  }
+  .rule.do .badge { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+  .rule.dont .badge { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .rule .head .title { font-size: 15px; font-weight: 600; }
+  .rule .body { font-size: 14px; line-height: 1.5; color: var(--ink-2); }
+
+  /* ── Code snippet ── */
+  .code {
+    background: var(--ink-1); color: #E4E4E7;
+    font-family: var(--font-mono); font-size: 12px; line-height: 1.7;
+    padding: 24px 28px; border-radius: 8px; overflow-x: auto;
+  }
+  .code .tag { color: #9FB7E0; }
+  .code .attr { color: #C9A876; }
+  .code .str { color: #A4C28C; }
+  .code .com { color: #71717A; }
+
+  /* ── Footer ── */
+  footer { margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 16px; font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); }
+
+  @media (max-width: 900px) {
+    body { padding: 32px 20px 80px; }
+    .hero { grid-template-columns: 1fr; padding: 36px; gap: 32px; }
+    .hero h1 { font-size: 36px; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3, .grid-2, .colors, .rules { grid-template-columns: 1fr; }
+    .sec-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .sec-head .desc { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="icon/cream-on-black/icon-128.png" alt="Ask The W"/>
+    <div class="name">Ask The W — Brand Package</div>
+  </div>
+  <div class="meta">v1.0 · April 2026</div>
+</header>
+
+<!-- ───────── HERO ───────── -->
+<section class="hero">
+  <div>
+    <h1>The W <span>Logo &amp; Icon Package</span></h1>
+    <p>A complete set of logo, icon and lockup files for use across product, web, social, and print. Source mark cleaned and re-rendered as vector and raster at every required size.</p>
+    <div class="stats">
+      <div class="stat"><strong>3</strong>color variants</div>
+      <div class="stat"><strong>11</strong>raster sizes</div>
+      <div class="stat"><strong>15</strong>SVG files</div>
+      <div class="stat"><strong>5</strong>social headers</div>
+    </div>
+  </div>
+  <div class="hero-icon">
+    <img src="icon/cream-on-black/icon-1024.png" alt="Ask The W mark"/>
+  </div>
+</section>
+
+<!-- ───────── PRIMARY MARK ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">01 / Primary mark</div>
+      <h2>Cream on Black</h2>
+    </div>
+    <div class="desc">The default. Use this everywhere unless context requires otherwise.</div>
+  </div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="preview"><img src="icon/cream-on-black/icon-512.png" alt=""/></div>
+      <div class="meta"><span class="name">Square · rounded</span><span class="file">icon-512.png</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-cream"><img src="icon/cream-on-black/icon-512.png" alt=""/></div>
+      <div class="meta"><span class="name">On cream</span><span class="file">+ ✓</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-white"><img src="icon/cream-on-black/icon-512.png" alt=""/></div>
+      <div class="meta"><span class="name">On white</span><span class="file">+ ✓</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-black"><img src="icon/cream-on-black/icon-512.png" alt=""/></div>
+      <div class="meta"><span class="name">On black</span><span class="file">⚠ low contrast bg</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── ALTERNATE VARIANTS ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">02 / Alternate variants</div>
+      <h2>Inverted, transparent &amp; circular</h2>
+    </div>
+    <div class="desc">Use when the rounded square is wrong for the surface.</div>
+  </div>
+  <div class="grid-4">
+    <div class="card">
+      <div class="preview bg-white"><img src="icon/black-on-cream/icon-512.png" alt=""/></div>
+      <div class="meta"><span class="name">Black on cream</span><span class="file">inverted</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-checker"><img src="icon/mark-only-cream/mark-512.png" alt=""/></div>
+      <div class="meta"><span class="name">Mark only · cream</span><span class="file">transparent</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-checker"><img src="icon/mark-only-black/mark-512.png" alt=""/></div>
+      <div class="meta"><span class="name">Mark only · black</span><span class="file">transparent</span></div>
+    </div>
+    <div class="card">
+      <div class="preview bg-white"><img src="icon/circle-cream-on-black/circle-512.png" alt=""/></div>
+      <div class="meta"><span class="name">Circle · cream/black</span><span class="file">avatars</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── SIZE SHOWCASE ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">03 / Size range</div>
+      <h2>Rendered at every size</h2>
+    </div>
+    <div class="desc">From 16px favicon to 2048px high-res. Each size is rendered fresh, not scaled.</div>
+  </div>
+  <div class="sizes-row">
+    <div class="item"><img src="favicon/favicon-16.png" width="16" height="16" alt=""/><div class="label">16</div></div>
+    <div class="item"><img src="favicon/favicon-32.png" width="32" height="32" alt=""/><div class="label">32</div></div>
+    <div class="item"><img src="favicon/favicon-48.png" width="48" height="48" alt=""/><div class="label">48</div></div>
+    <div class="item"><img src="icon/cream-on-black/icon-64.png" width="64" height="64" alt=""/><div class="label">64</div></div>
+    <div class="item"><img src="icon/cream-on-black/icon-128.png" width="96" height="96" alt=""/><div class="label">128</div></div>
+    <div class="item"><img src="favicon/apple-touch-icon.png" width="120" height="120" alt=""/><div class="label">180</div></div>
+    <div class="item"><img src="icon/cream-on-black/icon-256.png" width="160" height="160" alt=""/><div class="label">256</div></div>
+    <div class="item"><img src="icon/cream-on-black/icon-512.png" width="200" height="200" alt=""/><div class="label">512</div></div>
+  </div>
+</section>
+
+<!-- ───────── LOCKUPS ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">04 / Lockups</div>
+      <h2>Wordmark + icon</h2>
+    </div>
+    <div class="desc">Horizontal and stacked lockups in SVG. Wordmark set in Cormorant Garamond italic, sized to match the icon.</div>
+  </div>
+  <div class="grid-2">
+    <div class="lockup-card">
+      <div class="frame bg-white"><img src="lockup/lockup-horizontal-light.svg?v=6" alt=""/></div>
+      <div class="meta"><span class="name">Horizontal · cream surface</span><span class="file">lockup-horizontal-light.svg</span></div>
+    </div>
+    <div class="lockup-card">
+      <div class="frame bg-black"><img src="lockup/lockup-horizontal-dark.svg?v=6" alt=""/></div>
+      <div class="meta"><span class="name">Horizontal · dark surface</span><span class="file">lockup-horizontal-dark.svg</span></div>
+    </div>
+    <div class="lockup-card">
+      <div class="frame bg-white"><img src="lockup/lockup-horizontal-white.svg?v=6" alt=""/></div>
+      <div class="meta"><span class="name">Horizontal · on white</span><span class="file">lockup-horizontal-white.svg</span></div>
+    </div>
+    <div class="lockup-card">
+      <div class="frame bg-white" style="padding: 32px;"><img src="lockup/lockup-stacked-white.svg?v=6" style="height: 200px;" alt=""/></div>
+      <div class="meta"><span class="name">Stacked · on white</span><span class="file">lockup-stacked-white.svg</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── SOCIAL HEADERS ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">05 / Social headers</div>
+      <h2>Twitter &amp; LinkedIn banners</h2>
+    </div>
+    <div class="desc">Drop-in cover images at platform-correct dimensions. SVG so they re-export crisply at any resolution.</div>
+  </div>
+  <div class="social-card" style="margin-bottom: 16px;">
+    <div class="frame"><img src="social/twitter-header-centered.svg" alt=""/></div>
+    <div class="meta">
+      <span class="name">Twitter / X · centered lockup</span>
+      <span style="display:flex; gap:16px;"><span class="dim">1500 × 500</span><span class="file">twitter-header-centered.svg</span></span>
+    </div>
+  </div>
+  <div class="social-card" style="margin-bottom: 16px;">
+    <div class="frame"><img src="social/twitter-header-editorial.svg" alt=""/></div>
+    <div class="meta">
+      <span class="name">Twitter / X · editorial · sigil right</span>
+      <span style="display:flex; gap:16px;"><span class="dim">1500 × 500</span><span class="file">twitter-header-editorial.svg</span></span>
+    </div>
+  </div>
+  <div class="social-card" style="margin-bottom: 16px;">
+    <div class="frame"><img src="social/twitter-header-editorial-v2.svg" alt=""/></div>
+    <div class="meta">
+      <span class="name">Twitter / X · editorial · sigil centered</span>
+      <span style="display:flex; gap:16px;"><span class="dim">1500 × 500</span><span class="file">twitter-header-editorial-v2.svg</span></span>
+    </div>
+  </div>
+  <div class="social-card" style="margin-bottom: 16px;">
+    <div class="frame"><img src="social/linkedin-personal-banner.svg" alt=""/></div>
+    <div class="meta">
+      <span class="name">LinkedIn · personal profile</span>
+      <span style="display:flex; gap:16px;"><span class="dim">1584 × 396</span><span class="file">linkedin-personal-banner.svg</span></span>
+    </div>
+  </div>
+  <div class="social-card">
+    <div class="frame"><img src="social/linkedin-company-banner.svg" alt=""/></div>
+    <div class="meta">
+      <span class="name">LinkedIn · company page</span>
+      <span style="display:flex; gap:16px;"><span class="dim">1128 × 191</span><span class="file">linkedin-company-banner.svg</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── COLORS ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">06 / Brand colors</div>
+      <h2>Two-color system</h2>
+    </div>
+    <div class="desc">Cream and black do all the heavy lifting. Amber is reserved for accents.</div>
+  </div>
+  <div class="colors">
+    <div class="swatch">
+      <div class="chip" style="background: #F5EDE0;"></div>
+      <div class="info"><div class="name">Cream</div><div class="hex">#F5EDE0</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background: #0A0A0B;"></div>
+      <div class="info"><div class="name">Black</div><div class="hex">#0A0A0B</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background: #FAFAF9; border-bottom: 1px solid var(--border);"></div>
+      <div class="info"><div class="name">Canvas</div><div class="hex">#FAFAF9</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background: #D4763A;"></div>
+      <div class="info"><div class="name">Accent (amber)</div><div class="hex">#D4763A</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── DO / DON'T ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">07 / Usage</div>
+      <h2>Do and don't</h2>
+    </div>
+    <div class="desc">A short list. Keep the mark simple and let it breathe.</div>
+  </div>
+  <div class="rules">
+    <div class="rule do">
+      <div class="head"><span class="badge">Do</span><span class="title">Keep clear space equal to ¼ icon height</span></div>
+      <div class="body">Pad the mark generously. The rounded square should never crowd a headline or sit flush against another element.</div>
+    </div>
+    <div class="rule do">
+      <div class="head"><span class="badge">Do</span><span class="title">Use the SVG for any size above 64px</span></div>
+      <div class="body">Vector files scale cleanly. Reserve the PNG raster for fixed sizes — favicons, app icons, social previews.</div>
+    </div>
+    <div class="rule do">
+      <div class="head"><span class="badge">Do</span><span class="title">Pair the mark with cream or off-white surfaces</span></div>
+      <div class="body">The brand reads warmest on #F5EDE0 or #FAFAF9. White is fine but feels colder.</div>
+    </div>
+    <div class="rule dont">
+      <div class="head"><span class="badge">Don't</span><span class="title">Recolor the W stroke</span></div>
+      <div class="body">The W stays cream. The square stays black. No gradients, no brand-color tints, no drop shadows on the mark itself.</div>
+    </div>
+    <div class="rule dont">
+      <div class="head"><span class="badge">Don't</span><span class="title">Stretch, skew, or rotate the mark</span></div>
+      <div class="body">Aspect ratio is fixed at 1:1. Rotation breaks the W's reading axis.</div>
+    </div>
+    <div class="rule dont">
+      <div class="head"><span class="badge">Don't</span><span class="title">Place on busy backgrounds without clear space</span></div>
+      <div class="body">If a background image is unavoidable, drop a solid black or cream plate behind the mark first.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────── INSTALL ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">08 / Install</div>
+      <h2>Drop into &lt;head&gt;</h2>
+    </div>
+    <div class="desc">Favicon + Apple touch + PWA manifest in one snippet.</div>
+  </div>
+  <div class="code">
+<span class="com">&lt;!-- Ask The W favicon set --&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="str">"icon"</span> <span class="attr">type</span>=<span class="str">"image/png"</span> <span class="attr">sizes</span>=<span class="str">"32x32"</span> <span class="attr">href</span>=<span class="str">"/favicon/favicon-32.png"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="str">"icon"</span> <span class="attr">type</span>=<span class="str">"image/png"</span> <span class="attr">sizes</span>=<span class="str">"16x16"</span> <span class="attr">href</span>=<span class="str">"/favicon/favicon-16.png"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="str">"apple-touch-icon"</span> <span class="attr">sizes</span>=<span class="str">"180x180"</span> <span class="attr">href</span>=<span class="str">"/favicon/apple-touch-icon.png"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;link</span> <span class="attr">rel</span>=<span class="str">"manifest"</span> <span class="attr">href</span>=<span class="str">"/site.webmanifest"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;meta</span> <span class="attr">name</span>=<span class="str">"theme-color"</span> <span class="attr">content</span>=<span class="str">"#0A0A0B"</span><span class="tag">&gt;</span>
+  </div>
+</section>
+
+<!-- ───────── FILE INDEX ───────── -->
+<section>
+  <div class="sec-head">
+    <div>
+      <div class="label">09 / What's in the box</div>
+      <h2>File index</h2>
+    </div>
+    <div class="desc">Everything in this package, organized by use.</div>
+  </div>
+  <div class="code">
+package/
+├── <span class="com">Brand Sheet.html</span>            <span class="com">— this page</span>
+├── favicon/
+│   ├── favicon-16.png  favicon-32.png  favicon-48.png
+│   ├── apple-touch-icon.png  <span class="com">(180×180)</span>
+│   └── icon-192.png  icon-512.png  <span class="com">(PWA)</span>
+├── icon/
+│   ├── cream-on-black/   <span class="com">icon-{16…2048}.png  (primary)</span>
+│   ├── black-on-cream/   <span class="com">icon-{16…1024}.png  (inverted)</span>
+│   ├── mark-only-cream/  <span class="com">mark-{128,256,512}.png  (transparent)</span>
+│   ├── mark-only-black/  <span class="com">mark-{128,256,512}.png  (transparent)</span>
+│   ├── circle-cream-on-black/  circle-black-on-cream/
+│   └── svg/              <span class="com">vector versions of every variant</span>
+├── lockup/
+│   ├── lockup-horizontal-{light,dark,white}.svg
+│   └── lockup-stacked-{light,white}.svg
+├── social/
+│   ├── og-image.png      <span class="com">(1200×630, for OG/Twitter)</span>
+│   ├── twitter-header-centered.svg     <span class="com">(1500×500)</span>
+│   ├── twitter-header-editorial.svg    <span class="com">(1500×500, tagline)</span>
+│   ├── linkedin-personal-banner.svg    <span class="com">(1584×396)</span>
+│   └── linkedin-company-banner.svg     <span class="com">(1128×191)</span>
+├── source/
+│   └── logo-source-cleaned.png
+├── site.webmanifest
+└── favicon-snippet.html
+  </div>
+</section>
+
+<footer>
+  <div>Ask The W · Brand package v1.0</div>
+  <div>Cream #F5EDE0 · Black #0A0A0B</div>
+</footer>
+
+</body>
+</html>

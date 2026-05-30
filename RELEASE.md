@@ -4,10 +4,10 @@ This repo is the Codex-native distribution wrapper for `@askthew/mcp-plugin`.
 
 ## Prerequisites
 
-1. Publish `@askthew/mcp-plugin@0.4.27` to npm.
+1. Publish `@askthew/mcp-plugin@0.4.29` to npm with runtime scope resolution, workspace-gated Codex mode, workspace bind MCP tools, and workspace quota bypass.
 2. Push this repository to `https://github.com/AskTheWAI/codex-plugin`.
 3. Confirm `.mcp.json` still pins the published MCP version.
-4. Confirm `.agents/plugins/marketplace.json` validates and uses `source.path: "./"`.
+4. Confirm `.agents/plugins/marketplace.json` validates and uses `source.path: "./plugins/askthew"` because the plugin package lives under `plugins/askthew/`.
 
 ## Publish MCP Package
 
@@ -57,7 +57,8 @@ After the plugin is installed and visible in Codex:
 
 ## Verification Gates
 
-- `python3 /Users/ym/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py askthew-codex-plugin`
+- `python3 /Users/ym/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py plugins/askthew`
 - `npm test --workspace @askthew/mcp-plugin`
 - `npm run docs:validate --workspace @askthew/app`
 - `npm_config_cache=/tmp/askthew-npm-cache npm pack --workspace @askthew/mcp-plugin --dry-run`
+- Install from the marketplace and verify an unbound token asks for workspace connection, then completes `askthew_start_workspace_bind` / `askthew_check_workspace_bind` before any protected tool succeeds.
