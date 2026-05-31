@@ -12362,6 +12362,16 @@ var AskTheWCloudClient = class {
       })
     });
   }
+  async nextMoves(input) {
+    const result = await this.request("/next-moves", {
+      method: "POST",
+      body: JSON.stringify({
+        limit: input.limit,
+        scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
   async startPaidBind() {
     return this.request("/paid/bind/start", { method: "POST", body: "{}" });
   }
@@ -12963,7 +12973,7 @@ function installBehaviorInstructions(input) {
     "",
     "**Payload guardrails.** Prefer a short summary, relative files touched, verification status, and useful non-sensitive metadata. Omit `commandsRun` unless the command materially explains verification or failure; when included, keep it short and avoid inline environment values. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
     "",
-    "Related tools: `recap` (what happened), `coach` (next-step nudge), `create_decision` (durable architectural decisions).",
+    "Related tools: `recap` (what happened), `coach` (guidance), `next_moves` (structured workspace actions), `create_decision` (durable architectural decisions).",
     INSTRUCTIONS_END,
     ""
   ].join("\n");
@@ -27459,9 +27469,34 @@ var MCP_TOOL_CAPABILITY_SCOPES = {
   create_decision: "agent:decisions:write",
   list_decisions: "agent:decisions:read",
   recap: "agent:recap",
-  coach: "agent:coach"
+  coach: "agent:coach",
+  next_moves: "agent:next_moves"
 };
-var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W workspace installs, send compact session signals at setup, meaningful state changes, verification, and final summary. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
+var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W workspace installs, send compact session signals to the connected Ask The W workspace at setup, meaningful state changes, verification, and final summary. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
+var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W workspace binding for the local identity. Returns a confirmation URL and display code; does not send project content.";
+var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W workspace binding status for a display code. When completed, stores the workspace binding and consent receipt locally.";
+var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected workspace or scope. Does not modify workspace state.";
+var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record in the connected workspace or scope. Sends the provided decision content and optional linked IDs.";
+var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history for the connected workspace or scope. Does not modify workspace state.";
+var RECAP_DESCRIPTION = "Read a server-generated recap from existing Ask The W workspace signals. Does not modify workspace state.";
+var COACH_DESCRIPTION = "Read server-backed coaching and next-step guidance from existing Ask The W workspace context plus the optional focus string. Does not modify workspace state.";
+var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W workspace Next Moves as structured action items. This is separate from coach tips and does not modify workspace state.";
+var READ_WORKSPACE_ANNOTATIONS = {
+  readOnlyHint: true,
+  openWorldHint: false
+};
+var ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false
+};
+var IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false
+};
 function toolJson(value) {
   return {
     content: [
@@ -27578,6 +27613,7 @@ function createAskTheWMcpServer(options = {}) {
       email: external_exports.string().email(),
       clientHint: external_exports.enum(["claude_code", "codex", "cursor", "web_agent"]).optional()
     },
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27598,6 +27634,7 @@ function createAskTheWMcpServer(options = {}) {
       code: external_exports.string().regex(/^\d{6}$/),
       clientHint: external_exports.enum(["claude_code", "codex", "cursor", "web_agent"]).optional()
     },
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27616,9 +27653,11 @@ function createAskTheWMcpServer(options = {}) {
   );
   server.tool(
     "askthew_start_workspace_bind",
+    START_WORKSPACE_BIND_DESCRIPTION,
     {
       reason: external_exports.string().max(500).optional()
     },
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
     async () => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27631,9 +27670,11 @@ function createAskTheWMcpServer(options = {}) {
   );
   server.tool(
     "askthew_check_workspace_bind",
+    CHECK_WORKSPACE_BIND_DESCRIPTION,
     {
       codeDisplay: external_exports.string().min(3).max(32)
     },
+    IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27666,60 +27707,67 @@ function createAskTheWMcpServer(options = {}) {
       return toolJson(body);
     }
   );
-  server.tool("capture_session_signal", CAPTURE_SESSION_SIGNAL_DESCRIPTION, codingSessionSignalSchema.shape, async (payload) => {
-    const blocked = blockedOutsideProject();
-    if (blocked) return blocked;
-    const currentClient = client();
-    const unavailable = cloudGuard(currentClient);
-    if (unavailable) return unavailable;
-    const parsed = codingSessionSignalSchema.safeParse({
-      ...payload,
-      clientId: payload.clientId ?? defaultClientId(runtimeEnv),
-      scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
-      idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey()
-    });
-    if (!parsed.success) {
-      return toolJson({
-        ok: false,
-        code: "invalid_signal",
-        message: parsed.error.issues.map((issue2) => issue2.message).join("; ")
+  server.tool(
+    "capture_session_signal",
+    CAPTURE_SESSION_SIGNAL_DESCRIPTION,
+    codingSessionSignalSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const parsed = codingSessionSignalSchema.safeParse({
+        ...payload,
+        clientId: payload.clientId ?? defaultClientId(runtimeEnv),
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey()
       });
-    }
-    const sanitized = redactSignalPayload(parsed.data, { env: runtimeEnv });
-    const feedback = captureCadenceFeedback(signalCadenceBySession, parsed.data);
-    const localOutboxId = outbox.append(sanitized);
-    const result = await sendOutboxPayload(currentClient, sanitized);
-    if (result.kind === "sent") {
-      outbox.markSent(localOutboxId);
-      const body = result.body;
+      if (!parsed.success) {
+        return toolJson({
+          ok: false,
+          code: "invalid_signal",
+          message: parsed.error.issues.map((issue2) => issue2.message).join("; ")
+        });
+      }
+      const sanitized = redactSignalPayload(parsed.data, { env: runtimeEnv });
+      const feedback = captureCadenceFeedback(signalCadenceBySession, parsed.data);
+      const localOutboxId = outbox.append(sanitized);
+      const result = await sendOutboxPayload(currentClient, sanitized);
+      if (result.kind === "sent") {
+        outbox.markSent(localOutboxId);
+        const body = result.body;
+        return toolJson({
+          ok: true,
+          queued: false,
+          id: body.id,
+          sequence: body.sequence ?? sanitized.sequence,
+          ...feedback
+        });
+      }
+      if (result.kind === "failed") {
+        outbox.markFailed(localOutboxId, result.code, result.message);
+        return toolJson({
+          ok: false,
+          code: result.code,
+          message: result.message,
+          ...feedback
+        });
+      }
+      const retryEstimateSeconds = outbox.backoff(localOutboxId, 0, result.retryAfterSeconds);
       return toolJson({
         ok: true,
-        queued: false,
-        id: body.id,
-        sequence: body.sequence ?? sanitized.sequence,
+        queued: true,
+        local_outbox_id: localOutboxId,
+        retry_estimate_seconds: retryEstimateSeconds,
         ...feedback
       });
     }
-    if (result.kind === "failed") {
-      outbox.markFailed(localOutboxId, result.code, result.message);
-      return toolJson({
-        ok: false,
-        code: result.code,
-        message: result.message,
-        ...feedback
-      });
-    }
-    const retryEstimateSeconds = outbox.backoff(localOutboxId, 0, result.retryAfterSeconds);
-    return toolJson({
-      ok: true,
-      queued: true,
-      local_outbox_id: localOutboxId,
-      retry_estimate_seconds: retryEstimateSeconds,
-      ...feedback
-    });
-  });
+  );
   server.tool(
     "list_signals",
+    LIST_SIGNALS_DESCRIPTION,
     {
       sessionId: external_exports.string().optional(),
       since: external_exports.string().optional(),
@@ -27727,6 +27775,7 @@ function createAskTheWMcpServer(options = {}) {
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
     },
+    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27740,26 +27789,34 @@ function createAskTheWMcpServer(options = {}) {
       return toolJson(result.body);
     }
   );
-  server.tool("create_decision", decisionSchema.shape, async (payload) => {
-    const blocked = blockedOutsideProject();
-    if (blocked) return blocked;
-    const currentClient = client();
-    const unavailable = cloudGuard(currentClient);
-    if (unavailable) return unavailable;
-    const result = await currentClient.createDecision({
-      ...payload,
-      idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey(),
-      scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
-    });
-    return toolJson(result.body);
-  });
+  server.tool(
+    "create_decision",
+    CREATE_DECISION_DESCRIPTION,
+    decisionSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.createDecision({
+        ...payload,
+        idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey(),
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolJson(result.body);
+    }
+  );
   server.tool(
     "list_decisions",
+    LIST_DECISIONS_DESCRIPTION,
     {
       limit: external_exports.number().int().min(1).max(200).default(50),
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
     },
+    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27775,12 +27832,14 @@ function createAskTheWMcpServer(options = {}) {
   );
   server.tool(
     "recap",
+    RECAP_DESCRIPTION,
     {
       since: external_exports.string().optional(),
       maxSignals: external_exports.number().int().min(1).max(200).optional(),
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
     },
+    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27804,6 +27863,7 @@ function createAskTheWMcpServer(options = {}) {
   );
   server.tool(
     "coach",
+    COACH_DESCRIPTION,
     {
       focus: external_exports.string().max(1e3).optional(),
       cursor: external_exports.string().optional(),
@@ -27811,6 +27871,7 @@ function createAskTheWMcpServer(options = {}) {
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
     },
+    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -27828,6 +27889,35 @@ function createAskTheWMcpServer(options = {}) {
           ok: false,
           code: "unreachable",
           message: "Couldn't reach Ask The W. Captures are queued; coach will be available when you're back online."
+        });
+      }
+    }
+  );
+  server.tool(
+    "next_moves",
+    NEXT_MOVES_DESCRIPTION,
+    {
+      limit: external_exports.number().int().min(1).max(50).optional(),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    READ_WORKSPACE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      try {
+        const result = await currentClient.nextMoves({
+          ...payload,
+          scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        });
+        return toolJson(result.body);
+      } catch {
+        return toolJson({
+          ok: false,
+          code: "unreachable",
+          message: "Couldn't reach Ask The W. Captures are queued; next moves will be available when you're back online."
         });
       }
     }
@@ -28422,7 +28512,7 @@ function printInstructionsCommand() {
       "",
       "First-run signup: if a protected Ask The W tool returns `needs_signup`, ask the user for their email, call `askthew_start_signup({ email })`, ask for the six-digit email code, call `askthew_complete_signup({ email, code })`, then retry the original `setup_complete` capture.",
       "",
-      "Related tools: `recap` for prior context, `coach` for next-step guidance, and `create_decision` for durable decisions."
+      "Related tools: `recap` for prior context, `coach` for guidance, `next_moves` for structured workspace actions, and `create_decision` for durable decisions."
     ].join("\n")
   );
 }
