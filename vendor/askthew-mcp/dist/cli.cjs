@@ -12345,6 +12345,13 @@ var AskTheWCloudClient = class {
     const result = await this.request(`/decisions${params.size ? `?${params.toString()}` : ""}`);
     return { ...result, body: camelize(result.body) };
   }
+  async listOutcomes(input = {}) {
+    const params = new URLSearchParams();
+    if (input.limit) params.set("limit", String(input.limit));
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/outcomes${params.size ? `?${params.toString()}` : ""}`);
+    return { ...result, body: camelize(result.body) };
+  }
   async recap(input) {
     return this.request("/recap", {
       method: "POST",
@@ -27468,6 +27475,7 @@ var MCP_TOOL_CAPABILITY_SCOPES = {
   list_signals: "agent:signals:read",
   create_decision: "agent:decisions:write",
   list_decisions: "agent:decisions:read",
+  list_outcomes: "agent:outcomes:read",
   recap: "agent:recap",
   coach: "agent:coach",
   next_moves: "agent:next_moves"
@@ -27478,6 +27486,7 @@ var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W workspace binding status
 var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected workspace or scope. Does not modify workspace state.";
 var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record in the connected workspace or scope. Sends the provided decision content and optional linked IDs.";
 var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history for the connected workspace or scope. Does not modify workspace state.";
+var LIST_OUTCOMES_DESCRIPTION = "Read active Ask The W outcomes for the connected workspace resolved from the current scope. Does not modify workspace state.";
 var RECAP_DESCRIPTION = "Read a server-generated recap from existing Ask The W workspace signals. Does not modify workspace state.";
 var COACH_DESCRIPTION = "Read server-backed coaching and next-step guidance from existing Ask The W workspace context plus the optional focus string. Does not modify workspace state.";
 var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W workspace Next Moves as structured action items. This is separate from coach tips and does not modify workspace state.";
@@ -27826,6 +27835,27 @@ function createAskTheWMcpServer(options = {}) {
       const result = await currentClient.listDecisions({
         ...payload,
         scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolJson(result.body);
+    }
+  );
+  server.tool(
+    "list_outcomes",
+    LIST_OUTCOMES_DESCRIPTION,
+    {
+      limit: external_exports.number().int().min(1).max(500).optional(),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    READ_WORKSPACE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.listOutcomes({
+        ...payload,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
       return toolJson(result.body);
     }
@@ -28512,7 +28542,7 @@ function printInstructionsCommand() {
       "",
       "First-run signup: if a protected Ask The W tool returns `needs_signup`, ask the user for their email, call `askthew_start_signup({ email })`, ask for the six-digit email code, call `askthew_complete_signup({ email, code })`, then retry the original `setup_complete` capture.",
       "",
-      "Related tools: `recap` for prior context, `coach` for guidance, `next_moves` for structured workspace actions, and `create_decision` for durable decisions."
+      "Related tools: `list_outcomes` for workspace outcome context, `recap` for prior context, `coach` for guidance, `next_moves` for structured workspace actions, and `create_decision` for durable decisions."
     ].join("\n")
   );
 }
