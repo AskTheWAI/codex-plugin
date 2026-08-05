@@ -7,7 +7,11 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -2633,7 +2637,7 @@ var require_dist = __commonJS({
         const override2 = prompt._override || {};
         questions = [].concat(questions);
         let answer, question, quit, name, type, lastPrompt;
-        const getFormattedAnswer = /* @__PURE__ */ function() {
+        const getFormattedAnswer = /* @__PURE__ */ (function() {
           var _ref = _asyncToGenerator(function* (question2, answer2, skipValidation = false) {
             if (!skipValidation && question2.validate && question2.validate(answer2) !== true) {
               return;
@@ -2643,7 +2647,7 @@ var require_dist = __commonJS({
           return function getFormattedAnswer2(_x, _x2) {
             return _ref.apply(this, arguments);
           };
-        }();
+        })();
         var _iterator = _createForOfIteratorHelper(questions), _step;
         try {
           for (_iterator.s(); !(_step = _iterator.n()).done; ) {
@@ -8616,6 +8620,7 @@ var require_fast_uri = __commonJS({
       return uriTokens.join("");
     }
     var URI_PARSE = /^(?:([^#/:?]+):)?(?:\/\/((?:([^#/?@]*)@)?(\[[^#/?\]]+\]|[^#/:?]*)(?::(\d*))?))?([^#?]*)(?:\?([^#]*))?(?:#((?:.|[\n\r])*))?/u;
+    var AUTHORITY_PREFIX = /^(?:[^#/:?]+:)?\/\/([^/?#]*)/;
     function getParseError(parsed, matches) {
       if (matches[2] !== void 0 && parsed.path && parsed.path[0] !== "/") {
         return 'URI path must start with "/" when authority is present.';
@@ -8644,6 +8649,11 @@ var require_fast_uri = __commonJS({
         } else {
           uri = "//" + uri;
         }
+      }
+      const authorityMatch = uri.match(AUTHORITY_PREFIX);
+      if (authorityMatch !== null && authorityMatch[1].indexOf("\\") !== -1) {
+        parsed.error = "URI authority must not contain a literal backslash.";
+        malformedAuthorityOrPort = true;
       }
       const matches = uri.match(URI_PARSE);
       if (matches) {
@@ -8688,7 +8698,7 @@ var require_fast_uri = __commonJS({
         if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
           if (parsed.host && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) {
             try {
-              parsed.host = URL.domainToASCII(parsed.host.toLowerCase());
+              parsed.host = new URL("http://" + parsed.host).hostname;
             } catch (e) {
               parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
             }
@@ -11881,7 +11891,7 @@ function canonicalPath(value) {
   }
 }
 function stableSlug(value) {
-  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "workspace";
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "project";
 }
 function explicitEnvScope(env) {
   const repoName = cleanEnv(env.ASKTHEW_REPO_NAME);
@@ -11986,7 +11996,7 @@ function resolvePluginScope(startDirectory = process.cwd(), env = process.env) {
   const hintedEnvRoot = envRepoRoot(env, ACTIVE_PROJECT_HINT_ENV_KEYS);
   const fallbackEnvRoot = envRepoRoot(env, LEGACY_PROJECT_ROOT_ENV_KEYS);
   const discoveredWorkspaceRoot = cwdIsPluginRuntimePath || isNpxSandboxRoot(discoveredRoot) ? null : discoveredRoot;
-  const activeWorkspaceRoot = activeEnvRoot || discoveredWorkspaceRoot || (isNpxSandboxRoot(hintedEnvRoot) ? null : hintedEnvRoot);
+  const activeWorkspaceRoot = discoveredWorkspaceRoot || activeEnvRoot || (isNpxSandboxRoot(hintedEnvRoot) ? null : hintedEnvRoot);
   const repoRoot = (parsedConfig.repoRoot ? path2.resolve(parsedConfig.repoRoot) : "") || (hasProjectConfig ? configRoot : "") || activeWorkspaceRoot || envScope?.repoRoot || fallbackEnvRoot || discoveredRoot || cwd;
   const envScopeApplies = Boolean(envScope?.repoRoot && path2.resolve(repoRoot) === path2.resolve(envScope.repoRoot));
   const repoName = parsedConfig.repoName || (envScopeApplies ? envScope?.repoName : "") || path2.basename(repoRoot);
@@ -12079,7 +12089,7 @@ function uniqueRoots(options) {
 function rootReplacement(root, options) {
   const scope = safeResolveScope(options);
   const home = String((options.env ?? process.env).HOME ?? import_node_os2.default.homedir()).trim();
-  if (scope?.repoRoot && import_node_path2.default.resolve(root) === import_node_path2.default.resolve(scope.repoRoot)) return "[WORKSPACE]";
+  if (scope?.repoRoot && import_node_path2.default.resolve(root) === import_node_path2.default.resolve(scope.repoRoot)) return "[PROJECT]";
   if (home && import_node_path2.default.resolve(root) === import_node_path2.default.resolve(home)) return "~";
   return "[LOCAL_PATH]";
 }
@@ -12131,6 +12141,19 @@ function redactMetadata(value, options, markRedacted, key) {
   }
   return value;
 }
+function redactFreeText(value, options = {}) {
+  return sanitizeText(value, options);
+}
+function redactFilesTouched(files, options = {}) {
+  return files.map((entry) => fileReference(entry, options));
+}
+function redactMetadataRecord(value, options = {}) {
+  let redacted = false;
+  const next = redactMetadata(value ?? {}, options, () => {
+    redacted = true;
+  });
+  return redacted ? { ...next, redacted: true } : next;
+}
 function redactSignalPayload(payload, options = {}) {
   let redacted = false;
   const redact = (value, mode = "text") => {
@@ -12168,8 +12191,9 @@ var STALE_TOKEN_CODES = /* @__PURE__ */ new Set([
   "install_revoked",
   "install_not_found"
 ]);
+var DEFAULT_API_URL = "https://my.askthew.com";
 function trimBaseUrl(value) {
-  return (value?.trim() || "https://app.askthew.com").replace(/\/+$/, "");
+  return (value?.trim() || DEFAULT_API_URL).replace(/\/+$/, "");
 }
 function errorMessage(error2, fallback) {
   return error2 instanceof Error && error2.message ? error2.message : fallback;
@@ -12207,6 +12231,13 @@ function networkFailure(error2) {
 function loadCloudToken(env = process.env) {
   return readJsonFile(cloudTokenPath(env));
 }
+function resolveApiUrl(input = {}) {
+  const env = input.env ?? process.env;
+  const tokenFile = input.tokenFile !== void 0 ? input.tokenFile : loadCloudToken(env);
+  return trimBaseUrl(
+    input.apiUrl?.trim() || env.ASKTHEW_API_URL?.trim() || tokenFile?.api_url
+  );
+}
 function saveCloudToken(tokenFile, env = process.env) {
   writePrivateJson(cloudTokenPath(env), tokenFile);
 }
@@ -12230,11 +12261,11 @@ async function verifyToken(input = {}) {
   if (!result.ok) {
     return { stale: false };
   }
-  const workspaceId = typeof body.workspace_id === "string" ? body.workspace_id : null;
+  const projectId = typeof body.project_id === "string" ? body.project_id : null;
   return {
     stale: false,
     email: typeof body.email === "string" ? body.email : null,
-    ...workspaceId ? { workspace_id: workspaceId } : {}
+    ...projectId ? { project_id: projectId } : {}
   };
 }
 function snakeSignal(payload) {
@@ -12256,6 +12287,18 @@ function appendScopeParam(params, scopeKey) {
   const trimmed = scopeKey?.trim();
   if (trimmed) params.set("scope_key", trimmed);
 }
+function appendManualRequestParams(params, input) {
+  const requestIntent = String(input.requestIntent ?? "").trim();
+  const originatingPrompt = String(input.originatingPrompt ?? "").trim();
+  if (requestIntent) params.set("request_intent", requestIntent);
+  if (originatingPrompt) params.set("originating_prompt", originatingPrompt);
+}
+function manualRequestBody(input) {
+  return {
+    request_intent: input.requestIntent,
+    originating_prompt: input.originatingPrompt
+  };
+}
 function camelize(value) {
   if (Array.isArray(value)) return value.map(camelize);
   if (typeof value !== "object" || value === null) return value;
@@ -12273,7 +12316,7 @@ var AskTheWCloudClient = class {
   redactionOptions;
   constructor(options = {}) {
     const tokenFile = loadCloudToken(options.env);
-    this.apiUrl = trimBaseUrl(options.apiUrl ?? tokenFile?.api_url);
+    this.apiUrl = resolveApiUrl({ apiUrl: options.apiUrl, env: options.env, tokenFile });
     this.token = options.token ?? tokenFile?.token;
     this.fetcher = options.fetcher ?? fetch;
     this.redactionOptions = {
@@ -12329,7 +12372,9 @@ var AskTheWCloudClient = class {
   }
   async createDecision(payload) {
     const body = {
-      content: payload.content,
+      content: typeof payload.content === "string" ? redactFreeText(payload.content, this.redactionOptions) : payload.content,
+      capture_intent: payload.captureIntent,
+      originating_prompt: typeof payload.originatingPrompt === "string" ? redactFreeText(payload.originatingPrompt, this.redactionOptions) : payload.originatingPrompt,
       source_signal_ids: payload.sourceSignalIds,
       idempotency_key: payload.idempotencyKey,
       status: payload.status,
@@ -12342,6 +12387,7 @@ var AskTheWCloudClient = class {
     const params = new URLSearchParams();
     if (input.limit) params.set("limit", String(input.limit));
     appendScopeParam(params, input.scopeKey);
+    appendManualRequestParams(params, input);
     const result = await this.request(`/decisions${params.size ? `?${params.toString()}` : ""}`);
     return { ...result, body: camelize(result.body) };
   }
@@ -12349,19 +12395,42 @@ var AskTheWCloudClient = class {
     const params = new URLSearchParams();
     if (input.limit) params.set("limit", String(input.limit));
     appendScopeParam(params, input.scopeKey);
+    appendManualRequestParams(params, input);
     const result = await this.request(`/outcomes${params.size ? `?${params.toString()}` : ""}`);
+    return { ...result, body: camelize(result.body) };
+  }
+  async listProjectDocs(input = {}) {
+    const params = new URLSearchParams();
+    if (input.limit) params.set("limit", String(input.limit));
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/docs${params.size ? `?${params.toString()}` : ""}`);
+    return { ...result, body: camelize(result.body) };
+  }
+  async readProjectDoc(input) {
+    const params = new URLSearchParams();
+    if (input.artifactId) params.set("artifact_id", input.artifactId);
+    if (input.path) params.set("path", input.path);
+    if (input.version) params.set("version", String(input.version));
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/docs?${params.toString()}`);
     return { ...result, body: camelize(result.body) };
   }
   async recap(input) {
     return this.request("/recap", {
       method: "POST",
-      body: JSON.stringify({ since: input.since, max_signals: input.maxSignals, scope_key: input.scopeKey })
+      body: JSON.stringify({
+        ...manualRequestBody(input),
+        since: input.since,
+        max_signals: input.maxSignals,
+        scope_key: input.scopeKey
+      })
     });
   }
   async coach(input) {
     return this.request("/coach", {
       method: "POST",
       body: JSON.stringify({
+        ...manualRequestBody(input),
         focus: input.focus,
         cursor: input.cursor,
         limit: input.limit,
@@ -12373,8 +12442,98 @@ var AskTheWCloudClient = class {
     const result = await this.request("/next-moves", {
       method: "POST",
       body: JSON.stringify({
+        ...manualRequestBody(input),
         limit: input.limit,
         scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async listReadyWork(input = {}) {
+    const params = new URLSearchParams();
+    if (input.limit) params.set("limit", String(input.limit));
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/work${params.size ? `?${params.toString()}` : ""}`, {
+      method: "GET"
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async claimWork(input = {}) {
+    const result = await this.request("/work/claim", {
+      method: "POST",
+      body: JSON.stringify({
+        run_id: input.runId,
+        scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async heartbeatWork(input) {
+    const result = await this.request(`/work/${encodeURIComponent(input.runId)}/heartbeat`, {
+      method: "POST",
+      body: JSON.stringify({
+        progress_note: input.progressNote,
+        scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async completeWork(input) {
+    const result = await this.request(`/work/${encodeURIComponent(input.runId)}/complete`, {
+      method: "POST",
+      body: JSON.stringify({
+        summary: redactFreeText(input.summary, this.redactionOptions),
+        files_touched: redactFilesTouched(input.filesTouched ?? [], this.redactionOptions),
+        checks: redactMetadataRecord(input.checks, this.redactionOptions),
+        commit_ref: input.commitRef ?? null,
+        scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async releaseWork(input) {
+    const result = await this.request(`/work/${encodeURIComponent(input.runId)}/release`, {
+      method: "POST",
+      body: JSON.stringify({
+        outcome: input.outcome ?? "requeue",
+        reason: input.reason ?? null,
+        scope_key: input.scopeKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async fileRequest(input) {
+    const result = await this.request("/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        title: redactFreeText(input.title, this.redactionOptions),
+        body: redactFreeText(input.body, this.redactionOptions),
+        scope_key: input.scopeKey,
+        metadata: redactMetadataRecord(input.metadata, this.redactionOptions)
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async draftWireMessage(input) {
+    const sanitizedBody = redactFreeText(input.body, this.redactionOptions);
+    const result = await this.request("/requests", {
+      method: "POST",
+      body: JSON.stringify({
+        title: "Draft a Wire message",
+        body: sanitizedBody,
+        scope_key: input.scopeKey,
+        metadata: {
+          source: "mcp_wire_draft",
+          action_intent: "wire.message.draft",
+          action_target: {
+            body: sanitizedBody,
+            channelKey: input.channelKey ?? null,
+            threadId: input.threadId ?? null
+          },
+          request_intent: input.requestIntent,
+          originating_prompt: redactFreeText(input.originatingPrompt, this.redactionOptions),
+          delivery: "draft_only"
+        }
       })
     });
     return { ...result, body: camelize(result.body) };
@@ -12390,12 +12549,13 @@ var AskTheWCloudClient = class {
   async exportData(input = {}) {
     const params = new URLSearchParams();
     appendScopeParam(params, input.scopeKey);
+    appendManualRequestParams(params, input);
     const result = await this.request(`/export${params.size ? `?${params.toString()}` : ""}`, { method: "GET" });
     return { ...result, body: camelize(result.body) };
   }
 };
 async function startSignup(input) {
-  const base = trimBaseUrl(input.apiUrl);
+  const base = resolveApiUrl({ apiUrl: input.apiUrl, env: input.env, tokenFile: null });
   try {
     const response = await (input.fetcher ?? fetch)(`${base}/api/v1/agent/signup`, {
       method: "POST",
@@ -12408,7 +12568,7 @@ async function startSignup(input) {
   }
 }
 async function completeSignup(input) {
-  const base = trimBaseUrl(input.apiUrl);
+  const base = resolveApiUrl({ apiUrl: input.apiUrl, env: input.env, tokenFile: null });
   let response;
   let body;
   try {
@@ -12444,6 +12604,7 @@ var import_node_module = require("node:module");
 var import_node_path3 = __toESM(require("node:path"), 1);
 var import_meta = {};
 var BACKOFF_SECONDS = [5, 15, 60, 300];
+var BACKGROUND_FLUSH_INTERVAL_MS = 5 * 60 * 1e3;
 var requireFromHere = (0, import_node_module.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta.url);
 function loadSqliteDatabase() {
   if (process.env.ASKTHEW_OUTBOX_STORE === "file") return null;
@@ -12484,6 +12645,7 @@ var SqliteOutbox = class {
       create index if not exists outbox_pending_idx
         on outbox(status, next_attempt_at, scope_key, session_id, sequence);
     `);
+    this.db.exec("delete from outbox where status = 'sent'");
   }
   append(payload) {
     const result = this.db.prepare(`
@@ -12501,7 +12663,7 @@ var SqliteOutbox = class {
     return Number(this.db.prepare("select count(*) as count from outbox where status = 'pending'").get()?.count ?? 0);
   }
   markSent(id) {
-    this.db.prepare("update outbox set status = 'sent', error_code = null, error_message = null where id = ?").run(id);
+    this.db.prepare("delete from outbox where id = ?").run(id);
   }
   markFailed(id, code, message) {
     this.db.prepare("update outbox set status = 'failed', error_code = ?, error_message = ? where id = ?").run(code, message, id);
@@ -12525,7 +12687,9 @@ var SqliteOutbox = class {
 var FileOutbox = class {
   constructor(storePath) {
     this.storePath = storePath;
+    this.pruneSent();
   }
+  storePath;
   append(payload) {
     const store = this.read();
     const id = store.nextId;
@@ -12550,11 +12714,11 @@ var FileOutbox = class {
     return this.read().rows.filter((row) => row.status === "pending").length;
   }
   markSent(id) {
-    this.update(id, (row) => {
-      row.status = "sent";
-      row.error_code = null;
-      row.error_message = null;
-    });
+    const store = this.read();
+    const kept = store.rows.filter((row) => row.id !== id);
+    if (kept.length === store.rows.length) return;
+    store.rows = kept;
+    this.write(store);
   }
   markFailed(id, code, message) {
     this.update(id, (row) => {
@@ -12581,6 +12745,13 @@ var FileOutbox = class {
       payload_json: row.payload_json,
       attempts: row.attempts
     }));
+  }
+  pruneSent() {
+    const store = this.read();
+    const kept = store.rows.filter((row) => row.status !== "sent");
+    if (kept.length === store.rows.length) return;
+    store.rows = kept;
+    this.write(store);
   }
   update(id, updater) {
     const store = this.read();
@@ -12609,12 +12780,24 @@ var FileOutbox = class {
 };
 var Outbox = class {
   store;
+  flushing = false;
+  flushTimer = null;
   constructor(storePath = localStorePath()) {
     const Database = loadSqliteDatabase();
-    this.store = Database ? new SqliteOutbox(Database, storePath) : new FileOutbox(fallbackOutboxPath(storePath));
+    if (Database) {
+      try {
+        this.store = new SqliteOutbox(Database, storePath);
+        return;
+      } catch {
+      }
+    }
+    this.store = new FileOutbox(fallbackOutboxPath(storePath));
   }
   append(payload) {
-    return this.store.append(payload);
+    const id = this.store.append(payload);
+    this.ensureBackgroundFlushTimer();
+    void this.runBackgroundFlush();
+    return id;
   }
   pendingCount() {
     return this.store.pendingCount();
@@ -12632,21 +12815,43 @@ var Outbox = class {
     return this.store.dueRows(limit);
   }
   async flush(client) {
-    const rows = this.dueRows();
-    let sent = 0;
-    for (const row of rows) {
-      const payload = JSON.parse(row.payload_json);
-      const result = await sendOutboxPayload(client, payload, row.attempts);
-      if (result.kind === "sent") {
-        this.markSent(row.id);
-        sent += 1;
-      } else if (result.kind === "failed") {
-        this.markFailed(row.id, result.code, result.message);
-      } else {
-        this.backoff(row.id, row.attempts, result.retryAfterSeconds);
+    if (this.flushing) return { sent: 0, attempted: 0 };
+    this.flushing = true;
+    try {
+      const rows = this.dueRows();
+      let sent = 0;
+      for (const row of rows) {
+        const payload = JSON.parse(row.payload_json);
+        const result = await sendOutboxPayload(client, payload, row.attempts);
+        if (result.kind === "sent") {
+          this.markSent(row.id);
+          sent += 1;
+        } else if (result.kind === "failed") {
+          this.markFailed(row.id, result.code, result.message);
+        } else {
+          this.backoff(row.id, row.attempts, result.retryAfterSeconds);
+        }
       }
+      return { sent, attempted: rows.length };
+    } finally {
+      this.flushing = false;
     }
-    return { sent, attempted: rows.length };
+  }
+  ensureBackgroundFlushTimer() {
+    if (this.flushTimer) return;
+    const timer = setInterval(() => {
+      void this.runBackgroundFlush();
+    }, BACKGROUND_FLUSH_INTERVAL_MS);
+    timer.unref();
+    this.flushTimer = timer;
+  }
+  async runBackgroundFlush() {
+    try {
+      const client = new AskTheWCloudClient();
+      if (!client.hasToken()) return;
+      await this.flush(client);
+    } catch {
+    }
   }
 };
 function isTransientStatus(status) {
@@ -12728,7 +12933,7 @@ function createServerEntry(input) {
 }
 function serverEnvironment(input, scope) {
   return {
-    ASKTHEW_API_URL: (input.apiUrl ?? "https://app.askthew.com").replace(/\/+$/, ""),
+    ASKTHEW_API_URL: (input.apiUrl ?? DEFAULT_API_URL).replace(/\/+$/, ""),
     ASKTHEW_HOST_TYPE: input.hostType,
     ASKTHEW_REPO_NAME: scope.repoName,
     ...scope.repoRoot ? { ASKTHEW_REPO_ROOT: scope.repoRoot } : {},
@@ -12957,30 +13162,33 @@ function installBehaviorInstructions(input) {
     INSTRUCTIONS_START,
     "## Ask The W",
     "",
-    "This workspace has an authorized Ask The W connector. Send compact, policy-sanitized signals via MCP tool",
+    "This project has an authorized Ask The W connector. Send compact, policy-sanitized signals via MCP tool",
     `\`capture_session_signal\` (often shown as \`mcp__askthew__capture_session_signal\`) with \`scopeKey: "${scopeKey}"\`.`,
     `Bound workspace root: \`${projectRoot}\`.`,
     "",
-    "**Authorization.** The Ask The W install or workspace-bind confirmation authorizes compact session signals for this workspace. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
+    "**Authorization.** The Ask The W install or project-bind confirmation authorizes compact session signals for this project. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
     "",
-    "Required cadence when the connector is active:",
-    '1. **Session start** - `kind: "setup_complete"`, before any other work.',
-    '2. **After state changes** - after writes/edits, tests, builds, migrations, deploys, accepted/rejected directions. Use `kind: "session_checkpoint"`, `"direction_change"`, `"implementation_update"`, or `"verification_result"`.',
-    '3. **Before final reply** - `kind: "final_summary"` summarizing what changed, what was verified, and remaining risk.',
+    "Recommended quiet cadence when the connector is active:",
+    "1. **Routine setup/checkpoints stay local** - do not send `setup_complete` or `session_checkpoint` for normal tool availability or progress bookkeeping.",
+    '2. **Verification** - send `kind: "verification_result"` after meaningful tests, builds, migrations, or production-impacting verification.',
+    '3. **Direction changes** - send `kind: "direction_change"` only when user/product direction materially changed. Send `kind: "implementation_update"` only when it is explicitly durable project context and include `metadata.project_to_workspace=true`.',
+    '4. **Final** - before a substantive final reply, send one `kind: "final_summary"` summarizing what changed, what was verified, and remaining risk.',
     "",
-    "Aim for 5-15 signals per session.",
+    "Aim for 1-3 signals per substantive session.",
     "",
     "**Tool loading.** If `capture_session_signal` appears in your deferred-tools list rather than your active list, load it with `ToolSearch select:mcp__askthew__capture_session_signal` first. Deferred does not equal unavailable.",
     "",
-    "**Plan mode.** Signals are read-only observability. Emit in plan mode; they do not modify project state.",
-    "",
-    "**Recovery.** If you missed the startup signal, send it now with `metadata.recovered_missed_startup=true`. Never skip because the moment passed.",
+    "**Plan mode.** Signals are read-only observability. If a substantive verification or final summary belongs in the project, it may be emitted in plan mode, but do not emit routine planning checkpoints.",
     "",
     "**Inactivity (narrow).** Skip this entire block only if no `mcp__askthew__*` tool appears anywhere: active or deferred. Workspace ambiguity, plan mode, and deferred-tool mode do not count.",
     "",
     "**Payload guardrails.** Prefer a short summary, relative files touched, verification status, and useful non-sensitive metadata. Omit `commandsRun` unless the command materially explains verification or failure; when included, keep it short and avoid inline environment values. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
     "",
-    "Related tools: `recap` (what happened), `coach` (guidance), `next_moves` (structured workspace actions), `create_decision` (durable architectural decisions).",
+    "**Startup work check.** After the project binding is active, `list_ready_work` may be called at session start/resume. If work is returned, present the list and ask the human which item to claim. Never call `claim_work` silently.",
+    "",
+    "Related tools: `recap`, `coach`, `next_moves`, `list_decisions`, `list_outcomes`, and `create_decision` are manual-only: use them only when the user explicitly asks for that Ask The W action.",
+    "",
+    "**Manual-only tools.** Only `capture_session_signal` and startup `list_ready_work` may be called automatically. Do not call `claim_work`, `complete_work`, `release_work`, `recap`, `coach`, `next_moves`, `list_decisions`, `list_outcomes`, or `create_decision` during routine setup, checkpoint, planning, verification, or final-summary cadence unless the user explicitly asks for that Ask The W action.",
     INSTRUCTIONS_END,
     ""
   ].join("\n");
@@ -13089,7 +13297,7 @@ var SIGNAL_DISALLOWED_FIELDS = [
   "credentials",
   "private tokens",
   "large copied content",
-  "absolute local paths when a relative workspace path is available"
+  "absolute local paths when a relative project path is available"
 ];
 var SIGNAL_GUARDRAILS = [
   "MCP package redacts known credential patterns before queueing or sending.",
@@ -13106,9 +13314,9 @@ function metadataHostFromRecord(record2, fallbackHost) {
   return {
     host,
     version: typeof record2.version === "string" ? record2.version : "unknown",
-    api_url: typeof record2.api_url === "string" ? record2.api_url : "https://app.askthew.com",
+    api_url: typeof record2.api_url === "string" ? record2.api_url : DEFAULT_API_URL,
     tier: record2.tier === "paid" ? "paid" : "free",
-    workspace_id: typeof record2.workspace_id === "string" ? record2.workspace_id : null,
+    project_id: typeof record2.project_id === "string" ? record2.project_id : null,
     last_sync: typeof record2.last_sync === "string" ? record2.last_sync : (/* @__PURE__ */ new Date()).toISOString()
   };
 }
@@ -13148,7 +13356,7 @@ function readSignalAuthorizationFile(env = process.env) {
       granted_at: typeof entry.granted_at === "string" ? entry.granted_at : (/* @__PURE__ */ new Date()).toISOString(),
       source: entry.source === "workspace_bind" || entry.source === "mcp_workspace_bind" || entry.source === "plugin_install" ? entry.source : "plugin_install",
       scope_key: typeof entry.scope_key === "string" ? entry.scope_key : "global",
-      workspace_id: typeof entry.workspace_id === "string" ? entry.workspace_id : null,
+      project_id: typeof entry.project_id === "string" ? entry.project_id : null,
       allowed_fields: Array.isArray(entry.allowed_fields) ? entry.allowed_fields.map(String) : SIGNAL_ALLOWED_FIELDS,
       disallowed_fields: Array.isArray(entry.disallowed_fields) ? entry.disallowed_fields.map(String) : SIGNAL_DISALLOWED_FIELDS,
       guardrails: Array.isArray(entry.guardrails) ? entry.guardrails.map(String) : SIGNAL_GUARDRAILS
@@ -13166,9 +13374,9 @@ function writeSignalAuthorizationReceipt(input) {
     version: 1,
     host: input.hostType,
     granted_at: (/* @__PURE__ */ new Date()).toISOString(),
-    source: input.source ?? (input.workspaceId ? "workspace_bind" : "plugin_install"),
+    source: input.source ?? (input.projectId ? "workspace_bind" : "plugin_install"),
     scope_key: scopeKey,
-    workspace_id: input.workspaceId ?? null,
+    project_id: input.projectId ?? null,
     allowed_fields: SIGNAL_ALLOWED_FIELDS,
     disallowed_fields: SIGNAL_DISALLOWED_FIELDS,
     guardrails: SIGNAL_GUARDRAILS
@@ -13182,16 +13390,16 @@ function writeInstallMetadata(input) {
   const hostMetadata = {
     host: input.hostType,
     version: packageVersion(),
-    api_url: input.apiUrl ?? "https://app.askthew.com",
+    api_url: input.apiUrl ?? DEFAULT_API_URL,
     tier: input.tier ?? "free",
-    workspace_id: input.workspaceId ?? null,
+    project_id: input.projectId ?? null,
     last_sync: (/* @__PURE__ */ new Date()).toISOString()
   };
   metadata.hosts[input.hostType] = hostMetadata;
   writePrivateJson(installMetadataPath(input.env), metadata);
   writeSignalAuthorizationReceipt({
     hostType: input.hostType,
-    workspaceId: input.workspaceId,
+    projectId: input.projectId,
     source: input.signalAuthorizationSource,
     cwd: input.cwd,
     env: input.env
@@ -17030,7 +17238,7 @@ ZodNaN.create = (params) => {
     ...processCreateParams(params)
   });
 };
-var BRAND = Symbol("zod_brand");
+var BRAND = /* @__PURE__ */ Symbol("zod_brand");
 var ZodBranded = class extends ZodType {
   _parse(input) {
     const { ctx } = this._processInputParams(input);
@@ -17232,14 +17440,14 @@ var ostring = () => stringType().optional();
 var onumber = () => numberType().optional();
 var oboolean = () => booleanType().optional();
 var coerce = {
-  string: (arg) => ZodString.create({ ...arg, coerce: true }),
-  number: (arg) => ZodNumber.create({ ...arg, coerce: true }),
-  boolean: (arg) => ZodBoolean.create({
+  string: ((arg) => ZodString.create({ ...arg, coerce: true })),
+  number: ((arg) => ZodNumber.create({ ...arg, coerce: true })),
+  boolean: ((arg) => ZodBoolean.create({
     ...arg,
     coerce: true
-  }),
-  bigint: (arg) => ZodBigInt.create({ ...arg, coerce: true }),
-  date: (arg) => ZodDate.create({ ...arg, coerce: true })
+  })),
+  bigint: ((arg) => ZodBigInt.create({ ...arg, coerce: true })),
+  date: ((arg) => ZodDate.create({ ...arg, coerce: true }))
 };
 var NEVER = INVALID;
 
@@ -17290,7 +17498,6 @@ function $constructor(name, initializer3, params) {
   Object.defineProperty(_, "name", { value: name });
   return _;
 }
-var $brand = Symbol("zod_brand");
 var $ZodAsyncError = class extends Error {
   constructor() {
     super(`Encountered Promise during synchronous parse. Use .parseAsync() instead.`);
@@ -19794,8 +20001,6 @@ function en_default2() {
 }
 
 // ../../node_modules/zod/v4/core/registries.js
-var $output = Symbol("ZodOutput");
-var $input = Symbol("ZodInput");
 var $ZodRegistry = class {
   constructor() {
     this._map = /* @__PURE__ */ new Map();
@@ -21073,10 +21278,10 @@ var ZodMiniType = /* @__PURE__ */ $constructor("ZodMiniType", (inst, def) => {
   };
   inst.clone = (_def, params) => clone(inst, _def, params);
   inst.brand = () => inst;
-  inst.register = (reg, meta) => {
+  inst.register = ((reg, meta) => {
     reg.add(inst, meta);
     return inst;
-  };
+  });
 });
 var ZodMiniObject = /* @__PURE__ */ $constructor("ZodMiniObject", (inst, def) => {
   $ZodObject.init(inst, def);
@@ -21339,10 +21544,10 @@ var ZodType2 = /* @__PURE__ */ $constructor("ZodType", (inst, def) => {
   };
   inst.clone = (def2, params) => clone(inst, def2, params);
   inst.brand = () => inst;
-  inst.register = (reg, meta) => {
+  inst.register = ((reg, meta) => {
     reg.add(inst, meta);
     return inst;
-  };
+  });
   inst.parse = (data, params) => parse2(inst, data, params, { callee: inst.parse });
   inst.safeParse = (data, params) => safeParse3(inst, data, params);
   inst.parseAsync = async (data, params) => parseAsync2(inst, data, params, { callee: inst.parseAsync });
@@ -23471,7 +23676,7 @@ function isTerminal(status) {
 }
 
 // ../../node_modules/zod-to-json-schema/dist/esm/Options.js
-var ignoreOverride = Symbol("Let zodToJsonSchema decide on which parser to use");
+var ignoreOverride = /* @__PURE__ */ Symbol("Let zodToJsonSchema decide on which parser to use");
 var defaultOptions = {
   name: void 0,
   $refStrategy: "root",
@@ -26447,7 +26652,7 @@ var Server = class extends Protocol {
 };
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/server/completable.js
-var COMPLETABLE_SYMBOL = Symbol.for("mcp.completable");
+var COMPLETABLE_SYMBOL = /* @__PURE__ */ Symbol.for("mcp.completable");
 function isCompletable(schema) {
   return !!schema && typeof schema === "object" && COMPLETABLE_SYMBOL in schema;
 }
@@ -27422,7 +27627,7 @@ var import_node_crypto = __toESM(require("node:crypto"), 1);
 var import_node_module3 = require("node:module");
 var import_meta3 = {};
 var requirePackageJson2 = (0, import_node_module3.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta3.url);
-var tokenInvalidReason = null;
+var TOKEN_CHECK_TIMEOUT_MS = 5e3;
 function packageVersion2() {
   try {
     const manifest = requirePackageJson2("../package.json");
@@ -27444,7 +27649,8 @@ var signalKindSchema = external_exports.enum([
   "verification_result",
   "final_summary"
 ]);
-var idempotencyKeySchema = external_exports.string().min(16).refine((value) => !/^[A-Za-z0-9_.:/-]+-\d+$/.test(value), {
+var providedIdempotencyKeySchema = external_exports.string();
+var strictIdempotencyKeySchema = external_exports.string().min(16).refine((value) => !/^[A-Za-z0-9_.:/-]+-\d+$/.test(value), {
   message: "Use a ULID or 16+ char random key, not sessionId-sequence."
 });
 var codingSessionSignalSchema = external_exports.object({
@@ -27452,7 +27658,8 @@ var codingSessionSignalSchema = external_exports.object({
   sequence: external_exports.number().int().nonnegative(),
   kind: signalKindSchema,
   summary: external_exports.string().min(1).max(2e3),
-  idempotencyKey: idempotencyKeySchema.optional(),
+  // Keep host validation lenient so the handler can replace bad keys instead of surfacing MCP -32602.
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
   clientId: external_exports.enum(["claude_code", "codex", "cursor", "web_agent"]).optional(),
   scopeKey: external_exports.string().min(1).default("global"),
   evidence: external_exports.array(evidenceEntrySchema).default([]),
@@ -27462,12 +27669,66 @@ var codingSessionSignalSchema = external_exports.object({
 });
 var decisionSchema = external_exports.object({
   content: external_exports.string().min(1).max(4e3),
+  captureIntent: external_exports.literal("explicit_user_request").describe(
+    "Required. Set only when the user explicitly asks Ask The W to capture or record this as a decision. Use capture_session_signal for routine coding work."
+  ),
+  originatingPrompt: external_exports.string().min(1).max(4e3).describe(
+    "Short quote or paraphrase of the user's explicit Ask The W capture-decision request."
+  ),
   sourceSignalIds: external_exports.array(external_exports.string().uuid()).default([]),
-  idempotencyKey: idempotencyKeySchema.optional(),
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
   status: external_exports.enum(["proposed", "committed", "shipped", "abandoned"]).default("proposed"),
   outcomeId: external_exports.string().uuid().optional(),
   scopeKey: external_exports.string().min(1).optional()
 });
+var manualRequestShape = {
+  requestIntent: external_exports.literal("explicit_user_request").describe("Required. Set only when the user explicitly asks to use this Ask The W tool."),
+  originatingPrompt: external_exports.string().min(1).max(4e3).describe("Short quote or paraphrase of the user's explicit request.")
+};
+var workRunIdSchema = external_exports.string().uuid();
+var workScopeShape = {
+  scopeKey: external_exports.string().min(1).optional()
+};
+var listReadyWorkSchema = external_exports.object({
+  limit: external_exports.number().int().min(1).max(100).default(50),
+  ...workScopeShape
+});
+var claimWorkSchema = external_exports.object({
+  runId: workRunIdSchema.optional(),
+  ...workScopeShape
+});
+var heartbeatWorkSchema = external_exports.object({
+  runId: workRunIdSchema,
+  progressNote: external_exports.string().max(4e3).optional(),
+  ...workScopeShape
+});
+var completeWorkSchema = external_exports.object({
+  runId: workRunIdSchema,
+  summary: external_exports.string().min(1).max(4e3),
+  filesTouched: external_exports.array(external_exports.string().min(1).max(500)).default([]),
+  checks: external_exports.record(external_exports.string(), external_exports.unknown()).default({}),
+  commitRef: external_exports.string().max(200).optional(),
+  ...workScopeShape
+});
+var releaseWorkSchema = external_exports.object({
+  runId: workRunIdSchema,
+  outcome: external_exports.enum(["requeue", "failed"]).default("requeue"),
+  reason: external_exports.string().max(4e3).optional(),
+  ...workScopeShape
+});
+var fileRequestSchema = external_exports.object({
+  title: external_exports.string().min(1).max(200),
+  body: external_exports.string().min(1).max(8e3),
+  metadata: external_exports.record(external_exports.string(), external_exports.unknown()).default({}),
+  ...workScopeShape
+});
+var draftWireMessageSchema = external_exports.object({
+  ...manualRequestShape,
+  body: external_exports.string().trim().min(1).max(8e3),
+  channelKey: external_exports.string().trim().min(1).max(120).optional().nullable(),
+  threadId: external_exports.string().uuid().optional().nullable(),
+  ...workScopeShape
+}).strict();
 var MCP_TOOL_CAPABILITY_SCOPES = {
   askthew_start_workspace_bind: "agent:bind:start",
   askthew_check_workspace_bind: "agent:bind:status",
@@ -27476,20 +27737,38 @@ var MCP_TOOL_CAPABILITY_SCOPES = {
   create_decision: "agent:decisions:write",
   list_decisions: "agent:decisions:read",
   list_outcomes: "agent:outcomes:read",
+  list_project_docs: "agent:docs:read",
+  read_project_doc: "agent:docs:read",
   recap: "agent:recap",
   coach: "agent:coach",
-  next_moves: "agent:next_moves"
+  next_moves: "agent:next_moves",
+  list_ready_work: "agent:work:read",
+  claim_work: "agent:work:claim",
+  heartbeat_work: "agent:work:write",
+  complete_work: "agent:work:write",
+  release_work: "agent:work:write",
+  file_request: "agent:requests:write",
+  draft_wire_message: "agent:wire:draft"
 };
-var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W workspace installs, send compact session signals to the connected Ask The W workspace at setup, meaningful state changes, verification, and final summary. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
-var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W workspace binding for the local identity. Returns a confirmation URL and display code; does not send project content.";
-var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W workspace binding status for a display code. When completed, stores the workspace binding and consent receipt locally.";
-var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected workspace or scope. Does not modify workspace state.";
-var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record in the connected workspace or scope. Sends the provided decision content and optional linked IDs.";
-var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history for the connected workspace or scope. Does not modify workspace state.";
-var LIST_OUTCOMES_DESCRIPTION = "Read active Ask The W outcomes for the connected workspace resolved from the current scope. Does not modify workspace state.";
-var RECAP_DESCRIPTION = "Read a server-generated recap from existing Ask The W workspace signals. Does not modify workspace state.";
-var COACH_DESCRIPTION = "Read server-backed coaching and next-step guidance from existing Ask The W workspace context plus the optional focus string. Does not modify workspace state.";
-var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W workspace Next Moves as structured action items. This is separate from coach tips and does not modify workspace state.";
+var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W project installs, send compact session signals to the connected Ask The W project for meaningful verification, final summaries, and explicit product-relevant direction changes. Routine setup, checkpoints, and implementation chatter should stay local/internal. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
+var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W project binding for the local identity. Returns a confirmation URL and display code; does not send project content.";
+var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W project binding status for a display code. When completed, stores the project binding and consent receipt locally.";
+var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected project or scope. Does not modify project state.";
+var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record only when the user explicitly asks Ask The W to capture or record a decision. Routine coding work must use capture_session_signal instead.";
+var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history only when the user explicitly asks for it. Does not modify project state.";
+var LIST_OUTCOMES_DESCRIPTION = "Read active Ask The W outcomes only when the user explicitly asks for them. Does not modify project state.";
+var LIST_PROJECT_DOCS_DESCRIPTION = "List current kept files in the bound Ask The W Project library, including agent entry-point docs. Read-only.";
+var READ_PROJECT_DOC_DESCRIPTION = "Read one bound Project library file at an exact version. Returns grounded text and a versioned artifact ref; never writes or pushes files.";
+var RECAP_DESCRIPTION = "Read a server-generated recap only when the user explicitly asks for a recap. Does not modify project state.";
+var COACH_DESCRIPTION = "Read on-demand server-backed coaching and next-step guidance only when the user explicitly asks for guidance. Not part of routine setup, checkpoint, or final-summary cadence. Does not modify project state.";
+var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W project Next Moves only when the user explicitly asks for next moves. This is separate from coach tips and does not modify project state.";
+var LIST_READY_WORK_DESCRIPTION = "Read approved terminal work waiting for this bound project. Safe for a session-start check; does not claim or start work.";
+var CLAIM_WORK_DESCRIPTION = "Explicitly claim one approved terminal work item after the human chooses it. Claiming starts the run and returns the full fenced brief.";
+var HEARTBEAT_WORK_DESCRIPTION = "Renew the lease for a claimed terminal work item and optionally attach a short progress note.";
+var COMPLETE_WORK_DESCRIPTION = "Complete a claimed terminal work item with a receipt: summary, files touched, checks run, and optional commit ref.";
+var RELEASE_WORK_DESCRIPTION = "Release a claimed terminal work item back to waiting work, or mark it failed with a reason.";
+var FILE_REQUEST_DESCRIPTION = "File a new project request from this coding session. This records intake only; it does not create, approve, claim, or execute work.";
+var DRAFT_WIRE_MESSAGE_DESCRIPTION = "Draft a strict internal Wire message action only when the user explicitly asks. This files a Project request for human review; it never sends, publishes, addresses recipients, invokes a connector, or performs external delivery.";
 var READ_WORKSPACE_ANNOTATIONS = {
   readOnlyHint: true,
   openWorldHint: false
@@ -27506,15 +27785,40 @@ var IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS = {
   idempotentHint: true,
   openWorldHint: false
 };
-function toolJson(value) {
+var IDEMPOTENT_WORK_WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false
+};
+function verifyTokenWithTimeout(input) {
+  return Promise.race([
+    verifyToken(input),
+    new Promise((resolve2) => {
+      const timer = setTimeout(() => resolve2({ stale: false }), TOKEN_CHECK_TIMEOUT_MS);
+      timer.unref?.();
+    })
+  ]);
+}
+function toolJson(value, options = {}) {
   return {
     content: [
       {
         type: "text",
         text: JSON.stringify(value, null, 2)
       }
-    ]
+    ],
+    ...options.isError ? { isError: true } : {}
   };
+}
+function isFailureBody(body) {
+  return typeof body === "object" && body !== null && body.ok === false;
+}
+function toolBody(body) {
+  return toolJson(body, { isError: isFailureBody(body) });
+}
+function toolResult(result) {
+  return toolJson(result.body, { isError: !result.ok || isFailureBody(result.body) });
 }
 function requiresPaidWorkspace(env = process.env) {
   const value = String(env.ASKTHEW_REQUIRE_PAID ?? env.ASKTHEW_PLUGIN_TIER ?? "").trim().toLowerCase();
@@ -27522,11 +27826,14 @@ function requiresPaidWorkspace(env = process.env) {
 }
 function needsSignup(env = process.env) {
   const paidRequired = requiresPaidWorkspace(env);
-  return toolJson({
-    ok: false,
-    code: "needs_signup",
-    message: paidRequired ? "Ask The W needs a workspace connection. First call askthew_start_signup({email}) and askthew_complete_signup({email, code}), then call askthew_start_workspace_bind and complete the browser confirmation." : "Ask The W needs signup before this tool can run. Call askthew_start_signup({email}), then askthew_complete_signup({email, code})."
-  });
+  return toolJson(
+    {
+      ok: false,
+      code: "needs_signup",
+      message: paidRequired ? "Ask The W needs a project connection. First call askthew_start_signup({email}) and askthew_complete_signup({email, code}), then call askthew_start_workspace_bind and complete the browser confirmation." : "Ask The W needs signup before this tool can run. Call askthew_start_signup({email}), then askthew_complete_signup({email, code})."
+    },
+    { isError: true }
+  );
 }
 function installHostArg(env) {
   return defaultClientId(env) ?? "<host>";
@@ -27536,24 +27843,30 @@ function defaultClientId(env) {
   return host === "claude_code" || host === "codex" || host === "cursor" ? host : void 0;
 }
 function needsReauth(reason, env) {
-  return toolJson({
-    ok: false,
-    code: "needs_reauth",
-    message: `Ask The W token is no longer valid (reason: ${reason}). Run: npx -y --package @askthew/mcp-plugin askthew-mcp install --host ${installHostArg(env)} --force`
-  });
+  return toolJson(
+    {
+      ok: false,
+      code: "needs_reauth",
+      message: `Ask The W token is no longer valid (reason: ${reason}). Run: npx -y --package @askthew/mcp-plugin askthew-mcp install --host ${installHostArg(env)} --force`
+    },
+    { isError: true }
+  );
 }
 function needsPaidWorkspace() {
-  return toolJson({
-    ok: false,
-    code: "needs_paid_workspace",
-    message: "Ask The W needs a workspace connection. Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed."
-  });
+  return toolJson(
+    {
+      ok: false,
+      code: "needs_paid_workspace",
+      message: "Ask The W needs a project connection. Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed."
+    },
+    { isError: true }
+  );
 }
 function defaultScopeKey(env = process.env) {
   return currentScopeKey(process.cwd(), env);
 }
 function validIdempotencyKey(value) {
-  return typeof value === "string" && idempotencyKeySchema.safeParse(value).success;
+  return typeof value === "string" && strictIdempotencyKeySchema.safeParse(value).success;
 }
 function fallbackIdempotencyKey() {
   return import_node_crypto.default.randomUUID();
@@ -27562,7 +27875,6 @@ function captureCadenceFeedback(sessions, signal, nowMs = Date.now()) {
   const previous = sessions.get(signal.sessionId);
   const firstSignal = !previous;
   const signalsThisSession = (previous?.signalsThisSession ?? 0) + 1;
-  const missedStartup = firstSignal && signal.kind !== "setup_complete";
   sessions.set(signal.sessionId, {
     signalsThisSession,
     lastSignalAtMs: nowMs
@@ -27570,15 +27882,34 @@ function captureCadenceFeedback(sessions, signal, nowMs = Date.now()) {
   return {
     signals_this_session: signalsThisSession,
     seconds_since_last_signal: previous ? Math.max(0, Math.floor((nowMs - previous.lastSignalAtMs) / 1e3)) : null,
-    next_recommended: signal.kind === "final_summary" ? "at the start of your next coding-agent session" : "after your next state-changing tool call or before final reply",
-    missed_startup: missedStartup,
-    ...missedStartup ? { recommended_action: "send setup_complete now with metadata.recovered_missed_startup=true" } : {},
+    next_recommended: signal.kind === "final_summary" ? "after meaningful verification in your next substantive coding session" : "after verification or before a substantive final reply",
+    missed_startup: false,
     ...firstSignal ? {
       plugin_status: "connected",
       scope_key: signal.scopeKey,
       session_id: signal.sessionId
     } : {}
   };
+}
+var heldWorkByRunId = /* @__PURE__ */ new Map();
+function rememberHeldWork(body, scopeKey) {
+  const claimed = body;
+  const runId = typeof claimed?.work?.runId === "string" ? claimed.work.runId : null;
+  if (claimed?.ok !== false && runId) heldWorkByRunId.set(runId, scopeKey);
+}
+function forgetHeldWork(runId) {
+  heldWorkByRunId.delete(runId);
+}
+async function releaseHeldWork(input) {
+  const held = Array.from(heldWorkByRunId.entries());
+  heldWorkByRunId.clear();
+  for (const [runId, scopeKey] of held) {
+    try {
+      await input.client.releaseWork({ runId, outcome: "requeue", reason: input.reason, scopeKey });
+    } catch {
+    }
+  }
+  return held.length;
 }
 function createAskTheWMcpServer(options = {}) {
   const server = new McpServer({
@@ -27588,6 +27919,13 @@ function createAskTheWMcpServer(options = {}) {
   const outbox = options.outbox ?? new Outbox();
   const signalCadenceBySession = /* @__PURE__ */ new Map();
   const runtimeEnv = options.env ?? process.env;
+  let tokenInvalidReason = null;
+  if (options.verifyTokenOnStart) {
+    verifyTokenWithTimeout({ apiUrl: options.apiUrl, fetcher: options.fetcher, env: runtimeEnv }).then((result) => {
+      if (result.stale) tokenInvalidReason = result.reason;
+    }).catch(() => {
+    });
+  }
   const client = () => new AskTheWCloudClient({
     apiUrl: options.apiUrl,
     fetcher: options.fetcher,
@@ -27606,14 +27944,17 @@ function createAskTheWMcpServer(options = {}) {
   const blockedOutsideProject = () => {
     const status = bindingStatus();
     if (status.allowed) return null;
-    return toolJson({
-      ok: false,
-      code: "wrong_project",
-      message: "Ask The W is connected to a different workspace. Reinstall it from this workspace if you want to use it here.",
-      bound_root: status.boundRoot,
-      active_root: status.activeRoot,
-      reason: status.reason
-    });
+    return toolJson(
+      {
+        ok: false,
+        code: "wrong_project",
+        message: "Ask The W is connected to a different project. Reinstall it from this project if you want to use it here.",
+        bound_root: status.boundRoot,
+        active_root: status.activeRoot,
+        reason: status.reason
+      },
+      { isError: true }
+    );
   };
   server.tool(
     "askthew_start_signup",
@@ -27630,9 +27971,10 @@ function createAskTheWMcpServer(options = {}) {
         email: payload.email,
         apiUrl: options.apiUrl,
         clientHint: payload.clientHint,
-        fetcher: options.fetcher
+        fetcher: options.fetcher,
+        env: runtimeEnv
       });
-      return toolJson(body);
+      return toolBody(body);
     }
   );
   server.tool(
@@ -27657,7 +27999,7 @@ function createAskTheWMcpServer(options = {}) {
         env: runtimeEnv
       });
       if (body?.ok) tokenInvalidReason = null;
-      return toolJson(body);
+      return toolBody(body);
     }
   );
   server.tool(
@@ -27674,7 +28016,7 @@ function createAskTheWMcpServer(options = {}) {
       const unavailable = cloudGuard(currentClient, { requirePaid: false });
       if (unavailable) return unavailable;
       const result = await currentClient.startPaidBind();
-      return toolJson(result.body);
+      return toolResult(result);
     }
   );
   server.tool(
@@ -27695,25 +28037,25 @@ function createAskTheWMcpServer(options = {}) {
       if (result.ok && body.status === "completed") {
         const tokenFile = loadCloudToken(runtimeEnv);
         if (tokenFile) {
-          const workspaceId = typeof body.workspace_id === "string" ? body.workspace_id : tokenFile.workspace_id ?? null;
+          const projectId = typeof body.project_id === "string" ? body.project_id : tokenFile.project_id ?? null;
           saveCloudToken({
             ...tokenFile,
             tier: "paid",
-            workspace_id: workspaceId,
+            project_id: projectId,
             api_url: options.apiUrl ?? tokenFile.api_url
           }, runtimeEnv);
           const hostType = defaultClientId(runtimeEnv);
           if (hostType) {
             writeSignalAuthorizationReceipt({
               hostType,
-              workspaceId,
+              projectId,
               source: "mcp_workspace_bind",
               env: runtimeEnv
             });
           }
         }
       }
-      return toolJson(body);
+      return toolResult(result);
     }
   );
   server.tool(
@@ -27734,11 +28076,14 @@ function createAskTheWMcpServer(options = {}) {
         idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey()
       });
       if (!parsed.success) {
-        return toolJson({
-          ok: false,
-          code: "invalid_signal",
-          message: parsed.error.issues.map((issue2) => issue2.message).join("; ")
-        });
+        return toolJson(
+          {
+            ok: false,
+            code: "invalid_signal",
+            message: parsed.error.issues.map((issue2) => issue2.message).join("; ")
+          },
+          { isError: true }
+        );
       }
       const sanitized = redactSignalPayload(parsed.data, { env: runtimeEnv });
       const feedback = captureCadenceFeedback(signalCadenceBySession, parsed.data);
@@ -27757,12 +28102,15 @@ function createAskTheWMcpServer(options = {}) {
       }
       if (result.kind === "failed") {
         outbox.markFailed(localOutboxId, result.code, result.message);
-        return toolJson({
-          ok: false,
-          code: result.code,
-          message: result.message,
-          ...feedback
-        });
+        return toolJson(
+          {
+            ok: false,
+            code: result.code,
+            message: result.message,
+            ...feedback
+          },
+          { isError: true }
+        );
       }
       const retryEstimateSeconds = outbox.backoff(localOutboxId, 0, result.retryAfterSeconds);
       return toolJson({
@@ -27780,7 +28128,7 @@ function createAskTheWMcpServer(options = {}) {
     {
       sessionId: external_exports.string().optional(),
       since: external_exports.string().optional(),
-      limit: external_exports.number().int().min(1).max(200).default(50),
+      limit: external_exports.number().int().min(1).max(100).default(50),
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
     },
@@ -27795,7 +28143,7 @@ function createAskTheWMcpServer(options = {}) {
         ...payload,
         scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
-      return toolJson(result.body);
+      return toolResult(result);
     }
   );
   server.tool(
@@ -27814,13 +28162,14 @@ function createAskTheWMcpServer(options = {}) {
         idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey(),
         scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
-      return toolJson(result.body);
+      return toolResult(result);
     }
   );
   server.tool(
     "list_decisions",
     LIST_DECISIONS_DESCRIPTION,
     {
+      ...manualRequestShape,
       limit: external_exports.number().int().min(1).max(200).default(50),
       scopeKey: external_exports.string().min(1).optional(),
       allScopes: external_exports.boolean().optional()
@@ -27836,13 +28185,14 @@ function createAskTheWMcpServer(options = {}) {
         ...payload,
         scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
-      return toolJson(result.body);
+      return toolResult(result);
     }
   );
   server.tool(
     "list_outcomes",
     LIST_OUTCOMES_DESCRIPTION,
     {
+      ...manualRequestShape,
       limit: external_exports.number().int().min(1).max(500).optional(),
       scopeKey: external_exports.string().min(1).optional()
     },
@@ -27857,13 +28207,66 @@ function createAskTheWMcpServer(options = {}) {
         ...payload,
         scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
-      return toolJson(result.body);
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "list_project_docs",
+    LIST_PROJECT_DOCS_DESCRIPTION,
+    {
+      limit: external_exports.number().int().min(1).max(100).default(50),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    READ_WORKSPACE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.listProjectDocs({
+        limit: payload.limit,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "read_project_doc",
+    READ_PROJECT_DOC_DESCRIPTION,
+    {
+      artifactId: external_exports.string().uuid().optional(),
+      path: external_exports.string().min(1).max(500).optional(),
+      version: external_exports.number().int().min(1).optional(),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    READ_WORKSPACE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      if (!payload.artifactId && !payload.path) {
+        return toolJson(
+          { ok: false, code: "doc_required", message: "Provide artifactId or path." },
+          { isError: true }
+        );
+      }
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.readProjectDoc({
+        artifactId: payload.artifactId,
+        path: payload.path,
+        version: payload.version,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
     }
   );
   server.tool(
     "recap",
     RECAP_DESCRIPTION,
     {
+      ...manualRequestShape,
       since: external_exports.string().optional(),
       maxSignals: external_exports.number().int().min(1).max(200).optional(),
       scopeKey: external_exports.string().min(1).optional(),
@@ -27876,25 +28279,18 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      try {
-        const result = await currentClient.recap({
-          ...payload,
-          scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
-        });
-        return toolJson(result.body);
-      } catch {
-        return toolJson({
-          ok: false,
-          code: "unreachable",
-          message: "Couldn't reach Ask The W. Captures are queued; recap will be available when you're back online."
-        });
-      }
+      const result = await currentClient.recap({
+        ...payload,
+        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
     }
   );
   server.tool(
     "coach",
     COACH_DESCRIPTION,
     {
+      ...manualRequestShape,
       focus: external_exports.string().max(1e3).optional(),
       cursor: external_exports.string().optional(),
       limit: external_exports.number().int().min(1).max(50).optional(),
@@ -27908,25 +28304,18 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      try {
-        const result = await currentClient.coach({
-          ...payload,
-          scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
-        });
-        return toolJson(result.body);
-      } catch {
-        return toolJson({
-          ok: false,
-          code: "unreachable",
-          message: "Couldn't reach Ask The W. Captures are queued; coach will be available when you're back online."
-        });
-      }
+      const result = await currentClient.coach({
+        ...payload,
+        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
     }
   );
   server.tool(
     "next_moves",
     NEXT_MOVES_DESCRIPTION,
     {
+      ...manualRequestShape,
       limit: external_exports.number().int().min(1).max(50).optional(),
       scopeKey: external_exports.string().min(1).optional()
     },
@@ -27937,55 +28326,242 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      try {
-        const result = await currentClient.nextMoves({
-          ...payload,
-          scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
-        });
-        return toolJson(result.body);
-      } catch {
-        return toolJson({
-          ok: false,
-          code: "unreachable",
-          message: "Couldn't reach Ask The W. Captures are queued; next moves will be available when you're back online."
-        });
-      }
+      const result = await currentClient.nextMoves({
+        ...payload,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "list_ready_work",
+    LIST_READY_WORK_DESCRIPTION,
+    listReadyWorkSchema.shape,
+    READ_WORKSPACE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.listReadyWork({
+        limit: payload.limit,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "claim_work",
+    CLAIM_WORK_DESCRIPTION,
+    claimWorkSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const scopeKey = payload.scopeKey || defaultScopeKey(runtimeEnv);
+      const result = await currentClient.claimWork({
+        runId: payload.runId,
+        scopeKey
+      });
+      rememberHeldWork(result.body, scopeKey);
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "heartbeat_work",
+    HEARTBEAT_WORK_DESCRIPTION,
+    heartbeatWorkSchema.shape,
+    IDEMPOTENT_WORK_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.heartbeatWork({
+        runId: payload.runId,
+        progressNote: payload.progressNote,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "complete_work",
+    COMPLETE_WORK_DESCRIPTION,
+    completeWorkSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.completeWork({
+        runId: payload.runId,
+        summary: payload.summary,
+        filesTouched: payload.filesTouched,
+        checks: payload.checks,
+        commitRef: payload.commitRef,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      forgetHeldWork(payload.runId);
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "release_work",
+    RELEASE_WORK_DESCRIPTION,
+    releaseWorkSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.releaseWork({
+        runId: payload.runId,
+        outcome: payload.outcome,
+        reason: payload.reason,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      forgetHeldWork(payload.runId);
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "file_request",
+    FILE_REQUEST_DESCRIPTION,
+    fileRequestSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.fileRequest({
+        title: payload.title,
+        body: payload.body,
+        metadata: payload.metadata,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "draft_wire_message",
+    DRAFT_WIRE_MESSAGE_DESCRIPTION,
+    draftWireMessageSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.draftWireMessage({
+        requestIntent: payload.requestIntent,
+        originatingPrompt: payload.originatingPrompt,
+        body: payload.body,
+        channelKey: payload.channelKey,
+        threadId: payload.threadId,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+      });
+      return toolResult(result);
     }
   );
   return server;
 }
 async function runStdioServer(options = {}) {
-  const runtimeEnv = options.env ?? process.env;
-  tokenInvalidReason = null;
-  void verifyToken({ apiUrl: options.apiUrl, fetcher: options.fetcher, env: runtimeEnv }).then((result) => {
-    if (result.stale) tokenInvalidReason = result.reason;
-  }).catch(() => {
-  });
-  const server = createAskTheWMcpServer(options);
+  const server = createAskTheWMcpServer({ ...options, verifyTokenOnStart: true });
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  const releaseOnSessionEnd = async () => {
+    if (heldWorkByRunId.size === 0) return;
+    const client = new AskTheWCloudClient({
+      apiUrl: options.apiUrl,
+      fetcher: options.fetcher,
+      env: options.env ?? process.env
+    });
+    if (!client.hasToken()) return;
+    await releaseHeldWork({
+      client,
+      reason: "The coding session ended before this work finished."
+    });
+  };
+  const sdkOnClose = transport.onclose?.bind(transport);
+  transport.onclose = () => {
+    sdkOnClose?.();
+    void releaseOnSessionEnd();
+  };
+  for (const signal of ["SIGINT", "SIGTERM"]) {
+    process.once(signal, () => {
+      void releaseOnSessionEnd().finally(() => process.exit(0));
+    });
+  }
 }
 
 // src/cli.ts
 var SUPPORTED_HOST_TYPES2 = ["claude_code", "codex", "cursor"];
+var EXIT_CODE = {
+  ok: 0,
+  internal: 1,
+  auth: 2,
+  network: 3,
+  binding: 4,
+  usage: 5
+};
+var CliError = class extends Error {
+  code;
+  exitCode;
+  constructor(message, options = {}) {
+    super(message);
+    this.code = options.code ?? "internal_error";
+    this.exitCode = options.exitCode ?? EXIT_CODE.internal;
+  }
+};
+function usageError(message, code = "usage_error") {
+  return new CliError(message, { code, exitCode: EXIT_CODE.usage });
+}
+function authError(message, code = "auth_error") {
+  return new CliError(message, { code, exitCode: EXIT_CODE.auth });
+}
+function bindingError(message, code = "binding_error") {
+  return new CliError(message, { code, exitCode: EXIT_CODE.binding });
+}
+function isNonInteractive(args) {
+  return boolArg(args, "--non-interactive") || process.stdin.isTTY !== true;
+}
+function printSuccessJson(command, data) {
+  console.log(JSON.stringify({ ok: true, command, data }, null, 2));
+}
 function usage() {
   return [
     "Ask The W MCP",
     "",
     "Usage:",
     "  askthew-mcp",
-    "  askthew-mcp install --host <claude_code|codex|cursor> [--email <email>] [--code <otp>] [--skip-auth] [--force|--reauth] [--server-entrypoint <path>] [--api-url <url>] [--dry-run]",
-    "  askthew-mcp uninstall --host <claude_code|codex|cursor> [--dry-run] [--keep-local-data] [--keep-auth]",
+    "  askthew-mcp install --host <claude_code|codex|cursor> [--email <email>] [--code <otp>] [--skip-auth] [--force|--reauth] [--server-entrypoint <path>] [--api-url <url>] [--dry-run] [--json] [--non-interactive]",
+    "  askthew-mcp uninstall --host <claude_code|codex|cursor> [--dry-run] [--keep-local-data] [--keep-auth] [--json]",
     "  askthew-mcp initialize-handshake [--host <claude_code|codex|cursor>] [--json]",
-    "  askthew-mcp bind [--allow-pending]",
+    "  askthew-mcp session-start [--scope-key <scope>] [--limit <n>] [--json]",
+    "  askthew-mcp bind [--allow-pending] [--json] [--non-interactive]",
     "  askthew-mcp identity status [--json]",
     "  askthew-mcp doctor [--host <claude_code|codex|cursor>] [--json] [--strict]",
-    "  askthew-mcp refresh",
-    "  askthew-mcp token rotate|revoke",
-    "  askthew-mcp export [--scope-key <scope>] [--all-scopes]",
+    "  askthew-mcp refresh [--json]",
+    "  askthew-mcp token rotate|revoke [--json]",
+    "  askthew-mcp export [--scope-key <scope>] [--all-scopes] [--json]",
     "  askthew-mcp print-instructions",
-    "  askthew-mcp delete-me --confirm",
-    "  askthew-mcp --version"
+    "  askthew-mcp delete-me --confirm [--json]",
+    "  askthew-mcp --version",
+    "",
+    "Global: --non-interactive fails fast instead of prompting (also inferred when stdin is not a TTY)."
   ].join("\n");
 }
 function parseArgs(argv) {
@@ -28013,18 +28589,28 @@ function stringArg(args, name) {
 function boolArg(args, name) {
   return args[name] === true;
 }
+function positiveIntArg(args, name, fallback, max) {
+  const parsed = Number(stringArg(args, name));
+  return Number.isFinite(parsed) ? Math.max(1, Math.min(max, Math.round(parsed))) : fallback;
+}
 function requireHost(value) {
   if (value === "claude_code" || value === "codex" || value === "cursor") return value;
-  throw new Error("Missing or invalid --host. Expected claude_code, codex, or cursor.");
+  throw usageError("Missing or invalid --host. Expected claude_code, codex, or cursor.", "invalid_host");
 }
 function optionalHost(value) {
   if (value === "claude_code" || value === "codex" || value === "cursor") return value;
   return null;
 }
-function apiUrl(args) {
-  return stringArg(args, "--api-url") || process.env.ASKTHEW_API_URL?.trim() || "https://app.askthew.com";
+function apiUrl(args, tokenFile) {
+  return resolveApiUrl({
+    apiUrl: stringArg(args, "--api-url"),
+    tokenFile: tokenFile ?? null
+  });
 }
-async function readEmail() {
+async function readEmail(nonInteractive) {
+  if (nonInteractive) {
+    throw usageError("Missing --email. Pass --email <address> in non-interactive mode.", "missing_email");
+  }
   const response = await (0, import_prompts.default)({
     type: "text",
     name: "email",
@@ -28034,7 +28620,10 @@ async function readEmail() {
   if (!response.email) throw new Error("Signup cancelled.");
   return String(response.email);
 }
-async function readCode() {
+async function readCode(nonInteractive) {
+  if (nonInteractive) {
+    throw usageError("Missing --code. Pass --code <otp> in non-interactive mode.", "missing_code");
+  }
   const response = await (0, import_prompts.default)({
     type: "text",
     name: "code",
@@ -28045,7 +28634,7 @@ async function readCode() {
   return String(response.code);
 }
 async function authenticateInstall(input) {
-  const email2 = input.email || await readEmail();
+  const email2 = input.email || await readEmail(input.nonInteractive);
   if (input.code) {
     const completed2 = await completeSignup({
       email: email2,
@@ -28064,8 +28653,10 @@ async function authenticateInstall(input) {
     apiUrl: input.apiUrl,
     clientHint: input.hostType
   });
-  if (!started?.ok) throw new Error(String(started?.message ?? started?.code ?? "Could not send signup code."));
-  const code = await readCode();
+  if (!started?.ok) {
+    throw authError(String(started?.message ?? started?.code ?? "Could not send signup code."), "signup_start_failed");
+  }
+  const code = await readCode(input.nonInteractive);
   const completed = await completeSignup({
     email: email2,
     code,
@@ -28074,12 +28665,14 @@ async function authenticateInstall(input) {
     tokenPurpose: "device"
   });
   if (!completed?.ok) {
-    throw new Error(String(completed?.message ?? completed?.code ?? "Could not verify signup code."));
+    throw authError(String(completed?.message ?? completed?.code ?? "Could not verify signup code."), "signup_verify_failed");
   }
   return completed;
 }
 async function installCommand(argv) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
+  const nonInteractive = isNonInteractive(args);
   const hostType = requireHost(stringArg(args, "--host"));
   const baseUrl = apiUrl(args);
   const skipAuth = boolArg(args, "--skip-auth");
@@ -28089,60 +28682,67 @@ async function installCommand(argv) {
   const code = stringArg(args, "--code") || void 0;
   const serverEntrypoint = stringArg(args, "--server-entrypoint") || void 0;
   if (stringArg(args, "--bind") || boolArg(args, "--bind")) {
-    throw new Error("--bind is no longer supported. Run install with email verification, then use `askthew-mcp bind` to connect a workspace.");
+    throw usageError(
+      "--bind is no longer supported. Run install with email verification, then use `askthew-mcp bind` to connect a project.",
+      "unsupported_flag"
+    );
   }
   if (boolArg(args, "--free")) {
-    throw new Error("This flag is no longer needed. Run install with email verification.");
+    throw usageError("This flag is no longer needed. Run install with email verification.", "unsupported_flag");
   }
-  if (hostType === "claude_code") {
+  if (hostType === "claude_code" && !asJson) {
     console.log("Tip: Claude Code users can install Ask The W with `/plugin marketplace add AskTheWAI/claude-plugins`.");
   }
-  let workspaceId;
+  let projectId;
   const existingToken = loadCloudToken();
   let installTier = existingToken?.tier ?? "free";
   if (!skipAuth && !dryRun && existingToken?.token && !email2 && !code) {
     const verification = await verifyToken({ apiUrl: baseUrl });
     if (verification.stale) {
       const archivePath = archiveCloudToken(verification.reason);
-      console.log(`Existing token was invalid (${verification.reason}). Starting fresh email signup.`);
-      if (archivePath) console.log(`Archived invalid token: ${archivePath}`);
-      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl });
-      workspaceId = auth.workspace_id ?? null;
+      if (!asJson) {
+        console.log(`Existing token was invalid (${verification.reason}). Starting fresh email signup.`);
+        if (archivePath) console.log(`Archived invalid token: ${archivePath}`);
+      }
+      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, nonInteractive });
+      projectId = auth.project_id ?? null;
       installTier = "free";
     } else if (forceAuth) {
       const archivePath = archiveCloudToken("replaced");
-      if (archivePath) console.log(`Archived existing token: ${archivePath}`);
-      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl });
-      workspaceId = auth.workspace_id ?? null;
+      if (!asJson && archivePath) console.log(`Archived existing token: ${archivePath}`);
+      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, nonInteractive });
+      projectId = auth.project_id ?? null;
       installTier = "free";
     } else {
-      workspaceId = verification.workspace_id ?? existingToken.workspace_id ?? null;
-      if (verification.workspace_id) {
+      projectId = verification.project_id ?? existingToken.project_id ?? null;
+      if (verification.project_id) {
         installTier = "paid";
         saveCloudToken({
           ...existingToken,
           tier: "paid",
-          workspace_id: verification.workspace_id,
+          project_id: verification.project_id,
           api_url: baseUrl
         });
       }
-      if ("email" in verification) {
-        console.log(`Existing Ask The W install detected and valid for ${verification.email ?? "this device"}.`);
-      } else {
-        console.log("Existing Ask The W install detected. Token verification is temporarily unavailable.");
+      if (!asJson) {
+        if ("email" in verification) {
+          console.log(`Existing Ask The W install detected and valid for ${verification.email ?? "this device"}.`);
+        } else {
+          console.log("Existing Ask The W install detected. Token verification is temporarily unavailable.");
+        }
+        console.log("Re-run with --force to re-authenticate.");
       }
-      console.log("Re-run with --force to re-authenticate.");
     }
   } else if (!skipAuth && !dryRun) {
     if (forceAuth && existingToken?.token) {
       const archivePath = archiveCloudToken("replaced");
-      if (archivePath) console.log(`Archived existing token: ${archivePath}`);
+      if (!asJson && archivePath) console.log(`Archived existing token: ${archivePath}`);
     }
-    const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, email: email2, code });
-    workspaceId = auth.workspace_id ?? null;
+    const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, email: email2, code, nonInteractive });
+    projectId = auth.project_id ?? null;
     installTier = "free";
   } else if (!dryRun && !existingToken) {
-    throw new Error("--skip-auth requires an existing ~/.askthew/cloud-token.json.");
+    throw authError("--skip-auth requires an existing ~/.askthew/cloud-token.json.", "no_existing_token");
   }
   try {
     const config2 = installHostConfig({
@@ -28158,25 +28758,54 @@ async function installCommand(argv) {
         hostType,
         apiUrl: baseUrl,
         tier: installTier,
-        workspaceId,
-        signalAuthorizationSource: workspaceId ? "workspace_bind" : "plugin_install",
+        projectId,
+        signalAuthorizationSource: projectId ? "workspace_bind" : "plugin_install",
         cwd: process.cwd()
       });
     }
-    console.log(`Ask The W installed for ${hostType}.`);
-    console.log(`MCP config: ${config2.settingsPath}`);
-    console.log(`Agent instructions: ${instructions.filePath}`);
-    console.log("Open a new coding-agent session or restart this one so it loads the new MCP server and instructions.");
+    if (asJson) {
+      printSuccessJson("install", {
+        host: hostType,
+        settings_path: config2.settingsPath,
+        instructions_path: instructions.filePath,
+        project_id: projectId ?? null,
+        tier: installTier,
+        dry_run: dryRun
+      });
+    } else {
+      console.log(`Ask The W installed for ${hostType}.`);
+      console.log(`MCP config: ${config2.settingsPath}`);
+      console.log(`Agent instructions: ${instructions.filePath}`);
+      console.log("Open a new coding-agent session or restart this one so it loads the new MCP server and instructions.");
+    }
   } catch (error2) {
     const message = error2 instanceof Error ? error2.message : "Unknown install failure.";
-    console.error(`Install reached auth, but writing local config failed: ${message}`);
-    console.error(`Your token is still saved under ${dataDirSummary()}.`);
-    console.error(`Retry local writes with: askthew-mcp install --host ${hostType} --skip-auth`);
-    process.exitCode = 1;
+    if (asJson) {
+      console.log(
+        JSON.stringify(
+          {
+            ok: false,
+            command: "install",
+            error: {
+              code: "install_config_write_failed",
+              message: `Install reached auth, but writing local config failed: ${message}. Token is still saved under ${dataDirSummary()}. Retry local writes with: askthew-mcp install --host ${hostType} --skip-auth`
+            }
+          },
+          null,
+          2
+        )
+      );
+    } else {
+      console.error(`Install reached auth, but writing local config failed: ${message}`);
+      console.error(`Your token is still saved under ${dataDirSummary()}.`);
+      console.error(`Retry local writes with: askthew-mcp install --host ${hostType} --skip-auth`);
+    }
+    process.exitCode = EXIT_CODE.internal;
   }
 }
 async function uninstallCommand(argv) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
   const hostType = requireHost(stringArg(args, "--host"));
   const dryRun = boolArg(args, "--dry-run");
   const config2 = uninstallHostConfig({
@@ -28185,6 +28814,18 @@ async function uninstallCommand(argv) {
     dryRun
   });
   const instructions = removeBehaviorInstructions({ hostType, dryRun });
+  if (asJson) {
+    printSuccessJson("uninstall", {
+      host: hostType,
+      dry_run: dryRun,
+      config_removed: config2.removed,
+      settings_path: config2.settingsPath,
+      instructions_removed: instructions.removed,
+      instructions_path: instructions.filePath,
+      data_dir: dataDirSummary()
+    });
+    return;
+  }
   console.log(`${dryRun ? "Would uninstall" : "Uninstalled"} Ask The W for ${hostType}.`);
   console.log(`${config2.removed ? "Removed" : "No matching"} MCP config: ${config2.settingsPath}`);
   console.log(`${instructions.removed ? "Removed" : "No matching"} agent instructions: ${instructions.filePath}`);
@@ -28200,47 +28841,61 @@ function openBrowser(url) {
   } catch {
   }
 }
+var BIND_POLL_INTERVAL_MS = 5e3;
+var BIND_CODE_LIFETIME_MS = 10 * 60 * 1e3;
+var BIND_POLL_GRACE_MS = 60 * 1e3;
+var BIND_POLL_ATTEMPTS = Math.ceil((BIND_CODE_LIFETIME_MS + BIND_POLL_GRACE_MS) / BIND_POLL_INTERVAL_MS);
 async function bindCommand(argv) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
+  const nonInteractive = isNonInteractive(args);
   const allowPending = boolArg(args, "--allow-pending");
   const baseUrl = apiUrl(args);
   const client = new AskTheWCloudClient({ apiUrl: baseUrl });
-  if (!client.hasToken()) throw new Error("Run askthew-mcp install first.");
+  if (!client.hasToken()) throw authError("Run askthew-mcp install first.", "not_signed_in");
   const outbox = new Outbox();
   const pendingBeforeBind = outbox.pendingCount();
   if (pendingBeforeBind > 0 && !allowPending) {
+    if (nonInteractive) {
+      throw usageError(
+        `${pendingBeforeBind} pending capture(s) are waiting locally. Pass --allow-pending to connect in non-interactive mode.`,
+        "pending_outbox_requires_allow_pending"
+      );
+    }
     const response = await (0, import_prompts.default)({
       type: "confirm",
       name: "ok",
-      message: `${pendingBeforeBind} captures are waiting locally. Connect now and sync them into the workspace after confirmation?`,
+      message: `${pendingBeforeBind} captures are waiting locally. Connect now and sync them into the project after confirmation?`,
       initial: true
     });
-    if (!response.ok) throw new Error("Workspace connection cancelled while captures are pending.");
+    if (!response.ok) throw usageError("Workspace connection cancelled while captures are pending.", "bind_cancelled");
   }
   const started = await client.request("/paid/bind/start", { method: "POST", body: "{}" });
   const body = started.body;
   if (!started.ok || body.ok === false) {
-    throw new Error(String(body.message ?? body.code ?? "Could not start workspace connection."));
+    throw bindingError(String(body.message ?? body.code ?? "Could not start project connection."), "bind_start_failed");
   }
   const codeDisplay = String(body.code_display ?? "");
   const url = String(body.url ?? "");
-  console.log(`Open this URL: ${url}`);
-  console.log(`Confirm this terminal code in the browser: ${codeDisplay}`);
+  if (!asJson) {
+    console.log(`Open this URL: ${url}`);
+    console.log(`Confirm this terminal code in the browser: ${codeDisplay}`);
+  }
   if (url) openBrowser(url);
-  for (let attempt = 0; attempt < 120; attempt += 1) {
-    await new Promise((resolve2) => setTimeout(resolve2, 5e3));
+  for (let attempt = 0; attempt < BIND_POLL_ATTEMPTS; attempt += 1) {
+    await new Promise((resolve2) => setTimeout(resolve2, BIND_POLL_INTERVAL_MS));
     const status = await client.request(
       `/paid/bind/status?code_display=${encodeURIComponent(codeDisplay)}`,
       { method: "GET" }
     );
     const statusBody = status.body;
     if (status.ok && statusBody.status === "completed") {
-      const workspaceId = typeof statusBody.workspace_id === "string" ? statusBody.workspace_id : null;
+      const projectId = typeof statusBody.project_id === "string" ? statusBody.project_id : null;
       const tokenFile = loadCloudToken();
       if (tokenFile) {
-        saveCloudToken({ ...tokenFile, tier: "paid", workspace_id: workspaceId, api_url: baseUrl });
+        saveCloudToken({ ...tokenFile, tier: "paid", project_id: projectId, api_url: baseUrl });
       }
-      if (workspaceId) {
+      if (projectId) {
         for (const hostType of SUPPORTED_HOST_TYPES2) {
           const metadata = loadInstallMetadata(hostType);
           if (!metadata) continue;
@@ -28248,21 +28903,27 @@ async function bindCommand(argv) {
             hostType,
             apiUrl: metadata.api_url || baseUrl,
             tier: "paid",
-            workspaceId,
+            projectId,
             signalAuthorizationSource: "workspace_bind",
             cwd: process.cwd()
           });
         }
       }
+      let synced = 0;
       if (outbox.pendingCount() > 0) {
         const flushed = await outbox.flush(client);
-        console.log(`Synced ${flushed.sent} pending capture(s) after workspace connection.`);
+        synced = flushed.sent;
+        if (!asJson) console.log(`Synced ${flushed.sent} pending capture(s) after project connection.`);
       }
-      console.log("Ask The W install is now connected to the workspace.");
+      if (asJson) {
+        printSuccessJson("bind", { project_id: projectId, synced });
+      } else {
+        console.log("Ask The W install is now connected to the project.");
+      }
       return;
     }
   }
-  throw new Error("Timed out waiting for workspace connection.");
+  throw bindingError("Timed out waiting for project connection.", "bind_timeout");
 }
 async function initializeHandshakeCommand(argv = []) {
   const args = parseArgs(argv);
@@ -28295,6 +28956,62 @@ async function initializeHandshakeCommand(argv = []) {
     return;
   }
   printObject(payload, false);
+}
+var EMPTY_WORK_LINES = {
+  no_approved_requests: "no work has been approved for this project yet.",
+  no_queued_runs: "work is approved but no run is queued for it. Tell the person who approved it.",
+  no_eligible_moves: "approved work is waiting on something else before an agent can pick it up."
+};
+async function sessionStartCommand(argv = []) {
+  const args = parseArgs(argv);
+  const scopeKey = stringArg(args, "--scope-key") || currentScopeKey(process.cwd());
+  const limit = positiveIntArg(args, "--limit", 10, 25);
+  const asJson = boolArg(args, "--json");
+  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
+  const result = client.hasToken() ? await client.listReadyWork({ scopeKey, limit }) : {
+    ok: false,
+    status: 401,
+    body: {
+      ok: false,
+      code: "needs_signup",
+      message: "No local Ask The W identity is configured."
+    }
+  };
+  const body = result.body;
+  const work = Array.isArray(body.work) ? body.work : [];
+  const emptyReason = typeof body.emptyReason === "string" ? body.emptyReason : null;
+  const payload = {
+    ok: Boolean(result.ok && body.ok !== false),
+    status: result.status,
+    scope_key: scopeKey,
+    count: work.length,
+    work,
+    empty_reason: emptyReason,
+    code: typeof body.code === "string" ? body.code : null,
+    message: typeof body.message === "string" ? body.message : null
+  };
+  if (asJson) {
+    console.log(JSON.stringify(payload, null, 2));
+    return;
+  }
+  if (!payload.ok) {
+    return;
+  }
+  if (work.length === 0) {
+    const line = EMPTY_WORK_LINES[emptyReason ?? ""];
+    if (line) console.log(`Ask The W: ${line}`);
+    return;
+  }
+  const noun = work.length === 1 ? "item is" : "items are";
+  console.log(`Ask The W: ${work.length} approved terminal work ${noun} waiting for this project.`);
+  console.log("Present the list and ask which item to claim. Do not call claim_work until the human chooses.");
+  for (const [index, entry] of work.entries()) {
+    const item = entry && typeof entry === "object" ? entry : {};
+    const title = String(item.title ?? item.id ?? "Untitled work");
+    const runId = String(item.runId ?? item.id ?? "");
+    const priority = item.priority === null || item.priority === void 0 ? "unranked" : `priority ${item.priority}`;
+    console.log(`${index + 1}. ${title}${runId ? ` (${runId})` : ""} - ${priority}`);
+  }
 }
 function pendingOutboxCount() {
   if (!outboxExists()) return 0;
@@ -28352,7 +29069,8 @@ function inspectHostToolCallability(hostType) {
 async function identityStatusCommand(argv) {
   const args = parseArgs(argv);
   const tokenFile = loadCloudToken();
-  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
+  const baseUrl = apiUrl(args, tokenFile);
+  const client = new AskTheWCloudClient({ apiUrl: baseUrl });
   const status = {
     ok: true,
     configured: Boolean(tokenFile?.token),
@@ -28362,7 +29080,7 @@ async function identityStatusCommand(argv) {
     signal_authorization_path: signalAuthorizationPath(),
     outbox_pending: pendingOutboxCount(),
     current_scope_key: currentScopeKey(process.cwd()),
-    api_url: stringArg(args, "--api-url") || tokenFile?.api_url || "https://app.askthew.com"
+    api_url: baseUrl
   };
   if (!tokenFile?.token) {
     status.message = "No local Ask The W identity is configured. Run `askthew-mcp install --host <host>`.";
@@ -28402,6 +29120,193 @@ async function probeHealth(baseUrl) {
     };
   }
 }
+async function buildDoctorSequence(input) {
+  const rows = [];
+  const hasToken = Boolean(input.tokenFile?.token);
+  rows.push({
+    id: "token_file",
+    label: "Local identity token",
+    status: hasToken ? "pass" : "fail",
+    detail: hasToken ? `Token file present at ${cloudTokenPath()}. api_url=${input.baseUrl}` : `No token file at ${cloudTokenPath()}.`,
+    remedy: hasToken ? null : "Run `askthew-mcp install --host <host>`."
+  });
+  if (!hasToken) {
+    rows.push({
+      id: "token_verified",
+      label: "Token verification",
+      status: "skipped",
+      detail: "No local token to verify.",
+      remedy: "Run `askthew-mcp install --host <host>`."
+    });
+    rows.push({
+      id: "project_binding",
+      label: "Project binding",
+      status: "skipped",
+      detail: "No local token to resolve a project with.",
+      remedy: "Run `askthew-mcp install --host <host>`, then `askthew-mcp bind`."
+    });
+    rows.push({
+      id: "capability_scopes",
+      label: "Capability scopes",
+      status: "skipped",
+      detail: "No local token to read capability scopes from.",
+      remedy: null
+    });
+    rows.push({
+      id: "ready_work_dry_run",
+      label: "Ready work read",
+      status: "skipped",
+      detail: "No local token to read work with.",
+      remedy: null
+    });
+  } else {
+    const verification = input.tokenVerification;
+    if (verification?.stale) {
+      rows.push({
+        id: "token_verified",
+        label: "Token verification",
+        status: "fail",
+        detail: `Token is no longer accepted (${verification.reason}).`,
+        remedy: "Run `askthew-mcp install --host <host> --force`."
+      });
+    } else if (verification && "email" in verification) {
+      rows.push({
+        id: "token_verified",
+        label: "Token verification",
+        status: "pass",
+        detail: `Token valid for ${verification.email ?? "this install"}.`,
+        remedy: null
+      });
+    } else {
+      rows.push({
+        id: "token_verified",
+        label: "Token verification",
+        status: "skipped",
+        detail: "Token verification was temporarily unavailable.",
+        remedy: "Retry `askthew-mcp doctor` shortly."
+      });
+    }
+    const me = await input.client.request("/me", { method: "GET" });
+    const meBody = me.body;
+    if (!me.ok) {
+      rows.push({
+        id: "project_binding",
+        label: "Project binding",
+        status: "fail",
+        detail: `Could not read account state (status ${me.status}).`,
+        remedy: "Check network connectivity and --api-url, then retry."
+      });
+      rows.push({
+        id: "capability_scopes",
+        label: "Capability scopes",
+        status: "skipped",
+        detail: "Account state was unreachable, so capability scopes could not be read.",
+        remedy: null
+      });
+    } else {
+      const scopeBindings = Array.isArray(meBody.scope_bindings) ? meBody.scope_bindings : null;
+      const matched = scopeBindings?.find(
+        (entry) => entry && typeof entry === "object" && entry.scope_key === input.scopeKey
+      );
+      if (!scopeBindings) {
+        rows.push({
+          id: "project_binding",
+          label: "Project binding",
+          status: "skipped",
+          detail: "Server did not return scope bindings for this account.",
+          remedy: null
+        });
+      } else if (matched) {
+        rows.push({
+          id: "project_binding",
+          label: "Project binding",
+          status: "pass",
+          detail: `Scope ${input.scopeKey} is bound to project ${matched.project_id}.`,
+          remedy: null
+        });
+      } else {
+        rows.push({
+          id: "project_binding",
+          label: "Project binding",
+          status: "fail",
+          detail: `No project bound for scope ${input.scopeKey} in this directory.`,
+          remedy: "Run `askthew-mcp bind` from this directory."
+        });
+      }
+      const capabilities = Array.isArray(meBody.token_capabilities) ? meBody.token_capabilities : null;
+      if (!capabilities) {
+        rows.push({
+          id: "capability_scopes",
+          label: "Capability scopes",
+          status: "skipped",
+          detail: "Server did not return capability scopes for this token.",
+          remedy: null
+        });
+      } else if (capabilities.length > 0) {
+        rows.push({
+          id: "capability_scopes",
+          label: "Capability scopes",
+          status: "pass",
+          detail: `${capabilities.length} capability scope(s) granted.`,
+          remedy: null
+        });
+      } else {
+        rows.push({
+          id: "capability_scopes",
+          label: "Capability scopes",
+          status: "fail",
+          detail: "No capability scopes are granted to this token.",
+          remedy: "Run `askthew-mcp install --host <host> --force` to re-authenticate."
+        });
+      }
+    }
+    const readyWork = await input.client.listReadyWork({ scopeKey: input.scopeKey, limit: 1 });
+    const readyWorkBody = readyWork.body;
+    if (readyWork.status === 0) {
+      rows.push({
+        id: "ready_work_dry_run",
+        label: "Ready work read",
+        status: "fail",
+        detail: "Could not reach Ask The W to read ready work.",
+        remedy: "Check network connectivity and --api-url."
+      });
+    } else if (readyWork.ok && readyWorkBody.ok !== false) {
+      const count = Array.isArray(readyWorkBody.work) ? readyWorkBody.work.length : 0;
+      rows.push({
+        id: "ready_work_dry_run",
+        label: "Ready work read",
+        status: "pass",
+        detail: `Ready work read succeeded (${count} item(s)).`,
+        remedy: null
+      });
+    } else {
+      const code = typeof readyWorkBody.code === "string" ? readyWorkBody.code : "refused";
+      rows.push({
+        id: "ready_work_dry_run",
+        label: "Ready work read",
+        status: "fail",
+        detail: `Ready work read refused: ${readyWorkBody.message ?? code}`,
+        remedy: code === "workspace_not_connected" ? "Run `askthew-mcp bind` from this directory." : null
+      });
+    }
+  }
+  rows.push({
+    id: "host_config",
+    label: input.hostLabel,
+    status: input.hostCallableOk ? "pass" : "fail",
+    detail: input.hostMessage,
+    remedy: input.hostCallableOk ? null : "Run `askthew-mcp install --host <host>`."
+  });
+  return rows;
+}
+function doctorStrictExitCode(input) {
+  if (input.tokenVerification?.stale) return EXIT_CODE.auth;
+  if (!input.health.ok) return EXIT_CODE.network;
+  if (input.sequence.some((row) => row.status === "fail" && (row.id === "project_binding" || row.id === "ready_work_dry_run"))) {
+    return EXIT_CODE.binding;
+  }
+  return EXIT_CODE.internal;
+}
 async function doctorCommand(argv) {
   const args = parseArgs(argv);
   const host = stringArg(args, "--host");
@@ -28411,6 +29316,8 @@ async function doctorCommand(argv) {
   const installMetadata = hostType ? loadInstallMetadata(hostType) : null;
   const health = await probeHealth(baseUrl);
   const pendingCount = pendingOutboxCount();
+  const client = new AskTheWCloudClient({ apiUrl: baseUrl });
+  const scopeKey = currentScopeKey(process.cwd());
   let tokenVerification = null;
   let tokenMessage = null;
   const checks = {
@@ -28424,7 +29331,7 @@ async function doctorCommand(argv) {
     outbox_paths: outboxStoragePaths(localStorePath()),
     outbox_pending: pendingCount,
     identity_configured: Boolean(tokenFile?.token),
-    current_scope_key: currentScopeKey(process.cwd())
+    current_scope_key: scopeKey
   };
   if (hostType) {
     checks.host = hostType;
@@ -28465,58 +29372,106 @@ async function doctorCommand(argv) {
     }
   }
   const hostCallableOk = hostType ? Boolean(checks.capture_session_signal_callable?.ok) : true;
-  const ok = Boolean(health.ok) && !tokenVerification?.stale && hostCallableOk;
+  const hostLabel = hostType ? `${hostType} MCP config` : "Host MCP config";
+  const hostMessage = hostType ? String(checks.capture_session_signal_callable?.message ?? "") : "Run with --host <host> to check a specific host's settings file.";
+  const sequence = await buildDoctorSequence({
+    tokenFile,
+    tokenVerification,
+    client,
+    scopeKey,
+    baseUrl,
+    hostCallableOk,
+    hostLabel,
+    hostMessage
+  });
+  checks.sequence = sequence;
+  const sequenceOk = !sequence.some((row) => row.status === "fail");
+  const ok = Boolean(health.ok) && !tokenVerification?.stale && hostCallableOk && sequenceOk;
   const asJson = boolArg(args, "--json");
   printObject({ ok, checks }, asJson);
-  if (!asJson && tokenMessage) console.log(tokenMessage);
+  if (!asJson) {
+    if (tokenMessage) console.log(tokenMessage);
+    for (const row of sequence) {
+      const marker = row.status === "pass" ? "PASS" : row.status === "skipped" ? "SKIP" : "FAIL";
+      console.log(`[${marker}] ${row.label}: ${row.detail}${row.remedy ? ` (fix: ${row.remedy})` : ""}`);
+    }
+  }
   if (!ok && boolArg(args, "--strict")) {
-    process.exitCode = 1;
+    process.exitCode = doctorStrictExitCode({ health, tokenVerification, sequence });
   }
 }
 async function tokenCommand(argv) {
   const [action] = argv;
   const args = parseArgs(argv.slice(1));
+  const asJson = boolArg(args, "--json");
   const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
   if (action === "rotate") {
     const result = await client.request("/token/rotate", { method: "POST", body: "{}" });
     const body = result.body;
-    if (!result.ok || body.ok === false) throw new Error(String(body.message ?? body.code ?? "Token rotate failed."));
+    if (!result.ok || body.ok === false) {
+      throw authError(String(body.message ?? body.code ?? "Token rotate failed."), "token_rotate_failed");
+    }
     const tokenFile = loadCloudToken();
     if (tokenFile && typeof body.token === "string") {
       saveCloudToken({ ...tokenFile, token: body.token });
     }
-    console.log("Ask The W token rotated. Restart your coding agent.");
+    if (asJson) {
+      printSuccessJson("token", { action: "rotate" });
+    } else {
+      console.log("Ask The W token rotated. Restart your coding agent.");
+    }
     return;
   }
   if (action === "revoke") {
     const result = await client.request("/token/revoke", { method: "POST", body: "{}" });
     const body = result.body;
-    if (!result.ok || body.ok === false) throw new Error(String(body.message ?? body.code ?? "Token revoke failed."));
-    console.log("Current Ask The W token revoked.");
+    if (!result.ok || body.ok === false) {
+      throw authError(String(body.message ?? body.code ?? "Token revoke failed."), "token_revoke_failed");
+    }
+    if (asJson) {
+      printSuccessJson("token", { action: "revoke" });
+    } else {
+      console.log("Current Ask The W token revoked.");
+    }
     return;
   }
-  throw new Error("Usage: askthew-mcp token rotate|revoke");
+  throw usageError("Usage: askthew-mcp token rotate|revoke", "invalid_token_action");
 }
 async function refreshCommand(argv = []) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
   const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  if (!client.hasToken()) throw new Error("Run askthew-mcp install first.");
+  if (!client.hasToken()) throw authError("Run askthew-mcp install first.", "not_signed_in");
   const outbox = new Outbox();
   const result = await outbox.flush(client);
-  console.log(JSON.stringify({ ok: true, ...result, pending: outbox.pendingCount() }, null, 2));
+  const data = { ...result, pending: outbox.pendingCount() };
+  if (asJson) {
+    printSuccessJson("refresh", data);
+    return;
+  }
+  console.log(JSON.stringify({ ok: true, ...data }, null, 2));
 }
 async function exportCommand(argv = []) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
   const allScopes = boolArg(args, "--all-scopes");
   const scopeKey = stringArg(args, "--scope-key") || currentScopeKey(process.cwd());
   if (allScopes && stringArg(args, "--scope-key")) {
-    throw new Error("Use either --scope-key or --all-scopes, not both.");
+    throw usageError("Use either --scope-key or --all-scopes, not both.", "conflicting_scope_flags");
   }
   const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  const result = await client.exportData({ scopeKey: allScopes ? void 0 : scopeKey });
+  const result = await client.exportData({
+    requestIntent: "explicit_user_request",
+    originatingPrompt: "User ran the Ask The W export command.",
+    scopeKey: allScopes ? void 0 : scopeKey
+  });
   if (!result.ok) {
     const body = result.body;
-    throw new Error(String(body.message ?? body.code ?? "Export failed."));
+    throw new CliError(String(body.message ?? body.code ?? "Export failed."), { code: "export_failed" });
+  }
+  if (asJson) {
+    printSuccessJson("export", result.body);
+    return;
   }
   console.log(JSON.stringify(result.body, null, 2));
 }
@@ -28525,46 +29480,56 @@ function printInstructionsCommand() {
     [
       "## Ask The W",
       "",
-      "Ask The W is available as an authorized connector in this workspace.",
+      "Ask The W is available as an authorized connector in this project.",
       "",
       "Send compact, policy-sanitized signals with `capture_session_signal` (often exposed as `mcp__askthew__capture_session_signal`). Omit `scopeKey` unless deliberately overriding the workspace default; the MCP server resolves it from the active project directory.",
       "",
-      "The plugin install or workspace-bind confirmation authorizes compact session signals for this workspace. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
+      "The plugin install or project-bind confirmation authorizes compact session signals for this project. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
       "",
-      "Required cadence:",
-      '1. Session start: send `kind: "setup_complete"` once the MCP tools are available.',
-      '2. After state changes: after writes, edits, tests, builds, migrations, deploys, accepted or rejected directions, or meaningful implementation progress. Use `kind: "session_checkpoint"`, `"direction_change"`, `"implementation_update"`, or `"verification_result"`.',
-      '3. Before final reply: send `kind: "final_summary"` with what changed, what was verified, and remaining risk.',
+      "Recommended quiet cadence:",
+      "1. Routine setup and checkpoints stay local/internal. Do not send `setup_complete` or `session_checkpoint` for normal tool availability or progress bookkeeping.",
+      '2. Send `kind: "verification_result"` after meaningful tests, builds, migrations, or production-impacting verification.',
+      '3. Send `kind: "direction_change"` only when the user/product direction materially changed. Send `kind: "implementation_update"` only when it is explicitly durable project context and include `metadata.project_to_workspace=true`.',
+      '4. Before a substantive final reply, send one `kind: "final_summary"` with what changed, what was verified, and remaining risk.',
       "",
-      "Aim for 5-15 signals per longer session. Keep payloads short: summary, relative files touched, verification status, and useful non-sensitive metadata. Omit commands unless they materially explain verification or failure. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
-      "",
-      "If the first signal was missed, send `setup_complete` as soon as you notice with `metadata.recovered_missed_startup=true`.",
+      "Aim for 1-3 signals per substantive session. Keep payloads short: summary, relative files touched, verification status, and useful non-sensitive metadata. Omit commands unless they materially explain verification or failure. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
       "",
       "First-run signup: if a protected Ask The W tool returns `needs_signup`, ask the user for their email, call `askthew_start_signup({ email })`, ask for the six-digit email code, call `askthew_complete_signup({ email, code })`, then retry the original `setup_complete` capture.",
       "",
-      "Related tools: `list_outcomes` for workspace outcome context, `recap` for prior context, `coach` for guidance, `next_moves` for structured workspace actions, and `create_decision` for durable decisions."
+      "Startup work check: after the project binding is active, `list_ready_work` may be called at session start/resume. If work is returned, present the list and ask the human which item to claim. Never call `claim_work` silently.",
+      "",
+      "Related tools: `list_outcomes`, `list_decisions`, `recap`, `coach`, `next_moves`, `create_decision`, and `draft_wire_message` are manual-only: use them only when the user explicitly asks for that Ask The W action. `draft_wire_message` files an internal draft request and never sends externally.",
+      "",
+      "Manual-only tools: only `capture_session_signal` and startup `list_ready_work` may be called automatically. Do not call other Ask The W tools during routine setup, checkpoint, planning, verification, or final-summary cadence unless the user explicitly asks for that Ask The W action."
     ].join("\n")
   );
 }
 async function deleteMeCommand(argv) {
   const args = parseArgs(argv);
+  const asJson = boolArg(args, "--json");
   if (!boolArg(args, "--confirm")) {
-    throw new Error("Refusing to delete without --confirm.");
+    throw usageError("Refusing to delete without --confirm.", "confirm_required");
   }
   const tokenFile = loadCloudToken();
-  if (tokenFile?.tier === "paid") {
-    console.error("This install is connected to a workspace. Install-scoped data will be deleted; workspace data is retained.");
+  if (tokenFile?.tier === "paid" && !asJson) {
+    console.error("This install is connected to a project. Install-scoped data will be deleted; project data is retained.");
   }
   const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  const result = await client.request("/me", { method: "DELETE" });
+  const result = await client.request("/me?confirm=true", { method: "DELETE" });
   const body = result.body;
-  if (!result.ok || body.ok === false) throw new Error(String(body.message ?? body.code ?? "Delete failed."));
+  if (!result.ok || body.ok === false) {
+    throw new CliError(String(body.message ?? body.code ?? "Delete failed."), { code: "delete_failed" });
+  }
+  if (asJson) {
+    printSuccessJson("delete-me", body);
+    return;
+  }
   console.log(JSON.stringify(body, null, 2));
 }
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
   if (!command) {
-    await runStdioServer();
+    await runStdioServer({ env: process.env });
     return;
   }
   if (command === "--help" || command === "-h" || command === "help") {
@@ -28575,57 +29540,74 @@ async function main() {
     console.log(packageVersion());
     return;
   }
-  if (command === "install") {
-    await installCommand(argv);
-    return;
-  }
-  if (command === "uninstall") {
-    await uninstallCommand(argv);
-    return;
-  }
-  if (command === "bind") {
-    await bindCommand(argv);
-    return;
-  }
-  if (command === "initialize-handshake") {
-    await initializeHandshakeCommand(argv);
-    return;
-  }
-  if (command === "identity") {
-    const [action, ...rest] = argv;
-    if (action !== "status") throw new Error("Usage: askthew-mcp identity status [--json]");
-    await identityStatusCommand(rest);
-    return;
-  }
-  if (command === "doctor") {
-    await doctorCommand(argv);
-    return;
-  }
-  if (command === "refresh") {
-    await refreshCommand(argv);
-    return;
-  }
-  if (command === "token") {
-    await tokenCommand(argv);
-    return;
-  }
-  if (command === "export") {
-    await exportCommand(argv);
-    return;
-  }
-  if (command === "print-instructions") {
-    printInstructionsCommand();
-    return;
-  }
-  if (command === "delete-me") {
-    await deleteMeCommand(argv);
-    return;
-  }
-  throw new Error(`Unknown command: ${command}
+  const asJson = boolArg(parseArgs(argv), "--json");
+  try {
+    if (command === "install") {
+      await installCommand(argv);
+      return;
+    }
+    if (command === "uninstall") {
+      await uninstallCommand(argv);
+      return;
+    }
+    if (command === "bind") {
+      await bindCommand(argv);
+      return;
+    }
+    if (command === "initialize-handshake") {
+      await initializeHandshakeCommand(argv);
+      return;
+    }
+    if (command === "session-start") {
+      await sessionStartCommand(argv);
+      return;
+    }
+    if (command === "identity") {
+      const [action, ...rest] = argv;
+      if (action !== "status") throw usageError("Usage: askthew-mcp identity status [--json]", "invalid_identity_action");
+      await identityStatusCommand(rest);
+      return;
+    }
+    if (command === "doctor") {
+      await doctorCommand(argv);
+      return;
+    }
+    if (command === "refresh") {
+      await refreshCommand(argv);
+      return;
+    }
+    if (command === "token") {
+      await tokenCommand(argv);
+      return;
+    }
+    if (command === "export") {
+      await exportCommand(argv);
+      return;
+    }
+    if (command === "print-instructions") {
+      printInstructionsCommand();
+      return;
+    }
+    if (command === "delete-me") {
+      await deleteMeCommand(argv);
+      return;
+    }
+    throw usageError(`Unknown command: ${command}
 
-${usage()}`);
+${usage()}`, "unknown_command");
+  } catch (error2) {
+    const cliError = error2 instanceof CliError ? error2 : new CliError(error2 instanceof Error ? error2.message : String(error2));
+    if (asJson) {
+      console.log(
+        JSON.stringify({ ok: false, command, error: { code: cliError.code, message: cliError.message } }, null, 2)
+      );
+    } else {
+      console.error(cliError.message);
+    }
+    process.exitCode = cliError.exitCode;
+  }
 }
 main().catch((error2) => {
   console.error(error2 instanceof Error ? error2.message : String(error2));
-  process.exitCode = 1;
+  process.exitCode = EXIT_CODE.internal;
 });

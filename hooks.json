@@ -4,7 +4,7 @@
       {
         "hooks": [
           {
-            "command": "bash ${PLUGIN_ROOT}/hooks/session-start.sh",
+            "command": "node ${PLUGIN_ROOT}/vendor/askthew-mcp/dist/cli.cjs session-start",
             "statusMessage": "Ask The W paid ready",
             "timeout": 10,
             "type": "command"
