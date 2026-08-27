@@ -5,7 +5,7 @@
     "url": "https://askthew.com"
   },
   "description": "Paid Ask The W MCP tools link Codex to your account for decisions, outcomes, recaps, and server-side next moves.",
-  "homepage": "https://askthew.com",
+  "homepage": "https://askthew.com/plugin",
   "interface": {
     "brandColor": "#0B5FFF",
     "capabilities": [

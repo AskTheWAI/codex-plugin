@@ -34,4856 +34,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../node_modules/kleur/index.js
-var require_kleur = __commonJS({
-  "../../node_modules/kleur/index.js"(exports2, module2) {
-    "use strict";
-    var { FORCE_COLOR, NODE_DISABLE_COLORS, TERM } = process.env;
-    var $ = {
-      enabled: !NODE_DISABLE_COLORS && TERM !== "dumb" && FORCE_COLOR !== "0",
-      // modifiers
-      reset: init(0, 0),
-      bold: init(1, 22),
-      dim: init(2, 22),
-      italic: init(3, 23),
-      underline: init(4, 24),
-      inverse: init(7, 27),
-      hidden: init(8, 28),
-      strikethrough: init(9, 29),
-      // colors
-      black: init(30, 39),
-      red: init(31, 39),
-      green: init(32, 39),
-      yellow: init(33, 39),
-      blue: init(34, 39),
-      magenta: init(35, 39),
-      cyan: init(36, 39),
-      white: init(37, 39),
-      gray: init(90, 39),
-      grey: init(90, 39),
-      // background colors
-      bgBlack: init(40, 49),
-      bgRed: init(41, 49),
-      bgGreen: init(42, 49),
-      bgYellow: init(43, 49),
-      bgBlue: init(44, 49),
-      bgMagenta: init(45, 49),
-      bgCyan: init(46, 49),
-      bgWhite: init(47, 49)
-    };
-    function run(arr, str) {
-      let i = 0, tmp, beg = "", end = "";
-      for (; i < arr.length; i++) {
-        tmp = arr[i];
-        beg += tmp.open;
-        end += tmp.close;
-        if (str.includes(tmp.close)) {
-          str = str.replace(tmp.rgx, tmp.close + tmp.open);
-        }
-      }
-      return beg + str + end;
-    }
-    function chain(has, keys) {
-      let ctx = { has, keys };
-      ctx.reset = $.reset.bind(ctx);
-      ctx.bold = $.bold.bind(ctx);
-      ctx.dim = $.dim.bind(ctx);
-      ctx.italic = $.italic.bind(ctx);
-      ctx.underline = $.underline.bind(ctx);
-      ctx.inverse = $.inverse.bind(ctx);
-      ctx.hidden = $.hidden.bind(ctx);
-      ctx.strikethrough = $.strikethrough.bind(ctx);
-      ctx.black = $.black.bind(ctx);
-      ctx.red = $.red.bind(ctx);
-      ctx.green = $.green.bind(ctx);
-      ctx.yellow = $.yellow.bind(ctx);
-      ctx.blue = $.blue.bind(ctx);
-      ctx.magenta = $.magenta.bind(ctx);
-      ctx.cyan = $.cyan.bind(ctx);
-      ctx.white = $.white.bind(ctx);
-      ctx.gray = $.gray.bind(ctx);
-      ctx.grey = $.grey.bind(ctx);
-      ctx.bgBlack = $.bgBlack.bind(ctx);
-      ctx.bgRed = $.bgRed.bind(ctx);
-      ctx.bgGreen = $.bgGreen.bind(ctx);
-      ctx.bgYellow = $.bgYellow.bind(ctx);
-      ctx.bgBlue = $.bgBlue.bind(ctx);
-      ctx.bgMagenta = $.bgMagenta.bind(ctx);
-      ctx.bgCyan = $.bgCyan.bind(ctx);
-      ctx.bgWhite = $.bgWhite.bind(ctx);
-      return ctx;
-    }
-    function init(open, close) {
-      let blk = {
-        open: `\x1B[${open}m`,
-        close: `\x1B[${close}m`,
-        rgx: new RegExp(`\\x1b\\[${close}m`, "g")
-      };
-      return function(txt) {
-        if (this !== void 0 && this.has !== void 0) {
-          this.has.includes(open) || (this.has.push(open), this.keys.push(blk));
-          return txt === void 0 ? this : $.enabled ? run(this.keys, txt + "") : txt + "";
-        }
-        return txt === void 0 ? chain([open], [blk]) : $.enabled ? run([blk], txt + "") : txt + "";
-      };
-    }
-    module2.exports = $;
-  }
-});
-
-// ../../node_modules/prompts/dist/util/action.js
-var require_action = __commonJS({
-  "../../node_modules/prompts/dist/util/action.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (key, isSelect) => {
-      if (key.meta && key.name !== "escape") return;
-      if (key.ctrl) {
-        if (key.name === "a") return "first";
-        if (key.name === "c") return "abort";
-        if (key.name === "d") return "abort";
-        if (key.name === "e") return "last";
-        if (key.name === "g") return "reset";
-      }
-      if (isSelect) {
-        if (key.name === "j") return "down";
-        if (key.name === "k") return "up";
-      }
-      if (key.name === "return") return "submit";
-      if (key.name === "enter") return "submit";
-      if (key.name === "backspace") return "delete";
-      if (key.name === "delete") return "deleteForward";
-      if (key.name === "abort") return "abort";
-      if (key.name === "escape") return "exit";
-      if (key.name === "tab") return "next";
-      if (key.name === "pagedown") return "nextPage";
-      if (key.name === "pageup") return "prevPage";
-      if (key.name === "home") return "home";
-      if (key.name === "end") return "end";
-      if (key.name === "up") return "up";
-      if (key.name === "down") return "down";
-      if (key.name === "right") return "right";
-      if (key.name === "left") return "left";
-      return false;
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/strip.js
-var require_strip = __commonJS({
-  "../../node_modules/prompts/dist/util/strip.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (str) => {
-      const pattern = ["[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)", "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"].join("|");
-      const RGX = new RegExp(pattern, "g");
-      return typeof str === "string" ? str.replace(RGX, "") : str;
-    };
-  }
-});
-
-// ../../node_modules/sisteransi/src/index.js
-var require_src = __commonJS({
-  "../../node_modules/sisteransi/src/index.js"(exports2, module2) {
-    "use strict";
-    var ESC = "\x1B";
-    var CSI = `${ESC}[`;
-    var beep = "\x07";
-    var cursor = {
-      to(x, y) {
-        if (!y) return `${CSI}${x + 1}G`;
-        return `${CSI}${y + 1};${x + 1}H`;
-      },
-      move(x, y) {
-        let ret = "";
-        if (x < 0) ret += `${CSI}${-x}D`;
-        else if (x > 0) ret += `${CSI}${x}C`;
-        if (y < 0) ret += `${CSI}${-y}A`;
-        else if (y > 0) ret += `${CSI}${y}B`;
-        return ret;
-      },
-      up: (count = 1) => `${CSI}${count}A`,
-      down: (count = 1) => `${CSI}${count}B`,
-      forward: (count = 1) => `${CSI}${count}C`,
-      backward: (count = 1) => `${CSI}${count}D`,
-      nextLine: (count = 1) => `${CSI}E`.repeat(count),
-      prevLine: (count = 1) => `${CSI}F`.repeat(count),
-      left: `${CSI}G`,
-      hide: `${CSI}?25l`,
-      show: `${CSI}?25h`,
-      save: `${ESC}7`,
-      restore: `${ESC}8`
-    };
-    var scroll = {
-      up: (count = 1) => `${CSI}S`.repeat(count),
-      down: (count = 1) => `${CSI}T`.repeat(count)
-    };
-    var erase = {
-      screen: `${CSI}2J`,
-      up: (count = 1) => `${CSI}1J`.repeat(count),
-      down: (count = 1) => `${CSI}J`.repeat(count),
-      line: `${CSI}2K`,
-      lineEnd: `${CSI}K`,
-      lineStart: `${CSI}1K`,
-      lines(count) {
-        let clear = "";
-        for (let i = 0; i < count; i++)
-          clear += this.line + (i < count - 1 ? cursor.up() : "");
-        if (count)
-          clear += cursor.left;
-        return clear;
-      }
-    };
-    module2.exports = { cursor, scroll, erase, beep };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/clear.js
-var require_clear = __commonJS({
-  "../../node_modules/prompts/dist/util/clear.js"(exports2, module2) {
-    "use strict";
-    function _createForOfIteratorHelper(o, allowArrayLike) {
-      var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
-      if (!it) {
-        if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-          if (it) o = it;
-          var i = 0;
-          var F = function F2() {
-          };
-          return { s: F, n: function n() {
-            if (i >= o.length) return { done: true };
-            return { done: false, value: o[i++] };
-          }, e: function e(_e) {
-            throw _e;
-          }, f: F };
-        }
-        throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-      }
-      var normalCompletion = true, didErr = false, err;
-      return { s: function s() {
-        it = it.call(o);
-      }, n: function n() {
-        var step = it.next();
-        normalCompletion = step.done;
-        return step;
-      }, e: function e(_e2) {
-        didErr = true;
-        err = _e2;
-      }, f: function f() {
-        try {
-          if (!normalCompletion && it.return != null) it.return();
-        } finally {
-          if (didErr) throw err;
-        }
-      } };
-    }
-    function _unsupportedIterableToArray(o, minLen) {
-      if (!o) return;
-      if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-      var n = Object.prototype.toString.call(o).slice(8, -1);
-      if (n === "Object" && o.constructor) n = o.constructor.name;
-      if (n === "Map" || n === "Set") return Array.from(o);
-      if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-    }
-    function _arrayLikeToArray(arr, len) {
-      if (len == null || len > arr.length) len = arr.length;
-      for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-      return arr2;
-    }
-    var strip = require_strip();
-    var _require = require_src();
-    var erase = _require.erase;
-    var cursor = _require.cursor;
-    var width = (str) => [...strip(str)].length;
-    module2.exports = function(prompt, perLine) {
-      if (!perLine) return erase.line + cursor.to(0);
-      let rows = 0;
-      const lines = prompt.split(/\r?\n/);
-      var _iterator = _createForOfIteratorHelper(lines), _step;
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-          let line = _step.value;
-          rows += 1 + Math.floor(Math.max(width(line) - 1, 0) / perLine);
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-      return erase.lines(rows);
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/figures.js
-var require_figures = __commonJS({
-  "../../node_modules/prompts/dist/util/figures.js"(exports2, module2) {
-    "use strict";
-    var main2 = {
-      arrowUp: "\u2191",
-      arrowDown: "\u2193",
-      arrowLeft: "\u2190",
-      arrowRight: "\u2192",
-      radioOn: "\u25C9",
-      radioOff: "\u25EF",
-      tick: "\u2714",
-      cross: "\u2716",
-      ellipsis: "\u2026",
-      pointerSmall: "\u203A",
-      line: "\u2500",
-      pointer: "\u276F"
-    };
-    var win = {
-      arrowUp: main2.arrowUp,
-      arrowDown: main2.arrowDown,
-      arrowLeft: main2.arrowLeft,
-      arrowRight: main2.arrowRight,
-      radioOn: "(*)",
-      radioOff: "( )",
-      tick: "\u221A",
-      cross: "\xD7",
-      ellipsis: "...",
-      pointerSmall: "\xBB",
-      line: "\u2500",
-      pointer: ">"
-    };
-    var figures = process.platform === "win32" ? win : main2;
-    module2.exports = figures;
-  }
-});
-
-// ../../node_modules/prompts/dist/util/style.js
-var require_style = __commonJS({
-  "../../node_modules/prompts/dist/util/style.js"(exports2, module2) {
-    "use strict";
-    var c = require_kleur();
-    var figures = require_figures();
-    var styles = Object.freeze({
-      password: {
-        scale: 1,
-        render: (input) => "*".repeat(input.length)
-      },
-      emoji: {
-        scale: 2,
-        render: (input) => "\u{1F603}".repeat(input.length)
-      },
-      invisible: {
-        scale: 0,
-        render: (input) => ""
-      },
-      default: {
-        scale: 1,
-        render: (input) => `${input}`
-      }
-    });
-    var render = (type) => styles[type] || styles.default;
-    var symbols = Object.freeze({
-      aborted: c.red(figures.cross),
-      done: c.green(figures.tick),
-      exited: c.yellow(figures.cross),
-      default: c.cyan("?")
-    });
-    var symbol = (done, aborted2, exited) => aborted2 ? symbols.aborted : exited ? symbols.exited : done ? symbols.done : symbols.default;
-    var delimiter = (completing) => c.gray(completing ? figures.ellipsis : figures.pointerSmall);
-    var item = (expandable, expanded) => c.gray(expandable ? expanded ? figures.pointerSmall : "+" : figures.line);
-    module2.exports = {
-      styles,
-      render,
-      symbols,
-      symbol,
-      delimiter,
-      item
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/lines.js
-var require_lines = __commonJS({
-  "../../node_modules/prompts/dist/util/lines.js"(exports2, module2) {
-    "use strict";
-    var strip = require_strip();
-    module2.exports = function(msg, perLine) {
-      let lines = String(strip(msg) || "").split(/\r?\n/);
-      if (!perLine) return lines.length;
-      return lines.map((l) => Math.ceil(l.length / perLine)).reduce((a, b) => a + b);
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/wrap.js
-var require_wrap = __commonJS({
-  "../../node_modules/prompts/dist/util/wrap.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (msg, opts = {}) => {
-      const tab = Number.isSafeInteger(parseInt(opts.margin)) ? new Array(parseInt(opts.margin)).fill(" ").join("") : opts.margin || "";
-      const width = opts.width;
-      return (msg || "").split(/\r?\n/g).map((line) => line.split(/\s+/g).reduce((arr, w) => {
-        if (w.length + tab.length >= width || arr[arr.length - 1].length + w.length + 1 < width) arr[arr.length - 1] += ` ${w}`;
-        else arr.push(`${tab}${w}`);
-        return arr;
-      }, [tab]).join("\n")).join("\n");
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/entriesToDisplay.js
-var require_entriesToDisplay = __commonJS({
-  "../../node_modules/prompts/dist/util/entriesToDisplay.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (cursor, total, maxVisible) => {
-      maxVisible = maxVisible || total;
-      let startIndex = Math.min(total - maxVisible, cursor - Math.floor(maxVisible / 2));
-      if (startIndex < 0) startIndex = 0;
-      let endIndex = Math.min(startIndex + maxVisible, total);
-      return {
-        startIndex,
-        endIndex
-      };
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/util/index.js
-var require_util = __commonJS({
-  "../../node_modules/prompts/dist/util/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      action: require_action(),
-      clear: require_clear(),
-      style: require_style(),
-      strip: require_strip(),
-      figures: require_figures(),
-      lines: require_lines(),
-      wrap: require_wrap(),
-      entriesToDisplay: require_entriesToDisplay()
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/prompt.js
-var require_prompt = __commonJS({
-  "../../node_modules/prompts/dist/elements/prompt.js"(exports2, module2) {
-    "use strict";
-    var readline = require("readline");
-    var _require = require_util();
-    var action = _require.action;
-    var EventEmitter = require("events");
-    var _require2 = require_src();
-    var beep = _require2.beep;
-    var cursor = _require2.cursor;
-    var color = require_kleur();
-    var Prompt = class extends EventEmitter {
-      constructor(opts = {}) {
-        super();
-        this.firstRender = true;
-        this.in = opts.stdin || process.stdin;
-        this.out = opts.stdout || process.stdout;
-        this.onRender = (opts.onRender || (() => void 0)).bind(this);
-        const rl = readline.createInterface({
-          input: this.in,
-          escapeCodeTimeout: 50
-        });
-        readline.emitKeypressEvents(this.in, rl);
-        if (this.in.isTTY) this.in.setRawMode(true);
-        const isSelect = ["SelectPrompt", "MultiselectPrompt"].indexOf(this.constructor.name) > -1;
-        const keypress = (str, key) => {
-          let a = action(key, isSelect);
-          if (a === false) {
-            this._ && this._(str, key);
-          } else if (typeof this[a] === "function") {
-            this[a](key);
-          } else {
-            this.bell();
-          }
-        };
-        this.close = () => {
-          this.out.write(cursor.show);
-          this.in.removeListener("keypress", keypress);
-          if (this.in.isTTY) this.in.setRawMode(false);
-          rl.close();
-          this.emit(this.aborted ? "abort" : this.exited ? "exit" : "submit", this.value);
-          this.closed = true;
-        };
-        this.in.on("keypress", keypress);
-      }
-      fire() {
-        this.emit("state", {
-          value: this.value,
-          aborted: !!this.aborted,
-          exited: !!this.exited
-        });
-      }
-      bell() {
-        this.out.write(beep);
-      }
-      render() {
-        this.onRender(color);
-        if (this.firstRender) this.firstRender = false;
-      }
-    };
-    module2.exports = Prompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/text.js
-var require_text = __commonJS({
-  "../../node_modules/prompts/dist/elements/text.js"(exports2, module2) {
-    "use strict";
-    function asyncGeneratorStep(gen, resolve2, reject, _next, _throw, key, arg) {
-      try {
-        var info = gen[key](arg);
-        var value = info.value;
-      } catch (error2) {
-        reject(error2);
-        return;
-      }
-      if (info.done) {
-        resolve2(value);
-      } else {
-        Promise.resolve(value).then(_next, _throw);
-      }
-    }
-    function _asyncToGenerator(fn) {
-      return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve2, reject) {
-          var gen = fn.apply(self, args);
-          function _next(value) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "next", value);
-          }
-          function _throw(err) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "throw", err);
-          }
-          _next(void 0);
-        });
-      };
-    }
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_src();
-    var erase = _require.erase;
-    var cursor = _require.cursor;
-    var _require2 = require_util();
-    var style = _require2.style;
-    var clear = _require2.clear;
-    var lines = _require2.lines;
-    var figures = _require2.figures;
-    var TextPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.transform = style.render(opts.style);
-        this.scale = this.transform.scale;
-        this.msg = opts.message;
-        this.initial = opts.initial || ``;
-        this.validator = opts.validate || (() => true);
-        this.value = ``;
-        this.errorMsg = opts.error || `Please Enter A Valid Value`;
-        this.cursor = Number(!!this.initial);
-        this.cursorOffset = 0;
-        this.clear = clear(``, this.out.columns);
-        this.render();
-      }
-      set value(v) {
-        if (!v && this.initial) {
-          this.placeholder = true;
-          this.rendered = color.gray(this.transform.render(this.initial));
-        } else {
-          this.placeholder = false;
-          this.rendered = this.transform.render(v);
-        }
-        this._value = v;
-        this.fire();
-      }
-      get value() {
-        return this._value;
-      }
-      reset() {
-        this.value = ``;
-        this.cursor = Number(!!this.initial);
-        this.cursorOffset = 0;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.value = this.value || this.initial;
-        this.done = this.aborted = true;
-        this.error = false;
-        this.red = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      validate() {
-        var _this = this;
-        return _asyncToGenerator(function* () {
-          let valid = yield _this.validator(_this.value);
-          if (typeof valid === `string`) {
-            _this.errorMsg = valid;
-            valid = false;
-          }
-          _this.error = !valid;
-        })();
-      }
-      submit() {
-        var _this2 = this;
-        return _asyncToGenerator(function* () {
-          _this2.value = _this2.value || _this2.initial;
-          _this2.cursorOffset = 0;
-          _this2.cursor = _this2.rendered.length;
-          yield _this2.validate();
-          if (_this2.error) {
-            _this2.red = true;
-            _this2.fire();
-            _this2.render();
-            return;
-          }
-          _this2.done = true;
-          _this2.aborted = false;
-          _this2.fire();
-          _this2.render();
-          _this2.out.write("\n");
-          _this2.close();
-        })();
-      }
-      next() {
-        if (!this.placeholder) return this.bell();
-        this.value = this.initial;
-        this.cursor = this.rendered.length;
-        this.fire();
-        this.render();
-      }
-      moveCursor(n) {
-        if (this.placeholder) return;
-        this.cursor = this.cursor + n;
-        this.cursorOffset += n;
-      }
-      _(c, key) {
-        let s1 = this.value.slice(0, this.cursor);
-        let s2 = this.value.slice(this.cursor);
-        this.value = `${s1}${c}${s2}`;
-        this.red = false;
-        this.cursor = this.placeholder ? 0 : s1.length + 1;
-        this.render();
-      }
-      delete() {
-        if (this.isCursorAtStart()) return this.bell();
-        let s1 = this.value.slice(0, this.cursor - 1);
-        let s2 = this.value.slice(this.cursor);
-        this.value = `${s1}${s2}`;
-        this.red = false;
-        if (this.isCursorAtStart()) {
-          this.cursorOffset = 0;
-        } else {
-          this.cursorOffset++;
-          this.moveCursor(-1);
-        }
-        this.render();
-      }
-      deleteForward() {
-        if (this.cursor * this.scale >= this.rendered.length || this.placeholder) return this.bell();
-        let s1 = this.value.slice(0, this.cursor);
-        let s2 = this.value.slice(this.cursor + 1);
-        this.value = `${s1}${s2}`;
-        this.red = false;
-        if (this.isCursorAtEnd()) {
-          this.cursorOffset = 0;
-        } else {
-          this.cursorOffset++;
-        }
-        this.render();
-      }
-      first() {
-        this.cursor = 0;
-        this.render();
-      }
-      last() {
-        this.cursor = this.value.length;
-        this.render();
-      }
-      left() {
-        if (this.cursor <= 0 || this.placeholder) return this.bell();
-        this.moveCursor(-1);
-        this.render();
-      }
-      right() {
-        if (this.cursor * this.scale >= this.rendered.length || this.placeholder) return this.bell();
-        this.moveCursor(1);
-        this.render();
-      }
-      isCursorAtStart() {
-        return this.cursor === 0 || this.placeholder && this.cursor === 1;
-      }
-      isCursorAtEnd() {
-        return this.cursor === this.rendered.length || this.placeholder && this.cursor === this.rendered.length + 1;
-      }
-      render() {
-        if (this.closed) return;
-        if (!this.firstRender) {
-          if (this.outputError) this.out.write(cursor.down(lines(this.outputError, this.out.columns) - 1) + clear(this.outputError, this.out.columns));
-          this.out.write(clear(this.outputText, this.out.columns));
-        }
-        super.render();
-        this.outputError = "";
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(this.done), this.red ? color.red(this.rendered) : this.rendered].join(` `);
-        if (this.error) {
-          this.outputError += this.errorMsg.split(`
-`).reduce((a, l, i) => a + `
-${i ? " " : figures.pointerSmall} ${color.red().italic(l)}`, ``);
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText + cursor.save + this.outputError + cursor.restore + cursor.move(this.cursorOffset, 0));
-      }
-    };
-    module2.exports = TextPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/select.js
-var require_select = __commonJS({
-  "../../node_modules/prompts/dist/elements/select.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_util();
-    var style = _require.style;
-    var clear = _require.clear;
-    var figures = _require.figures;
-    var wrap = _require.wrap;
-    var entriesToDisplay = _require.entriesToDisplay;
-    var _require2 = require_src();
-    var cursor = _require2.cursor;
-    var SelectPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.hint = opts.hint || "- Use arrow-keys. Return to submit.";
-        this.warn = opts.warn || "- This option is disabled";
-        this.cursor = opts.initial || 0;
-        this.choices = opts.choices.map((ch, idx) => {
-          if (typeof ch === "string") ch = {
-            title: ch,
-            value: idx
-          };
-          return {
-            title: ch && (ch.title || ch.value || ch),
-            value: ch && (ch.value === void 0 ? idx : ch.value),
-            description: ch && ch.description,
-            selected: ch && ch.selected,
-            disabled: ch && ch.disabled
-          };
-        });
-        this.optionsPerPage = opts.optionsPerPage || 10;
-        this.value = (this.choices[this.cursor] || {}).value;
-        this.clear = clear("", this.out.columns);
-        this.render();
-      }
-      moveCursor(n) {
-        this.cursor = n;
-        this.value = this.choices[n].value;
-        this.fire();
-      }
-      reset() {
-        this.moveCursor(0);
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        if (!this.selection.disabled) {
-          this.done = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        } else this.bell();
-      }
-      first() {
-        this.moveCursor(0);
-        this.render();
-      }
-      last() {
-        this.moveCursor(this.choices.length - 1);
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.moveCursor(this.choices.length - 1);
-        } else {
-          this.moveCursor(this.cursor - 1);
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.choices.length - 1) {
-          this.moveCursor(0);
-        } else {
-          this.moveCursor(this.cursor + 1);
-        }
-        this.render();
-      }
-      next() {
-        this.moveCursor((this.cursor + 1) % this.choices.length);
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") return this.submit();
-      }
-      get selection() {
-        return this.choices[this.cursor];
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        let _entriesToDisplay = entriesToDisplay(this.cursor, this.choices.length, this.optionsPerPage), startIndex = _entriesToDisplay.startIndex, endIndex = _entriesToDisplay.endIndex;
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(false), this.done ? this.selection.title : this.selection.disabled ? color.yellow(this.warn) : color.gray(this.hint)].join(" ");
-        if (!this.done) {
-          this.outputText += "\n";
-          for (let i = startIndex; i < endIndex; i++) {
-            let title, prefix, desc = "", v = this.choices[i];
-            if (i === startIndex && startIndex > 0) {
-              prefix = figures.arrowUp;
-            } else if (i === endIndex - 1 && endIndex < this.choices.length) {
-              prefix = figures.arrowDown;
-            } else {
-              prefix = " ";
-            }
-            if (v.disabled) {
-              title = this.cursor === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-              prefix = (this.cursor === i ? color.bold().gray(figures.pointer) + " " : "  ") + prefix;
-            } else {
-              title = this.cursor === i ? color.cyan().underline(v.title) : v.title;
-              prefix = (this.cursor === i ? color.cyan(figures.pointer) + " " : "  ") + prefix;
-              if (v.description && this.cursor === i) {
-                desc = ` - ${v.description}`;
-                if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-                  desc = "\n" + wrap(v.description, {
-                    margin: 3,
-                    width: this.out.columns
-                  });
-                }
-              }
-            }
-            this.outputText += `${prefix} ${title}${color.gray(desc)}
-`;
-          }
-        }
-        this.out.write(this.outputText);
-      }
-    };
-    module2.exports = SelectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/toggle.js
-var require_toggle = __commonJS({
-  "../../node_modules/prompts/dist/elements/toggle.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_util();
-    var style = _require.style;
-    var clear = _require.clear;
-    var _require2 = require_src();
-    var cursor = _require2.cursor;
-    var erase = _require2.erase;
-    var TogglePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.value = !!opts.initial;
-        this.active = opts.active || "on";
-        this.inactive = opts.inactive || "off";
-        this.initialValue = this.value;
-        this.render();
-      }
-      reset() {
-        this.value = this.initialValue;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      deactivate() {
-        if (this.value === false) return this.bell();
-        this.value = false;
-        this.render();
-      }
-      activate() {
-        if (this.value === true) return this.bell();
-        this.value = true;
-        this.render();
-      }
-      delete() {
-        this.deactivate();
-      }
-      left() {
-        this.deactivate();
-      }
-      right() {
-        this.activate();
-      }
-      down() {
-        this.deactivate();
-      }
-      up() {
-        this.activate();
-      }
-      next() {
-        this.value = !this.value;
-        this.fire();
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.value = !this.value;
-        } else if (c === "1") {
-          this.value = true;
-        } else if (c === "0") {
-          this.value = false;
-        } else return this.bell();
-        this.render();
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(this.done), this.value ? this.inactive : color.cyan().underline(this.inactive), color.gray("/"), this.value ? color.cyan().underline(this.active) : this.active].join(" ");
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = TogglePrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/datepart.js
-var require_datepart = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/datepart.js"(exports2, module2) {
-    "use strict";
-    var DatePart = class _DatePart {
-      constructor({
-        token,
-        date: date3,
-        parts,
-        locales
-      }) {
-        this.token = token;
-        this.date = date3 || /* @__PURE__ */ new Date();
-        this.parts = parts || [this];
-        this.locales = locales || {};
-      }
-      up() {
-      }
-      down() {
-      }
-      next() {
-        const currentIdx = this.parts.indexOf(this);
-        return this.parts.find((part, idx) => idx > currentIdx && part instanceof _DatePart);
-      }
-      setTo(val) {
-      }
-      prev() {
-        let parts = [].concat(this.parts).reverse();
-        const currentIdx = parts.indexOf(this);
-        return parts.find((part, idx) => idx > currentIdx && part instanceof _DatePart);
-      }
-      toString() {
-        return String(this.date);
-      }
-    };
-    module2.exports = DatePart;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/meridiem.js
-var require_meridiem = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/meridiem.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Meridiem = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setHours((this.date.getHours() + 12) % 24);
-      }
-      down() {
-        this.up();
-      }
-      toString() {
-        let meridiem = this.date.getHours() > 12 ? "pm" : "am";
-        return /\A/.test(this.token) ? meridiem.toUpperCase() : meridiem;
-      }
-    };
-    module2.exports = Meridiem;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/day.js
-var require_day = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/day.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var pos = (n) => {
-      n = n % 10;
-      return n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
-    };
-    var Day = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setDate(this.date.getDate() + 1);
-      }
-      down() {
-        this.date.setDate(this.date.getDate() - 1);
-      }
-      setTo(val) {
-        this.date.setDate(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let date3 = this.date.getDate();
-        let day = this.date.getDay();
-        return this.token === "DD" ? String(date3).padStart(2, "0") : this.token === "Do" ? date3 + pos(date3) : this.token === "d" ? day + 1 : this.token === "ddd" ? this.locales.weekdaysShort[day] : this.token === "dddd" ? this.locales.weekdays[day] : date3;
-      }
-    };
-    module2.exports = Day;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/hours.js
-var require_hours = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/hours.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Hours = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setHours(this.date.getHours() + 1);
-      }
-      down() {
-        this.date.setHours(this.date.getHours() - 1);
-      }
-      setTo(val) {
-        this.date.setHours(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let hours = this.date.getHours();
-        if (/h/.test(this.token)) hours = hours % 12 || 12;
-        return this.token.length > 1 ? String(hours).padStart(2, "0") : hours;
-      }
-    };
-    module2.exports = Hours;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/milliseconds.js
-var require_milliseconds = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/milliseconds.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Milliseconds = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMilliseconds(this.date.getMilliseconds() + 1);
-      }
-      down() {
-        this.date.setMilliseconds(this.date.getMilliseconds() - 1);
-      }
-      setTo(val) {
-        this.date.setMilliseconds(parseInt(val.substr(-this.token.length)));
-      }
-      toString() {
-        return String(this.date.getMilliseconds()).padStart(4, "0").substr(0, this.token.length);
-      }
-    };
-    module2.exports = Milliseconds;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/minutes.js
-var require_minutes = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/minutes.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Minutes = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMinutes(this.date.getMinutes() + 1);
-      }
-      down() {
-        this.date.setMinutes(this.date.getMinutes() - 1);
-      }
-      setTo(val) {
-        this.date.setMinutes(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let m = this.date.getMinutes();
-        return this.token.length > 1 ? String(m).padStart(2, "0") : m;
-      }
-    };
-    module2.exports = Minutes;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/month.js
-var require_month = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/month.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Month = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMonth(this.date.getMonth() + 1);
-      }
-      down() {
-        this.date.setMonth(this.date.getMonth() - 1);
-      }
-      setTo(val) {
-        val = parseInt(val.substr(-2)) - 1;
-        this.date.setMonth(val < 0 ? 0 : val);
-      }
-      toString() {
-        let month = this.date.getMonth();
-        let tl = this.token.length;
-        return tl === 2 ? String(month + 1).padStart(2, "0") : tl === 3 ? this.locales.monthsShort[month] : tl === 4 ? this.locales.months[month] : String(month + 1);
-      }
-    };
-    module2.exports = Month;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/seconds.js
-var require_seconds = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/seconds.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Seconds = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setSeconds(this.date.getSeconds() + 1);
-      }
-      down() {
-        this.date.setSeconds(this.date.getSeconds() - 1);
-      }
-      setTo(val) {
-        this.date.setSeconds(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let s = this.date.getSeconds();
-        return this.token.length > 1 ? String(s).padStart(2, "0") : s;
-      }
-    };
-    module2.exports = Seconds;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/year.js
-var require_year = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/year.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart();
-    var Year = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setFullYear(this.date.getFullYear() + 1);
-      }
-      down() {
-        this.date.setFullYear(this.date.getFullYear() - 1);
-      }
-      setTo(val) {
-        this.date.setFullYear(val.substr(-4));
-      }
-      toString() {
-        let year = String(this.date.getFullYear()).padStart(4, "0");
-        return this.token.length === 2 ? year.substr(-2) : year;
-      }
-    };
-    module2.exports = Year;
-  }
-});
-
-// ../../node_modules/prompts/dist/dateparts/index.js
-var require_dateparts = __commonJS({
-  "../../node_modules/prompts/dist/dateparts/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      DatePart: require_datepart(),
-      Meridiem: require_meridiem(),
-      Day: require_day(),
-      Hours: require_hours(),
-      Milliseconds: require_milliseconds(),
-      Minutes: require_minutes(),
-      Month: require_month(),
-      Seconds: require_seconds(),
-      Year: require_year()
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/date.js
-var require_date = __commonJS({
-  "../../node_modules/prompts/dist/elements/date.js"(exports2, module2) {
-    "use strict";
-    function asyncGeneratorStep(gen, resolve2, reject, _next, _throw, key, arg) {
-      try {
-        var info = gen[key](arg);
-        var value = info.value;
-      } catch (error2) {
-        reject(error2);
-        return;
-      }
-      if (info.done) {
-        resolve2(value);
-      } else {
-        Promise.resolve(value).then(_next, _throw);
-      }
-    }
-    function _asyncToGenerator(fn) {
-      return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve2, reject) {
-          var gen = fn.apply(self, args);
-          function _next(value) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "next", value);
-          }
-          function _throw(err) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "throw", err);
-          }
-          _next(void 0);
-        });
-      };
-    }
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_util();
-    var style = _require.style;
-    var clear = _require.clear;
-    var figures = _require.figures;
-    var _require2 = require_src();
-    var erase = _require2.erase;
-    var cursor = _require2.cursor;
-    var _require3 = require_dateparts();
-    var DatePart = _require3.DatePart;
-    var Meridiem = _require3.Meridiem;
-    var Day = _require3.Day;
-    var Hours = _require3.Hours;
-    var Milliseconds = _require3.Milliseconds;
-    var Minutes = _require3.Minutes;
-    var Month = _require3.Month;
-    var Seconds = _require3.Seconds;
-    var Year = _require3.Year;
-    var regex = /\\(.)|"((?:\\["\\]|[^"])+)"|(D[Do]?|d{3,4}|d)|(M{1,4})|(YY(?:YY)?)|([aA])|([Hh]{1,2})|(m{1,2})|(s{1,2})|(S{1,4})|./g;
-    var regexGroups = {
-      1: ({
-        token
-      }) => token.replace(/\\(.)/g, "$1"),
-      2: (opts) => new Day(opts),
-      // Day // TODO
-      3: (opts) => new Month(opts),
-      // Month
-      4: (opts) => new Year(opts),
-      // Year
-      5: (opts) => new Meridiem(opts),
-      // AM/PM // TODO (special)
-      6: (opts) => new Hours(opts),
-      // Hours
-      7: (opts) => new Minutes(opts),
-      // Minutes
-      8: (opts) => new Seconds(opts),
-      // Seconds
-      9: (opts) => new Milliseconds(opts)
-      // Fractional seconds
-    };
-    var dfltLocales = {
-      months: "January,February,March,April,May,June,July,August,September,October,November,December".split(","),
-      monthsShort: "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec".split(","),
-      weekdays: "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday".split(","),
-      weekdaysShort: "Sun,Mon,Tue,Wed,Thu,Fri,Sat".split(",")
-    };
-    var DatePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.cursor = 0;
-        this.typed = "";
-        this.locales = Object.assign(dfltLocales, opts.locales);
-        this._date = opts.initial || /* @__PURE__ */ new Date();
-        this.errorMsg = opts.error || "Please Enter A Valid Value";
-        this.validator = opts.validate || (() => true);
-        this.mask = opts.mask || "YYYY-MM-DD HH:mm:ss";
-        this.clear = clear("", this.out.columns);
-        this.render();
-      }
-      get value() {
-        return this.date;
-      }
-      get date() {
-        return this._date;
-      }
-      set date(date3) {
-        if (date3) this._date.setTime(date3.getTime());
-      }
-      set mask(mask) {
-        let result;
-        this.parts = [];
-        while (result = regex.exec(mask)) {
-          let match = result.shift();
-          let idx = result.findIndex((gr) => gr != null);
-          this.parts.push(idx in regexGroups ? regexGroups[idx]({
-            token: result[idx] || match,
-            date: this.date,
-            parts: this.parts,
-            locales: this.locales
-          }) : result[idx] || match);
-        }
-        let parts = this.parts.reduce((arr, i) => {
-          if (typeof i === "string" && typeof arr[arr.length - 1] === "string") arr[arr.length - 1] += i;
-          else arr.push(i);
-          return arr;
-        }, []);
-        this.parts.splice(0);
-        this.parts.push(...parts);
-        this.reset();
-      }
-      moveCursor(n) {
-        this.typed = "";
-        this.cursor = n;
-        this.fire();
-      }
-      reset() {
-        this.moveCursor(this.parts.findIndex((p) => p instanceof DatePart));
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.error = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      validate() {
-        var _this = this;
-        return _asyncToGenerator(function* () {
-          let valid = yield _this.validator(_this.value);
-          if (typeof valid === "string") {
-            _this.errorMsg = valid;
-            valid = false;
-          }
-          _this.error = !valid;
-        })();
-      }
-      submit() {
-        var _this2 = this;
-        return _asyncToGenerator(function* () {
-          yield _this2.validate();
-          if (_this2.error) {
-            _this2.color = "red";
-            _this2.fire();
-            _this2.render();
-            return;
-          }
-          _this2.done = true;
-          _this2.aborted = false;
-          _this2.fire();
-          _this2.render();
-          _this2.out.write("\n");
-          _this2.close();
-        })();
-      }
-      up() {
-        this.typed = "";
-        this.parts[this.cursor].up();
-        this.render();
-      }
-      down() {
-        this.typed = "";
-        this.parts[this.cursor].down();
-        this.render();
-      }
-      left() {
-        let prev = this.parts[this.cursor].prev();
-        if (prev == null) return this.bell();
-        this.moveCursor(this.parts.indexOf(prev));
-        this.render();
-      }
-      right() {
-        let next = this.parts[this.cursor].next();
-        if (next == null) return this.bell();
-        this.moveCursor(this.parts.indexOf(next));
-        this.render();
-      }
-      next() {
-        let next = this.parts[this.cursor].next();
-        this.moveCursor(next ? this.parts.indexOf(next) : this.parts.findIndex((part) => part instanceof DatePart));
-        this.render();
-      }
-      _(c) {
-        if (/\d/.test(c)) {
-          this.typed += c;
-          this.parts[this.cursor].setTo(this.typed);
-          this.render();
-        }
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(false), this.parts.reduce((arr, p, idx) => arr.concat(idx === this.cursor && !this.done ? color.cyan().underline(p.toString()) : p), []).join("")].join(" ");
-        if (this.error) {
-          this.outputText += this.errorMsg.split("\n").reduce((a, l, i) => a + `
-${i ? ` ` : figures.pointerSmall} ${color.red().italic(l)}`, ``);
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = DatePrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/number.js
-var require_number = __commonJS({
-  "../../node_modules/prompts/dist/elements/number.js"(exports2, module2) {
-    "use strict";
-    function asyncGeneratorStep(gen, resolve2, reject, _next, _throw, key, arg) {
-      try {
-        var info = gen[key](arg);
-        var value = info.value;
-      } catch (error2) {
-        reject(error2);
-        return;
-      }
-      if (info.done) {
-        resolve2(value);
-      } else {
-        Promise.resolve(value).then(_next, _throw);
-      }
-    }
-    function _asyncToGenerator(fn) {
-      return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve2, reject) {
-          var gen = fn.apply(self, args);
-          function _next(value) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "next", value);
-          }
-          function _throw(err) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "throw", err);
-          }
-          _next(void 0);
-        });
-      };
-    }
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_src();
-    var cursor = _require.cursor;
-    var erase = _require.erase;
-    var _require2 = require_util();
-    var style = _require2.style;
-    var figures = _require2.figures;
-    var clear = _require2.clear;
-    var lines = _require2.lines;
-    var isNumber = /[0-9]/;
-    var isDef = (any) => any !== void 0;
-    var round = (number3, precision) => {
-      let factor = Math.pow(10, precision);
-      return Math.round(number3 * factor) / factor;
-    };
-    var NumberPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.transform = style.render(opts.style);
-        this.msg = opts.message;
-        this.initial = isDef(opts.initial) ? opts.initial : "";
-        this.float = !!opts.float;
-        this.round = opts.round || 2;
-        this.inc = opts.increment || 1;
-        this.min = isDef(opts.min) ? opts.min : -Infinity;
-        this.max = isDef(opts.max) ? opts.max : Infinity;
-        this.errorMsg = opts.error || `Please Enter A Valid Value`;
-        this.validator = opts.validate || (() => true);
-        this.color = `cyan`;
-        this.value = ``;
-        this.typed = ``;
-        this.lastHit = 0;
-        this.render();
-      }
-      set value(v) {
-        if (!v && v !== 0) {
-          this.placeholder = true;
-          this.rendered = color.gray(this.transform.render(`${this.initial}`));
-          this._value = ``;
-        } else {
-          this.placeholder = false;
-          this.rendered = this.transform.render(`${round(v, this.round)}`);
-          this._value = round(v, this.round);
-        }
-        this.fire();
-      }
-      get value() {
-        return this._value;
-      }
-      parse(x) {
-        return this.float ? parseFloat(x) : parseInt(x);
-      }
-      valid(c) {
-        return c === `-` || c === `.` && this.float || isNumber.test(c);
-      }
-      reset() {
-        this.typed = ``;
-        this.value = ``;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        let x = this.value;
-        this.value = x !== `` ? x : this.initial;
-        this.done = this.aborted = true;
-        this.error = false;
-        this.fire();
-        this.render();
-        this.out.write(`
-`);
-        this.close();
-      }
-      validate() {
-        var _this = this;
-        return _asyncToGenerator(function* () {
-          let valid = yield _this.validator(_this.value);
-          if (typeof valid === `string`) {
-            _this.errorMsg = valid;
-            valid = false;
-          }
-          _this.error = !valid;
-        })();
-      }
-      submit() {
-        var _this2 = this;
-        return _asyncToGenerator(function* () {
-          yield _this2.validate();
-          if (_this2.error) {
-            _this2.color = `red`;
-            _this2.fire();
-            _this2.render();
-            return;
-          }
-          let x = _this2.value;
-          _this2.value = x !== `` ? x : _this2.initial;
-          _this2.done = true;
-          _this2.aborted = false;
-          _this2.error = false;
-          _this2.fire();
-          _this2.render();
-          _this2.out.write(`
-`);
-          _this2.close();
-        })();
-      }
-      up() {
-        this.typed = ``;
-        if (this.value === "") {
-          this.value = this.min - this.inc;
-        }
-        if (this.value >= this.max) return this.bell();
-        this.value += this.inc;
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      down() {
-        this.typed = ``;
-        if (this.value === "") {
-          this.value = this.min + this.inc;
-        }
-        if (this.value <= this.min) return this.bell();
-        this.value -= this.inc;
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      delete() {
-        let val = this.value.toString();
-        if (val.length === 0) return this.bell();
-        this.value = this.parse(val = val.slice(0, -1)) || ``;
-        if (this.value !== "" && this.value < this.min) {
-          this.value = this.min;
-        }
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      next() {
-        this.value = this.initial;
-        this.fire();
-        this.render();
-      }
-      _(c, key) {
-        if (!this.valid(c)) return this.bell();
-        const now = Date.now();
-        if (now - this.lastHit > 1e3) this.typed = ``;
-        this.typed += c;
-        this.lastHit = now;
-        this.color = `cyan`;
-        if (c === `.`) return this.fire();
-        this.value = Math.min(this.parse(this.typed), this.max);
-        if (this.value > this.max) this.value = this.max;
-        if (this.value < this.min) this.value = this.min;
-        this.fire();
-        this.render();
-      }
-      render() {
-        if (this.closed) return;
-        if (!this.firstRender) {
-          if (this.outputError) this.out.write(cursor.down(lines(this.outputError, this.out.columns) - 1) + clear(this.outputError, this.out.columns));
-          this.out.write(clear(this.outputText, this.out.columns));
-        }
-        super.render();
-        this.outputError = "";
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(this.done), !this.done || !this.done && !this.placeholder ? color[this.color]().underline(this.rendered) : this.rendered].join(` `);
-        if (this.error) {
-          this.outputError += this.errorMsg.split(`
-`).reduce((a, l, i) => a + `
-${i ? ` ` : figures.pointerSmall} ${color.red().italic(l)}`, ``);
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText + cursor.save + this.outputError + cursor.restore);
-      }
-    };
-    module2.exports = NumberPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/multiselect.js
-var require_multiselect = __commonJS({
-  "../../node_modules/prompts/dist/elements/multiselect.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var _require = require_src();
-    var cursor = _require.cursor;
-    var Prompt = require_prompt();
-    var _require2 = require_util();
-    var clear = _require2.clear;
-    var figures = _require2.figures;
-    var style = _require2.style;
-    var wrap = _require2.wrap;
-    var entriesToDisplay = _require2.entriesToDisplay;
-    var MultiselectPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.cursor = opts.cursor || 0;
-        this.scrollIndex = opts.cursor || 0;
-        this.hint = opts.hint || "";
-        this.warn = opts.warn || "- This option is disabled -";
-        this.minSelected = opts.min;
-        this.showMinError = false;
-        this.maxChoices = opts.max;
-        this.instructions = opts.instructions;
-        this.optionsPerPage = opts.optionsPerPage || 10;
-        this.value = opts.choices.map((ch, idx) => {
-          if (typeof ch === "string") ch = {
-            title: ch,
-            value: idx
-          };
-          return {
-            title: ch && (ch.title || ch.value || ch),
-            description: ch && ch.description,
-            value: ch && (ch.value === void 0 ? idx : ch.value),
-            selected: ch && ch.selected,
-            disabled: ch && ch.disabled
-          };
-        });
-        this.clear = clear("", this.out.columns);
-        if (!opts.overrideRender) {
-          this.render();
-        }
-      }
-      reset() {
-        this.value.map((v) => !v.selected);
-        this.cursor = 0;
-        this.fire();
-        this.render();
-      }
-      selected() {
-        return this.value.filter((v) => v.selected);
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        const selected = this.value.filter((e) => e.selected);
-        if (this.minSelected && selected.length < this.minSelected) {
-          this.showMinError = true;
-          this.render();
-        } else {
-          this.done = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        }
-      }
-      first() {
-        this.cursor = 0;
-        this.render();
-      }
-      last() {
-        this.cursor = this.value.length - 1;
-        this.render();
-      }
-      next() {
-        this.cursor = (this.cursor + 1) % this.value.length;
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.cursor = this.value.length - 1;
-        } else {
-          this.cursor--;
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.value.length - 1) {
-          this.cursor = 0;
-        } else {
-          this.cursor++;
-        }
-        this.render();
-      }
-      left() {
-        this.value[this.cursor].selected = false;
-        this.render();
-      }
-      right() {
-        if (this.value.filter((e) => e.selected).length >= this.maxChoices) return this.bell();
-        this.value[this.cursor].selected = true;
-        this.render();
-      }
-      handleSpaceToggle() {
-        const v = this.value[this.cursor];
-        if (v.selected) {
-          v.selected = false;
-          this.render();
-        } else if (v.disabled || this.value.filter((e) => e.selected).length >= this.maxChoices) {
-          return this.bell();
-        } else {
-          v.selected = true;
-          this.render();
-        }
-      }
-      toggleAll() {
-        if (this.maxChoices !== void 0 || this.value[this.cursor].disabled) {
-          return this.bell();
-        }
-        const newSelected = !this.value[this.cursor].selected;
-        this.value.filter((v) => !v.disabled).forEach((v) => v.selected = newSelected);
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.handleSpaceToggle();
-        } else if (c === "a") {
-          this.toggleAll();
-        } else {
-          return this.bell();
-        }
-      }
-      renderInstructions() {
-        if (this.instructions === void 0 || this.instructions) {
-          if (typeof this.instructions === "string") {
-            return this.instructions;
-          }
-          return `
-Instructions:
-    ${figures.arrowUp}/${figures.arrowDown}: Highlight option
-    ${figures.arrowLeft}/${figures.arrowRight}/[space]: Toggle selection
-` + (this.maxChoices === void 0 ? `    a: Toggle all
-` : "") + `    enter/return: Complete answer`;
-        }
-        return "";
-      }
-      renderOption(cursor2, v, i, arrowIndicator) {
-        const prefix = (v.selected ? color.green(figures.radioOn) : figures.radioOff) + " " + arrowIndicator + " ";
-        let title, desc;
-        if (v.disabled) {
-          title = cursor2 === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-        } else {
-          title = cursor2 === i ? color.cyan().underline(v.title) : v.title;
-          if (cursor2 === i && v.description) {
-            desc = ` - ${v.description}`;
-            if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-              desc = "\n" + wrap(v.description, {
-                margin: prefix.length,
-                width: this.out.columns
-              });
-            }
-          }
-        }
-        return prefix + title + color.gray(desc || "");
-      }
-      // shared with autocompleteMultiselect
-      paginateOptions(options) {
-        if (options.length === 0) {
-          return color.red("No matches for this query.");
-        }
-        let _entriesToDisplay = entriesToDisplay(this.cursor, options.length, this.optionsPerPage), startIndex = _entriesToDisplay.startIndex, endIndex = _entriesToDisplay.endIndex;
-        let prefix, styledOptions = [];
-        for (let i = startIndex; i < endIndex; i++) {
-          if (i === startIndex && startIndex > 0) {
-            prefix = figures.arrowUp;
-          } else if (i === endIndex - 1 && endIndex < options.length) {
-            prefix = figures.arrowDown;
-          } else {
-            prefix = " ";
-          }
-          styledOptions.push(this.renderOption(this.cursor, options[i], i, prefix));
-        }
-        return "\n" + styledOptions.join("\n");
-      }
-      // shared with autocomleteMultiselect
-      renderOptions(options) {
-        if (!this.done) {
-          return this.paginateOptions(options);
-        }
-        return "";
-      }
-      renderDoneOrInstructions() {
-        if (this.done) {
-          return this.value.filter((e) => e.selected).map((v) => v.title).join(", ");
-        }
-        const output = [color.gray(this.hint), this.renderInstructions()];
-        if (this.value[this.cursor].disabled) {
-          output.push(color.yellow(this.warn));
-        }
-        return output.join(" ");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        super.render();
-        let prompt = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(false), this.renderDoneOrInstructions()].join(" ");
-        if (this.showMinError) {
-          prompt += color.red(`You must select a minimum of ${this.minSelected} choices.`);
-          this.showMinError = false;
-        }
-        prompt += this.renderOptions(this.value);
-        this.out.write(this.clear + prompt);
-        this.clear = clear(prompt, this.out.columns);
-      }
-    };
-    module2.exports = MultiselectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/autocomplete.js
-var require_autocomplete = __commonJS({
-  "../../node_modules/prompts/dist/elements/autocomplete.js"(exports2, module2) {
-    "use strict";
-    function asyncGeneratorStep(gen, resolve2, reject, _next, _throw, key, arg) {
-      try {
-        var info = gen[key](arg);
-        var value = info.value;
-      } catch (error2) {
-        reject(error2);
-        return;
-      }
-      if (info.done) {
-        resolve2(value);
-      } else {
-        Promise.resolve(value).then(_next, _throw);
-      }
-    }
-    function _asyncToGenerator(fn) {
-      return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve2, reject) {
-          var gen = fn.apply(self, args);
-          function _next(value) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "next", value);
-          }
-          function _throw(err) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "throw", err);
-          }
-          _next(void 0);
-        });
-      };
-    }
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_src();
-    var erase = _require.erase;
-    var cursor = _require.cursor;
-    var _require2 = require_util();
-    var style = _require2.style;
-    var clear = _require2.clear;
-    var figures = _require2.figures;
-    var wrap = _require2.wrap;
-    var entriesToDisplay = _require2.entriesToDisplay;
-    var getVal = (arr, i) => arr[i] && (arr[i].value || arr[i].title || arr[i]);
-    var getTitle = (arr, i) => arr[i] && (arr[i].title || arr[i].value || arr[i]);
-    var getIndex = (arr, valOrTitle) => {
-      const index = arr.findIndex((el) => el.value === valOrTitle || el.title === valOrTitle);
-      return index > -1 ? index : void 0;
-    };
-    var AutocompletePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.suggest = opts.suggest;
-        this.choices = opts.choices;
-        this.initial = typeof opts.initial === "number" ? opts.initial : getIndex(opts.choices, opts.initial);
-        this.select = this.initial || opts.cursor || 0;
-        this.i18n = {
-          noMatches: opts.noMatches || "no matches found"
-        };
-        this.fallback = opts.fallback || this.initial;
-        this.clearFirst = opts.clearFirst || false;
-        this.suggestions = [];
-        this.input = "";
-        this.limit = opts.limit || 10;
-        this.cursor = 0;
-        this.transform = style.render(opts.style);
-        this.scale = this.transform.scale;
-        this.render = this.render.bind(this);
-        this.complete = this.complete.bind(this);
-        this.clear = clear("", this.out.columns);
-        this.complete(this.render);
-        this.render();
-      }
-      set fallback(fb) {
-        this._fb = Number.isSafeInteger(parseInt(fb)) ? parseInt(fb) : fb;
-      }
-      get fallback() {
-        let choice;
-        if (typeof this._fb === "number") choice = this.choices[this._fb];
-        else if (typeof this._fb === "string") choice = {
-          title: this._fb
-        };
-        return choice || this._fb || {
-          title: this.i18n.noMatches
-        };
-      }
-      moveSelect(i) {
-        this.select = i;
-        if (this.suggestions.length > 0) this.value = getVal(this.suggestions, i);
-        else this.value = this.fallback.value;
-        this.fire();
-      }
-      complete(cb) {
-        var _this = this;
-        return _asyncToGenerator(function* () {
-          const p = _this.completing = _this.suggest(_this.input, _this.choices);
-          const suggestions = yield p;
-          if (_this.completing !== p) return;
-          _this.suggestions = suggestions.map((s, i, arr) => ({
-            title: getTitle(arr, i),
-            value: getVal(arr, i),
-            description: s.description
-          }));
-          _this.completing = false;
-          const l = Math.max(suggestions.length - 1, 0);
-          _this.moveSelect(Math.min(l, _this.select));
-          cb && cb();
-        })();
-      }
-      reset() {
-        this.input = "";
-        this.complete(() => {
-          this.moveSelect(this.initial !== void 0 ? this.initial : 0);
-          this.render();
-        });
-        this.render();
-      }
-      exit() {
-        if (this.clearFirst && this.input.length > 0) {
-          this.reset();
-        } else {
-          this.done = this.exited = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        }
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.exited = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.done = true;
-        this.aborted = this.exited = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      _(c, key) {
-        let s1 = this.input.slice(0, this.cursor);
-        let s2 = this.input.slice(this.cursor);
-        this.input = `${s1}${c}${s2}`;
-        this.cursor = s1.length + 1;
-        this.complete(this.render);
-        this.render();
-      }
-      delete() {
-        if (this.cursor === 0) return this.bell();
-        let s1 = this.input.slice(0, this.cursor - 1);
-        let s2 = this.input.slice(this.cursor);
-        this.input = `${s1}${s2}`;
-        this.complete(this.render);
-        this.cursor = this.cursor - 1;
-        this.render();
-      }
-      deleteForward() {
-        if (this.cursor * this.scale >= this.rendered.length) return this.bell();
-        let s1 = this.input.slice(0, this.cursor);
-        let s2 = this.input.slice(this.cursor + 1);
-        this.input = `${s1}${s2}`;
-        this.complete(this.render);
-        this.render();
-      }
-      first() {
-        this.moveSelect(0);
-        this.render();
-      }
-      last() {
-        this.moveSelect(this.suggestions.length - 1);
-        this.render();
-      }
-      up() {
-        if (this.select === 0) {
-          this.moveSelect(this.suggestions.length - 1);
-        } else {
-          this.moveSelect(this.select - 1);
-        }
-        this.render();
-      }
-      down() {
-        if (this.select === this.suggestions.length - 1) {
-          this.moveSelect(0);
-        } else {
-          this.moveSelect(this.select + 1);
-        }
-        this.render();
-      }
-      next() {
-        if (this.select === this.suggestions.length - 1) {
-          this.moveSelect(0);
-        } else this.moveSelect(this.select + 1);
-        this.render();
-      }
-      nextPage() {
-        this.moveSelect(Math.min(this.select + this.limit, this.suggestions.length - 1));
-        this.render();
-      }
-      prevPage() {
-        this.moveSelect(Math.max(this.select - this.limit, 0));
-        this.render();
-      }
-      left() {
-        if (this.cursor <= 0) return this.bell();
-        this.cursor = this.cursor - 1;
-        this.render();
-      }
-      right() {
-        if (this.cursor * this.scale >= this.rendered.length) return this.bell();
-        this.cursor = this.cursor + 1;
-        this.render();
-      }
-      renderOption(v, hovered, isStart, isEnd) {
-        let desc;
-        let prefix = isStart ? figures.arrowUp : isEnd ? figures.arrowDown : " ";
-        let title = hovered ? color.cyan().underline(v.title) : v.title;
-        prefix = (hovered ? color.cyan(figures.pointer) + " " : "  ") + prefix;
-        if (v.description) {
-          desc = ` - ${v.description}`;
-          if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-            desc = "\n" + wrap(v.description, {
-              margin: 3,
-              width: this.out.columns
-            });
-          }
-        }
-        return prefix + " " + title + color.gray(desc || "");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        let _entriesToDisplay = entriesToDisplay(this.select, this.choices.length, this.limit), startIndex = _entriesToDisplay.startIndex, endIndex = _entriesToDisplay.endIndex;
-        this.outputText = [style.symbol(this.done, this.aborted, this.exited), color.bold(this.msg), style.delimiter(this.completing), this.done && this.suggestions[this.select] ? this.suggestions[this.select].title : this.rendered = this.transform.render(this.input)].join(" ");
-        if (!this.done) {
-          const suggestions = this.suggestions.slice(startIndex, endIndex).map((item, i) => this.renderOption(item, this.select === i + startIndex, i === 0 && startIndex > 0, i + startIndex === endIndex - 1 && endIndex < this.choices.length)).join("\n");
-          this.outputText += `
-` + (suggestions || color.gray(this.fallback.title));
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = AutocompletePrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/autocompleteMultiselect.js
-var require_autocompleteMultiselect = __commonJS({
-  "../../node_modules/prompts/dist/elements/autocompleteMultiselect.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var _require = require_src();
-    var cursor = _require.cursor;
-    var MultiselectPrompt = require_multiselect();
-    var _require2 = require_util();
-    var clear = _require2.clear;
-    var style = _require2.style;
-    var figures = _require2.figures;
-    var AutocompleteMultiselectPrompt = class extends MultiselectPrompt {
-      constructor(opts = {}) {
-        opts.overrideRender = true;
-        super(opts);
-        this.inputValue = "";
-        this.clear = clear("", this.out.columns);
-        this.filteredOptions = this.value;
-        this.render();
-      }
-      last() {
-        this.cursor = this.filteredOptions.length - 1;
-        this.render();
-      }
-      next() {
-        this.cursor = (this.cursor + 1) % this.filteredOptions.length;
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.cursor = this.filteredOptions.length - 1;
-        } else {
-          this.cursor--;
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.filteredOptions.length - 1) {
-          this.cursor = 0;
-        } else {
-          this.cursor++;
-        }
-        this.render();
-      }
-      left() {
-        this.filteredOptions[this.cursor].selected = false;
-        this.render();
-      }
-      right() {
-        if (this.value.filter((e) => e.selected).length >= this.maxChoices) return this.bell();
-        this.filteredOptions[this.cursor].selected = true;
-        this.render();
-      }
-      delete() {
-        if (this.inputValue.length) {
-          this.inputValue = this.inputValue.substr(0, this.inputValue.length - 1);
-          this.updateFilteredOptions();
-        }
-      }
-      updateFilteredOptions() {
-        const currentHighlight = this.filteredOptions[this.cursor];
-        this.filteredOptions = this.value.filter((v) => {
-          if (this.inputValue) {
-            if (typeof v.title === "string") {
-              if (v.title.toLowerCase().includes(this.inputValue.toLowerCase())) {
-                return true;
-              }
-            }
-            if (typeof v.value === "string") {
-              if (v.value.toLowerCase().includes(this.inputValue.toLowerCase())) {
-                return true;
-              }
-            }
-            return false;
-          }
-          return true;
-        });
-        const newHighlightIndex = this.filteredOptions.findIndex((v) => v === currentHighlight);
-        this.cursor = newHighlightIndex < 0 ? 0 : newHighlightIndex;
-        this.render();
-      }
-      handleSpaceToggle() {
-        const v = this.filteredOptions[this.cursor];
-        if (v.selected) {
-          v.selected = false;
-          this.render();
-        } else if (v.disabled || this.value.filter((e) => e.selected).length >= this.maxChoices) {
-          return this.bell();
-        } else {
-          v.selected = true;
-          this.render();
-        }
-      }
-      handleInputChange(c) {
-        this.inputValue = this.inputValue + c;
-        this.updateFilteredOptions();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.handleSpaceToggle();
-        } else {
-          this.handleInputChange(c);
-        }
-      }
-      renderInstructions() {
-        if (this.instructions === void 0 || this.instructions) {
-          if (typeof this.instructions === "string") {
-            return this.instructions;
-          }
-          return `
-Instructions:
-    ${figures.arrowUp}/${figures.arrowDown}: Highlight option
-    ${figures.arrowLeft}/${figures.arrowRight}/[space]: Toggle selection
-    [a,b,c]/delete: Filter choices
-    enter/return: Complete answer
-`;
-        }
-        return "";
-      }
-      renderCurrentInput() {
-        return `
-Filtered results for: ${this.inputValue ? this.inputValue : color.gray("Enter something to filter")}
-`;
-      }
-      renderOption(cursor2, v, i) {
-        let title;
-        if (v.disabled) title = cursor2 === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-        else title = cursor2 === i ? color.cyan().underline(v.title) : v.title;
-        return (v.selected ? color.green(figures.radioOn) : figures.radioOff) + "  " + title;
-      }
-      renderDoneOrInstructions() {
-        if (this.done) {
-          return this.value.filter((e) => e.selected).map((v) => v.title).join(", ");
-        }
-        const output = [color.gray(this.hint), this.renderInstructions(), this.renderCurrentInput()];
-        if (this.filteredOptions.length && this.filteredOptions[this.cursor].disabled) {
-          output.push(color.yellow(this.warn));
-        }
-        return output.join(" ");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        super.render();
-        let prompt = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(false), this.renderDoneOrInstructions()].join(" ");
-        if (this.showMinError) {
-          prompt += color.red(`You must select a minimum of ${this.minSelected} choices.`);
-          this.showMinError = false;
-        }
-        prompt += this.renderOptions(this.filteredOptions);
-        this.out.write(this.clear + prompt);
-        this.clear = clear(prompt, this.out.columns);
-      }
-    };
-    module2.exports = AutocompleteMultiselectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/confirm.js
-var require_confirm = __commonJS({
-  "../../node_modules/prompts/dist/elements/confirm.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt();
-    var _require = require_util();
-    var style = _require.style;
-    var clear = _require.clear;
-    var _require2 = require_src();
-    var erase = _require2.erase;
-    var cursor = _require2.cursor;
-    var ConfirmPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.value = opts.initial;
-        this.initialValue = !!opts.initial;
-        this.yesMsg = opts.yes || "yes";
-        this.yesOption = opts.yesOption || "(Y/n)";
-        this.noMsg = opts.no || "no";
-        this.noOption = opts.noOption || "(y/N)";
-        this.render();
-      }
-      reset() {
-        this.value = this.initialValue;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.value = this.value || false;
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      _(c, key) {
-        if (c.toLowerCase() === "y") {
-          this.value = true;
-          return this.submit();
-        }
-        if (c.toLowerCase() === "n") {
-          this.value = false;
-          return this.submit();
-        }
-        return this.bell();
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [style.symbol(this.done, this.aborted), color.bold(this.msg), style.delimiter(this.done), this.done ? this.value ? this.yesMsg : this.noMsg : color.gray(this.initialValue ? this.yesOption : this.noOption)].join(" ");
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = ConfirmPrompt;
-  }
-});
-
-// ../../node_modules/prompts/dist/elements/index.js
-var require_elements = __commonJS({
-  "../../node_modules/prompts/dist/elements/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      TextPrompt: require_text(),
-      SelectPrompt: require_select(),
-      TogglePrompt: require_toggle(),
-      DatePrompt: require_date(),
-      NumberPrompt: require_number(),
-      MultiselectPrompt: require_multiselect(),
-      AutocompletePrompt: require_autocomplete(),
-      AutocompleteMultiselectPrompt: require_autocompleteMultiselect(),
-      ConfirmPrompt: require_confirm()
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/prompts.js
-var require_prompts = __commonJS({
-  "../../node_modules/prompts/dist/prompts.js"(exports2) {
-    "use strict";
-    var $ = exports2;
-    var el = require_elements();
-    var noop = (v) => v;
-    function toPrompt(type, args, opts = {}) {
-      return new Promise((res, rej) => {
-        const p = new el[type](args);
-        const onAbort = opts.onAbort || noop;
-        const onSubmit = opts.onSubmit || noop;
-        const onExit = opts.onExit || noop;
-        p.on("state", args.onState || noop);
-        p.on("submit", (x) => res(onSubmit(x)));
-        p.on("exit", (x) => res(onExit(x)));
-        p.on("abort", (x) => rej(onAbort(x)));
-      });
-    }
-    $.text = (args) => toPrompt("TextPrompt", args);
-    $.password = (args) => {
-      args.style = "password";
-      return $.text(args);
-    };
-    $.invisible = (args) => {
-      args.style = "invisible";
-      return $.text(args);
-    };
-    $.number = (args) => toPrompt("NumberPrompt", args);
-    $.date = (args) => toPrompt("DatePrompt", args);
-    $.confirm = (args) => toPrompt("ConfirmPrompt", args);
-    $.list = (args) => {
-      const sep2 = args.separator || ",";
-      return toPrompt("TextPrompt", args, {
-        onSubmit: (str) => str.split(sep2).map((s) => s.trim())
-      });
-    };
-    $.toggle = (args) => toPrompt("TogglePrompt", args);
-    $.select = (args) => toPrompt("SelectPrompt", args);
-    $.multiselect = (args) => {
-      args.choices = [].concat(args.choices || []);
-      const toSelected = (items) => items.filter((item) => item.selected).map((item) => item.value);
-      return toPrompt("MultiselectPrompt", args, {
-        onAbort: toSelected,
-        onSubmit: toSelected
-      });
-    };
-    $.autocompleteMultiselect = (args) => {
-      args.choices = [].concat(args.choices || []);
-      const toSelected = (items) => items.filter((item) => item.selected).map((item) => item.value);
-      return toPrompt("AutocompleteMultiselectPrompt", args, {
-        onAbort: toSelected,
-        onSubmit: toSelected
-      });
-    };
-    var byTitle = (input, choices) => Promise.resolve(choices.filter((item) => item.title.slice(0, input.length).toLowerCase() === input.toLowerCase()));
-    $.autocomplete = (args) => {
-      args.suggest = args.suggest || byTitle;
-      args.choices = [].concat(args.choices || []);
-      return toPrompt("AutocompletePrompt", args);
-    };
-  }
-});
-
-// ../../node_modules/prompts/dist/index.js
-var require_dist = __commonJS({
-  "../../node_modules/prompts/dist/index.js"(exports2, module2) {
-    "use strict";
-    function ownKeys(object3, enumerableOnly) {
-      var keys = Object.keys(object3);
-      if (Object.getOwnPropertySymbols) {
-        var symbols = Object.getOwnPropertySymbols(object3);
-        if (enumerableOnly) {
-          symbols = symbols.filter(function(sym) {
-            return Object.getOwnPropertyDescriptor(object3, sym).enumerable;
-          });
-        }
-        keys.push.apply(keys, symbols);
-      }
-      return keys;
-    }
-    function _objectSpread(target) {
-      for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i] != null ? arguments[i] : {};
-        if (i % 2) {
-          ownKeys(Object(source), true).forEach(function(key) {
-            _defineProperty(target, key, source[key]);
-          });
-        } else if (Object.getOwnPropertyDescriptors) {
-          Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-        } else {
-          ownKeys(Object(source)).forEach(function(key) {
-            Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-          });
-        }
-      }
-      return target;
-    }
-    function _defineProperty(obj, key, value) {
-      if (key in obj) {
-        Object.defineProperty(obj, key, { value, enumerable: true, configurable: true, writable: true });
-      } else {
-        obj[key] = value;
-      }
-      return obj;
-    }
-    function _createForOfIteratorHelper(o, allowArrayLike) {
-      var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
-      if (!it) {
-        if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {
-          if (it) o = it;
-          var i = 0;
-          var F = function F2() {
-          };
-          return { s: F, n: function n() {
-            if (i >= o.length) return { done: true };
-            return { done: false, value: o[i++] };
-          }, e: function e(_e) {
-            throw _e;
-          }, f: F };
-        }
-        throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-      }
-      var normalCompletion = true, didErr = false, err;
-      return { s: function s() {
-        it = it.call(o);
-      }, n: function n() {
-        var step = it.next();
-        normalCompletion = step.done;
-        return step;
-      }, e: function e(_e2) {
-        didErr = true;
-        err = _e2;
-      }, f: function f() {
-        try {
-          if (!normalCompletion && it.return != null) it.return();
-        } finally {
-          if (didErr) throw err;
-        }
-      } };
-    }
-    function _unsupportedIterableToArray(o, minLen) {
-      if (!o) return;
-      if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-      var n = Object.prototype.toString.call(o).slice(8, -1);
-      if (n === "Object" && o.constructor) n = o.constructor.name;
-      if (n === "Map" || n === "Set") return Array.from(o);
-      if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-    }
-    function _arrayLikeToArray(arr, len) {
-      if (len == null || len > arr.length) len = arr.length;
-      for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-      return arr2;
-    }
-    function asyncGeneratorStep(gen, resolve2, reject, _next, _throw, key, arg) {
-      try {
-        var info = gen[key](arg);
-        var value = info.value;
-      } catch (error2) {
-        reject(error2);
-        return;
-      }
-      if (info.done) {
-        resolve2(value);
-      } else {
-        Promise.resolve(value).then(_next, _throw);
-      }
-    }
-    function _asyncToGenerator(fn) {
-      return function() {
-        var self = this, args = arguments;
-        return new Promise(function(resolve2, reject) {
-          var gen = fn.apply(self, args);
-          function _next(value) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "next", value);
-          }
-          function _throw(err) {
-            asyncGeneratorStep(gen, resolve2, reject, _next, _throw, "throw", err);
-          }
-          _next(void 0);
-        });
-      };
-    }
-    var prompts2 = require_prompts();
-    var passOn = ["suggest", "format", "onState", "validate", "onRender", "type"];
-    var noop = () => {
-    };
-    function prompt() {
-      return _prompt.apply(this, arguments);
-    }
-    function _prompt() {
-      _prompt = _asyncToGenerator(function* (questions = [], {
-        onSubmit = noop,
-        onCancel = noop
-      } = {}) {
-        const answers = {};
-        const override2 = prompt._override || {};
-        questions = [].concat(questions);
-        let answer, question, quit, name, type, lastPrompt;
-        const getFormattedAnswer = /* @__PURE__ */ (function() {
-          var _ref = _asyncToGenerator(function* (question2, answer2, skipValidation = false) {
-            if (!skipValidation && question2.validate && question2.validate(answer2) !== true) {
-              return;
-            }
-            return question2.format ? yield question2.format(answer2, answers) : answer2;
-          });
-          return function getFormattedAnswer2(_x, _x2) {
-            return _ref.apply(this, arguments);
-          };
-        })();
-        var _iterator = _createForOfIteratorHelper(questions), _step;
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-            question = _step.value;
-            var _question = question;
-            name = _question.name;
-            type = _question.type;
-            if (typeof type === "function") {
-              type = yield type(answer, _objectSpread({}, answers), question);
-              question["type"] = type;
-            }
-            if (!type) continue;
-            for (let key in question) {
-              if (passOn.includes(key)) continue;
-              let value = question[key];
-              question[key] = typeof value === "function" ? yield value(answer, _objectSpread({}, answers), lastPrompt) : value;
-            }
-            lastPrompt = question;
-            if (typeof question.message !== "string") {
-              throw new Error("prompt message is required");
-            }
-            var _question2 = question;
-            name = _question2.name;
-            type = _question2.type;
-            if (prompts2[type] === void 0) {
-              throw new Error(`prompt type (${type}) is not defined`);
-            }
-            if (override2[question.name] !== void 0) {
-              answer = yield getFormattedAnswer(question, override2[question.name]);
-              if (answer !== void 0) {
-                answers[name] = answer;
-                continue;
-              }
-            }
-            try {
-              answer = prompt._injected ? getInjectedAnswer(prompt._injected, question.initial) : yield prompts2[type](question);
-              answers[name] = answer = yield getFormattedAnswer(question, answer, true);
-              quit = yield onSubmit(question, answer, answers);
-            } catch (err) {
-              quit = !(yield onCancel(question, answers));
-            }
-            if (quit) return answers;
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-        return answers;
-      });
-      return _prompt.apply(this, arguments);
-    }
-    function getInjectedAnswer(injected, deafultValue) {
-      const answer = injected.shift();
-      if (answer instanceof Error) {
-        throw answer;
-      }
-      return answer === void 0 ? deafultValue : answer;
-    }
-    function inject(answers) {
-      prompt._injected = (prompt._injected || []).concat(answers);
-    }
-    function override(answers) {
-      prompt._override = Object.assign({}, answers);
-    }
-    module2.exports = Object.assign(prompt, {
-      prompt,
-      prompts: prompts2,
-      inject,
-      override
-    });
-  }
-});
-
-// ../../node_modules/prompts/lib/util/action.js
-var require_action2 = __commonJS({
-  "../../node_modules/prompts/lib/util/action.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (key, isSelect) => {
-      if (key.meta && key.name !== "escape") return;
-      if (key.ctrl) {
-        if (key.name === "a") return "first";
-        if (key.name === "c") return "abort";
-        if (key.name === "d") return "abort";
-        if (key.name === "e") return "last";
-        if (key.name === "g") return "reset";
-      }
-      if (isSelect) {
-        if (key.name === "j") return "down";
-        if (key.name === "k") return "up";
-      }
-      if (key.name === "return") return "submit";
-      if (key.name === "enter") return "submit";
-      if (key.name === "backspace") return "delete";
-      if (key.name === "delete") return "deleteForward";
-      if (key.name === "abort") return "abort";
-      if (key.name === "escape") return "exit";
-      if (key.name === "tab") return "next";
-      if (key.name === "pagedown") return "nextPage";
-      if (key.name === "pageup") return "prevPage";
-      if (key.name === "home") return "home";
-      if (key.name === "end") return "end";
-      if (key.name === "up") return "up";
-      if (key.name === "down") return "down";
-      if (key.name === "right") return "right";
-      if (key.name === "left") return "left";
-      return false;
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/strip.js
-var require_strip2 = __commonJS({
-  "../../node_modules/prompts/lib/util/strip.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (str) => {
-      const pattern = [
-        "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
-        "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
-      ].join("|");
-      const RGX = new RegExp(pattern, "g");
-      return typeof str === "string" ? str.replace(RGX, "") : str;
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/clear.js
-var require_clear2 = __commonJS({
-  "../../node_modules/prompts/lib/util/clear.js"(exports2, module2) {
-    "use strict";
-    var strip = require_strip2();
-    var { erase, cursor } = require_src();
-    var width = (str) => [...strip(str)].length;
-    module2.exports = function(prompt, perLine) {
-      if (!perLine) return erase.line + cursor.to(0);
-      let rows = 0;
-      const lines = prompt.split(/\r?\n/);
-      for (let line of lines) {
-        rows += 1 + Math.floor(Math.max(width(line) - 1, 0) / perLine);
-      }
-      return erase.lines(rows);
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/figures.js
-var require_figures2 = __commonJS({
-  "../../node_modules/prompts/lib/util/figures.js"(exports2, module2) {
-    "use strict";
-    var main2 = {
-      arrowUp: "\u2191",
-      arrowDown: "\u2193",
-      arrowLeft: "\u2190",
-      arrowRight: "\u2192",
-      radioOn: "\u25C9",
-      radioOff: "\u25EF",
-      tick: "\u2714",
-      cross: "\u2716",
-      ellipsis: "\u2026",
-      pointerSmall: "\u203A",
-      line: "\u2500",
-      pointer: "\u276F"
-    };
-    var win = {
-      arrowUp: main2.arrowUp,
-      arrowDown: main2.arrowDown,
-      arrowLeft: main2.arrowLeft,
-      arrowRight: main2.arrowRight,
-      radioOn: "(*)",
-      radioOff: "( )",
-      tick: "\u221A",
-      cross: "\xD7",
-      ellipsis: "...",
-      pointerSmall: "\xBB",
-      line: "\u2500",
-      pointer: ">"
-    };
-    var figures = process.platform === "win32" ? win : main2;
-    module2.exports = figures;
-  }
-});
-
-// ../../node_modules/prompts/lib/util/style.js
-var require_style2 = __commonJS({
-  "../../node_modules/prompts/lib/util/style.js"(exports2, module2) {
-    "use strict";
-    var c = require_kleur();
-    var figures = require_figures2();
-    var styles = Object.freeze({
-      password: { scale: 1, render: (input) => "*".repeat(input.length) },
-      emoji: { scale: 2, render: (input) => "\u{1F603}".repeat(input.length) },
-      invisible: { scale: 0, render: (input) => "" },
-      default: { scale: 1, render: (input) => `${input}` }
-    });
-    var render = (type) => styles[type] || styles.default;
-    var symbols = Object.freeze({
-      aborted: c.red(figures.cross),
-      done: c.green(figures.tick),
-      exited: c.yellow(figures.cross),
-      default: c.cyan("?")
-    });
-    var symbol = (done, aborted2, exited) => aborted2 ? symbols.aborted : exited ? symbols.exited : done ? symbols.done : symbols.default;
-    var delimiter = (completing) => c.gray(completing ? figures.ellipsis : figures.pointerSmall);
-    var item = (expandable, expanded) => c.gray(expandable ? expanded ? figures.pointerSmall : "+" : figures.line);
-    module2.exports = {
-      styles,
-      render,
-      symbols,
-      symbol,
-      delimiter,
-      item
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/lines.js
-var require_lines2 = __commonJS({
-  "../../node_modules/prompts/lib/util/lines.js"(exports2, module2) {
-    "use strict";
-    var strip = require_strip2();
-    module2.exports = function(msg, perLine) {
-      let lines = String(strip(msg) || "").split(/\r?\n/);
-      if (!perLine) return lines.length;
-      return lines.map((l) => Math.ceil(l.length / perLine)).reduce((a, b) => a + b);
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/wrap.js
-var require_wrap2 = __commonJS({
-  "../../node_modules/prompts/lib/util/wrap.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (msg, opts = {}) => {
-      const tab = Number.isSafeInteger(parseInt(opts.margin)) ? new Array(parseInt(opts.margin)).fill(" ").join("") : opts.margin || "";
-      const width = opts.width;
-      return (msg || "").split(/\r?\n/g).map((line) => line.split(/\s+/g).reduce((arr, w) => {
-        if (w.length + tab.length >= width || arr[arr.length - 1].length + w.length + 1 < width)
-          arr[arr.length - 1] += ` ${w}`;
-        else arr.push(`${tab}${w}`);
-        return arr;
-      }, [tab]).join("\n")).join("\n");
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/entriesToDisplay.js
-var require_entriesToDisplay2 = __commonJS({
-  "../../node_modules/prompts/lib/util/entriesToDisplay.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (cursor, total, maxVisible) => {
-      maxVisible = maxVisible || total;
-      let startIndex = Math.min(total - maxVisible, cursor - Math.floor(maxVisible / 2));
-      if (startIndex < 0) startIndex = 0;
-      let endIndex = Math.min(startIndex + maxVisible, total);
-      return { startIndex, endIndex };
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/util/index.js
-var require_util2 = __commonJS({
-  "../../node_modules/prompts/lib/util/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      action: require_action2(),
-      clear: require_clear2(),
-      style: require_style2(),
-      strip: require_strip2(),
-      figures: require_figures2(),
-      lines: require_lines2(),
-      wrap: require_wrap2(),
-      entriesToDisplay: require_entriesToDisplay2()
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/prompt.js
-var require_prompt2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/prompt.js"(exports2, module2) {
-    "use strict";
-    var readline = require("readline");
-    var { action } = require_util2();
-    var EventEmitter = require("events");
-    var { beep, cursor } = require_src();
-    var color = require_kleur();
-    var Prompt = class extends EventEmitter {
-      constructor(opts = {}) {
-        super();
-        this.firstRender = true;
-        this.in = opts.stdin || process.stdin;
-        this.out = opts.stdout || process.stdout;
-        this.onRender = (opts.onRender || (() => void 0)).bind(this);
-        const rl = readline.createInterface({ input: this.in, escapeCodeTimeout: 50 });
-        readline.emitKeypressEvents(this.in, rl);
-        if (this.in.isTTY) this.in.setRawMode(true);
-        const isSelect = ["SelectPrompt", "MultiselectPrompt"].indexOf(this.constructor.name) > -1;
-        const keypress = (str, key) => {
-          let a = action(key, isSelect);
-          if (a === false) {
-            this._ && this._(str, key);
-          } else if (typeof this[a] === "function") {
-            this[a](key);
-          } else {
-            this.bell();
-          }
-        };
-        this.close = () => {
-          this.out.write(cursor.show);
-          this.in.removeListener("keypress", keypress);
-          if (this.in.isTTY) this.in.setRawMode(false);
-          rl.close();
-          this.emit(this.aborted ? "abort" : this.exited ? "exit" : "submit", this.value);
-          this.closed = true;
-        };
-        this.in.on("keypress", keypress);
-      }
-      fire() {
-        this.emit("state", {
-          value: this.value,
-          aborted: !!this.aborted,
-          exited: !!this.exited
-        });
-      }
-      bell() {
-        this.out.write(beep);
-      }
-      render() {
-        this.onRender(color);
-        if (this.firstRender) this.firstRender = false;
-      }
-    };
-    module2.exports = Prompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/text.js
-var require_text2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/text.js"(exports2, module2) {
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { erase, cursor } = require_src();
-    var { style, clear, lines, figures } = require_util2();
-    var TextPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.transform = style.render(opts.style);
-        this.scale = this.transform.scale;
-        this.msg = opts.message;
-        this.initial = opts.initial || ``;
-        this.validator = opts.validate || (() => true);
-        this.value = ``;
-        this.errorMsg = opts.error || `Please Enter A Valid Value`;
-        this.cursor = Number(!!this.initial);
-        this.cursorOffset = 0;
-        this.clear = clear(``, this.out.columns);
-        this.render();
-      }
-      set value(v) {
-        if (!v && this.initial) {
-          this.placeholder = true;
-          this.rendered = color.gray(this.transform.render(this.initial));
-        } else {
-          this.placeholder = false;
-          this.rendered = this.transform.render(v);
-        }
-        this._value = v;
-        this.fire();
-      }
-      get value() {
-        return this._value;
-      }
-      reset() {
-        this.value = ``;
-        this.cursor = Number(!!this.initial);
-        this.cursorOffset = 0;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.value = this.value || this.initial;
-        this.done = this.aborted = true;
-        this.error = false;
-        this.red = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      async validate() {
-        let valid = await this.validator(this.value);
-        if (typeof valid === `string`) {
-          this.errorMsg = valid;
-          valid = false;
-        }
-        this.error = !valid;
-      }
-      async submit() {
-        this.value = this.value || this.initial;
-        this.cursorOffset = 0;
-        this.cursor = this.rendered.length;
-        await this.validate();
-        if (this.error) {
-          this.red = true;
-          this.fire();
-          this.render();
-          return;
-        }
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      next() {
-        if (!this.placeholder) return this.bell();
-        this.value = this.initial;
-        this.cursor = this.rendered.length;
-        this.fire();
-        this.render();
-      }
-      moveCursor(n) {
-        if (this.placeholder) return;
-        this.cursor = this.cursor + n;
-        this.cursorOffset += n;
-      }
-      _(c, key) {
-        let s1 = this.value.slice(0, this.cursor);
-        let s2 = this.value.slice(this.cursor);
-        this.value = `${s1}${c}${s2}`;
-        this.red = false;
-        this.cursor = this.placeholder ? 0 : s1.length + 1;
-        this.render();
-      }
-      delete() {
-        if (this.isCursorAtStart()) return this.bell();
-        let s1 = this.value.slice(0, this.cursor - 1);
-        let s2 = this.value.slice(this.cursor);
-        this.value = `${s1}${s2}`;
-        this.red = false;
-        if (this.isCursorAtStart()) {
-          this.cursorOffset = 0;
-        } else {
-          this.cursorOffset++;
-          this.moveCursor(-1);
-        }
-        this.render();
-      }
-      deleteForward() {
-        if (this.cursor * this.scale >= this.rendered.length || this.placeholder) return this.bell();
-        let s1 = this.value.slice(0, this.cursor);
-        let s2 = this.value.slice(this.cursor + 1);
-        this.value = `${s1}${s2}`;
-        this.red = false;
-        if (this.isCursorAtEnd()) {
-          this.cursorOffset = 0;
-        } else {
-          this.cursorOffset++;
-        }
-        this.render();
-      }
-      first() {
-        this.cursor = 0;
-        this.render();
-      }
-      last() {
-        this.cursor = this.value.length;
-        this.render();
-      }
-      left() {
-        if (this.cursor <= 0 || this.placeholder) return this.bell();
-        this.moveCursor(-1);
-        this.render();
-      }
-      right() {
-        if (this.cursor * this.scale >= this.rendered.length || this.placeholder) return this.bell();
-        this.moveCursor(1);
-        this.render();
-      }
-      isCursorAtStart() {
-        return this.cursor === 0 || this.placeholder && this.cursor === 1;
-      }
-      isCursorAtEnd() {
-        return this.cursor === this.rendered.length || this.placeholder && this.cursor === this.rendered.length + 1;
-      }
-      render() {
-        if (this.closed) return;
-        if (!this.firstRender) {
-          if (this.outputError)
-            this.out.write(cursor.down(lines(this.outputError, this.out.columns) - 1) + clear(this.outputError, this.out.columns));
-          this.out.write(clear(this.outputText, this.out.columns));
-        }
-        super.render();
-        this.outputError = "";
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(this.done),
-          this.red ? color.red(this.rendered) : this.rendered
-        ].join(` `);
-        if (this.error) {
-          this.outputError += this.errorMsg.split(`
-`).reduce((a, l, i) => a + `
-${i ? " " : figures.pointerSmall} ${color.red().italic(l)}`, ``);
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText + cursor.save + this.outputError + cursor.restore + cursor.move(this.cursorOffset, 0));
-      }
-    };
-    module2.exports = TextPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/select.js
-var require_select2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/select.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { style, clear, figures, wrap, entriesToDisplay } = require_util2();
-    var { cursor } = require_src();
-    var SelectPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.hint = opts.hint || "- Use arrow-keys. Return to submit.";
-        this.warn = opts.warn || "- This option is disabled";
-        this.cursor = opts.initial || 0;
-        this.choices = opts.choices.map((ch, idx) => {
-          if (typeof ch === "string")
-            ch = { title: ch, value: idx };
-          return {
-            title: ch && (ch.title || ch.value || ch),
-            value: ch && (ch.value === void 0 ? idx : ch.value),
-            description: ch && ch.description,
-            selected: ch && ch.selected,
-            disabled: ch && ch.disabled
-          };
-        });
-        this.optionsPerPage = opts.optionsPerPage || 10;
-        this.value = (this.choices[this.cursor] || {}).value;
-        this.clear = clear("", this.out.columns);
-        this.render();
-      }
-      moveCursor(n) {
-        this.cursor = n;
-        this.value = this.choices[n].value;
-        this.fire();
-      }
-      reset() {
-        this.moveCursor(0);
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        if (!this.selection.disabled) {
-          this.done = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        } else
-          this.bell();
-      }
-      first() {
-        this.moveCursor(0);
-        this.render();
-      }
-      last() {
-        this.moveCursor(this.choices.length - 1);
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.moveCursor(this.choices.length - 1);
-        } else {
-          this.moveCursor(this.cursor - 1);
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.choices.length - 1) {
-          this.moveCursor(0);
-        } else {
-          this.moveCursor(this.cursor + 1);
-        }
-        this.render();
-      }
-      next() {
-        this.moveCursor((this.cursor + 1) % this.choices.length);
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") return this.submit();
-      }
-      get selection() {
-        return this.choices[this.cursor];
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        let { startIndex, endIndex } = entriesToDisplay(this.cursor, this.choices.length, this.optionsPerPage);
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(false),
-          this.done ? this.selection.title : this.selection.disabled ? color.yellow(this.warn) : color.gray(this.hint)
-        ].join(" ");
-        if (!this.done) {
-          this.outputText += "\n";
-          for (let i = startIndex; i < endIndex; i++) {
-            let title, prefix, desc = "", v = this.choices[i];
-            if (i === startIndex && startIndex > 0) {
-              prefix = figures.arrowUp;
-            } else if (i === endIndex - 1 && endIndex < this.choices.length) {
-              prefix = figures.arrowDown;
-            } else {
-              prefix = " ";
-            }
-            if (v.disabled) {
-              title = this.cursor === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-              prefix = (this.cursor === i ? color.bold().gray(figures.pointer) + " " : "  ") + prefix;
-            } else {
-              title = this.cursor === i ? color.cyan().underline(v.title) : v.title;
-              prefix = (this.cursor === i ? color.cyan(figures.pointer) + " " : "  ") + prefix;
-              if (v.description && this.cursor === i) {
-                desc = ` - ${v.description}`;
-                if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-                  desc = "\n" + wrap(v.description, { margin: 3, width: this.out.columns });
-                }
-              }
-            }
-            this.outputText += `${prefix} ${title}${color.gray(desc)}
-`;
-          }
-        }
-        this.out.write(this.outputText);
-      }
-    };
-    module2.exports = SelectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/toggle.js
-var require_toggle2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/toggle.js"(exports2, module2) {
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { style, clear } = require_util2();
-    var { cursor, erase } = require_src();
-    var TogglePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.value = !!opts.initial;
-        this.active = opts.active || "on";
-        this.inactive = opts.inactive || "off";
-        this.initialValue = this.value;
-        this.render();
-      }
-      reset() {
-        this.value = this.initialValue;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      deactivate() {
-        if (this.value === false) return this.bell();
-        this.value = false;
-        this.render();
-      }
-      activate() {
-        if (this.value === true) return this.bell();
-        this.value = true;
-        this.render();
-      }
-      delete() {
-        this.deactivate();
-      }
-      left() {
-        this.deactivate();
-      }
-      right() {
-        this.activate();
-      }
-      down() {
-        this.deactivate();
-      }
-      up() {
-        this.activate();
-      }
-      next() {
-        this.value = !this.value;
-        this.fire();
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.value = !this.value;
-        } else if (c === "1") {
-          this.value = true;
-        } else if (c === "0") {
-          this.value = false;
-        } else return this.bell();
-        this.render();
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(this.done),
-          this.value ? this.inactive : color.cyan().underline(this.inactive),
-          color.gray("/"),
-          this.value ? color.cyan().underline(this.active) : this.active
-        ].join(" ");
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = TogglePrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/datepart.js
-var require_datepart2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/datepart.js"(exports2, module2) {
-    "use strict";
-    var DatePart = class _DatePart {
-      constructor({ token, date: date3, parts, locales }) {
-        this.token = token;
-        this.date = date3 || /* @__PURE__ */ new Date();
-        this.parts = parts || [this];
-        this.locales = locales || {};
-      }
-      up() {
-      }
-      down() {
-      }
-      next() {
-        const currentIdx = this.parts.indexOf(this);
-        return this.parts.find((part, idx) => idx > currentIdx && part instanceof _DatePart);
-      }
-      setTo(val) {
-      }
-      prev() {
-        let parts = [].concat(this.parts).reverse();
-        const currentIdx = parts.indexOf(this);
-        return parts.find((part, idx) => idx > currentIdx && part instanceof _DatePart);
-      }
-      toString() {
-        return String(this.date);
-      }
-    };
-    module2.exports = DatePart;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/meridiem.js
-var require_meridiem2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/meridiem.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Meridiem = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setHours((this.date.getHours() + 12) % 24);
-      }
-      down() {
-        this.up();
-      }
-      toString() {
-        let meridiem = this.date.getHours() > 12 ? "pm" : "am";
-        return /\A/.test(this.token) ? meridiem.toUpperCase() : meridiem;
-      }
-    };
-    module2.exports = Meridiem;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/day.js
-var require_day2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/day.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var pos = (n) => {
-      n = n % 10;
-      return n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
-    };
-    var Day = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setDate(this.date.getDate() + 1);
-      }
-      down() {
-        this.date.setDate(this.date.getDate() - 1);
-      }
-      setTo(val) {
-        this.date.setDate(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let date3 = this.date.getDate();
-        let day = this.date.getDay();
-        return this.token === "DD" ? String(date3).padStart(2, "0") : this.token === "Do" ? date3 + pos(date3) : this.token === "d" ? day + 1 : this.token === "ddd" ? this.locales.weekdaysShort[day] : this.token === "dddd" ? this.locales.weekdays[day] : date3;
-      }
-    };
-    module2.exports = Day;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/hours.js
-var require_hours2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/hours.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Hours = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setHours(this.date.getHours() + 1);
-      }
-      down() {
-        this.date.setHours(this.date.getHours() - 1);
-      }
-      setTo(val) {
-        this.date.setHours(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let hours = this.date.getHours();
-        if (/h/.test(this.token))
-          hours = hours % 12 || 12;
-        return this.token.length > 1 ? String(hours).padStart(2, "0") : hours;
-      }
-    };
-    module2.exports = Hours;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/milliseconds.js
-var require_milliseconds2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/milliseconds.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Milliseconds = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMilliseconds(this.date.getMilliseconds() + 1);
-      }
-      down() {
-        this.date.setMilliseconds(this.date.getMilliseconds() - 1);
-      }
-      setTo(val) {
-        this.date.setMilliseconds(parseInt(val.substr(-this.token.length)));
-      }
-      toString() {
-        return String(this.date.getMilliseconds()).padStart(4, "0").substr(0, this.token.length);
-      }
-    };
-    module2.exports = Milliseconds;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/minutes.js
-var require_minutes2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/minutes.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Minutes = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMinutes(this.date.getMinutes() + 1);
-      }
-      down() {
-        this.date.setMinutes(this.date.getMinutes() - 1);
-      }
-      setTo(val) {
-        this.date.setMinutes(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let m = this.date.getMinutes();
-        return this.token.length > 1 ? String(m).padStart(2, "0") : m;
-      }
-    };
-    module2.exports = Minutes;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/month.js
-var require_month2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/month.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Month = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setMonth(this.date.getMonth() + 1);
-      }
-      down() {
-        this.date.setMonth(this.date.getMonth() - 1);
-      }
-      setTo(val) {
-        val = parseInt(val.substr(-2)) - 1;
-        this.date.setMonth(val < 0 ? 0 : val);
-      }
-      toString() {
-        let month = this.date.getMonth();
-        let tl = this.token.length;
-        return tl === 2 ? String(month + 1).padStart(2, "0") : tl === 3 ? this.locales.monthsShort[month] : tl === 4 ? this.locales.months[month] : String(month + 1);
-      }
-    };
-    module2.exports = Month;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/seconds.js
-var require_seconds2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/seconds.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Seconds = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setSeconds(this.date.getSeconds() + 1);
-      }
-      down() {
-        this.date.setSeconds(this.date.getSeconds() - 1);
-      }
-      setTo(val) {
-        this.date.setSeconds(parseInt(val.substr(-2)));
-      }
-      toString() {
-        let s = this.date.getSeconds();
-        return this.token.length > 1 ? String(s).padStart(2, "0") : s;
-      }
-    };
-    module2.exports = Seconds;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/year.js
-var require_year2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/year.js"(exports2, module2) {
-    "use strict";
-    var DatePart = require_datepart2();
-    var Year = class extends DatePart {
-      constructor(opts = {}) {
-        super(opts);
-      }
-      up() {
-        this.date.setFullYear(this.date.getFullYear() + 1);
-      }
-      down() {
-        this.date.setFullYear(this.date.getFullYear() - 1);
-      }
-      setTo(val) {
-        this.date.setFullYear(val.substr(-4));
-      }
-      toString() {
-        let year = String(this.date.getFullYear()).padStart(4, "0");
-        return this.token.length === 2 ? year.substr(-2) : year;
-      }
-    };
-    module2.exports = Year;
-  }
-});
-
-// ../../node_modules/prompts/lib/dateparts/index.js
-var require_dateparts2 = __commonJS({
-  "../../node_modules/prompts/lib/dateparts/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      DatePart: require_datepart2(),
-      Meridiem: require_meridiem2(),
-      Day: require_day2(),
-      Hours: require_hours2(),
-      Milliseconds: require_milliseconds2(),
-      Minutes: require_minutes2(),
-      Month: require_month2(),
-      Seconds: require_seconds2(),
-      Year: require_year2()
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/date.js
-var require_date2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/date.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { style, clear, figures } = require_util2();
-    var { erase, cursor } = require_src();
-    var { DatePart, Meridiem, Day, Hours, Milliseconds, Minutes, Month, Seconds, Year } = require_dateparts2();
-    var regex = /\\(.)|"((?:\\["\\]|[^"])+)"|(D[Do]?|d{3,4}|d)|(M{1,4})|(YY(?:YY)?)|([aA])|([Hh]{1,2})|(m{1,2})|(s{1,2})|(S{1,4})|./g;
-    var regexGroups = {
-      1: ({ token }) => token.replace(/\\(.)/g, "$1"),
-      2: (opts) => new Day(opts),
-      // Day // TODO
-      3: (opts) => new Month(opts),
-      // Month
-      4: (opts) => new Year(opts),
-      // Year
-      5: (opts) => new Meridiem(opts),
-      // AM/PM // TODO (special)
-      6: (opts) => new Hours(opts),
-      // Hours
-      7: (opts) => new Minutes(opts),
-      // Minutes
-      8: (opts) => new Seconds(opts),
-      // Seconds
-      9: (opts) => new Milliseconds(opts)
-      // Fractional seconds
-    };
-    var dfltLocales = {
-      months: "January,February,March,April,May,June,July,August,September,October,November,December".split(","),
-      monthsShort: "Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep,Oct,Nov,Dec".split(","),
-      weekdays: "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday".split(","),
-      weekdaysShort: "Sun,Mon,Tue,Wed,Thu,Fri,Sat".split(",")
-    };
-    var DatePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.cursor = 0;
-        this.typed = "";
-        this.locales = Object.assign(dfltLocales, opts.locales);
-        this._date = opts.initial || /* @__PURE__ */ new Date();
-        this.errorMsg = opts.error || "Please Enter A Valid Value";
-        this.validator = opts.validate || (() => true);
-        this.mask = opts.mask || "YYYY-MM-DD HH:mm:ss";
-        this.clear = clear("", this.out.columns);
-        this.render();
-      }
-      get value() {
-        return this.date;
-      }
-      get date() {
-        return this._date;
-      }
-      set date(date3) {
-        if (date3) this._date.setTime(date3.getTime());
-      }
-      set mask(mask) {
-        let result;
-        this.parts = [];
-        while (result = regex.exec(mask)) {
-          let match = result.shift();
-          let idx = result.findIndex((gr) => gr != null);
-          this.parts.push(idx in regexGroups ? regexGroups[idx]({ token: result[idx] || match, date: this.date, parts: this.parts, locales: this.locales }) : result[idx] || match);
-        }
-        let parts = this.parts.reduce((arr, i) => {
-          if (typeof i === "string" && typeof arr[arr.length - 1] === "string")
-            arr[arr.length - 1] += i;
-          else arr.push(i);
-          return arr;
-        }, []);
-        this.parts.splice(0);
-        this.parts.push(...parts);
-        this.reset();
-      }
-      moveCursor(n) {
-        this.typed = "";
-        this.cursor = n;
-        this.fire();
-      }
-      reset() {
-        this.moveCursor(this.parts.findIndex((p) => p instanceof DatePart));
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.error = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      async validate() {
-        let valid = await this.validator(this.value);
-        if (typeof valid === "string") {
-          this.errorMsg = valid;
-          valid = false;
-        }
-        this.error = !valid;
-      }
-      async submit() {
-        await this.validate();
-        if (this.error) {
-          this.color = "red";
-          this.fire();
-          this.render();
-          return;
-        }
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      up() {
-        this.typed = "";
-        this.parts[this.cursor].up();
-        this.render();
-      }
-      down() {
-        this.typed = "";
-        this.parts[this.cursor].down();
-        this.render();
-      }
-      left() {
-        let prev = this.parts[this.cursor].prev();
-        if (prev == null) return this.bell();
-        this.moveCursor(this.parts.indexOf(prev));
-        this.render();
-      }
-      right() {
-        let next = this.parts[this.cursor].next();
-        if (next == null) return this.bell();
-        this.moveCursor(this.parts.indexOf(next));
-        this.render();
-      }
-      next() {
-        let next = this.parts[this.cursor].next();
-        this.moveCursor(next ? this.parts.indexOf(next) : this.parts.findIndex((part) => part instanceof DatePart));
-        this.render();
-      }
-      _(c) {
-        if (/\d/.test(c)) {
-          this.typed += c;
-          this.parts[this.cursor].setTo(this.typed);
-          this.render();
-        }
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(false),
-          this.parts.reduce((arr, p, idx) => arr.concat(idx === this.cursor && !this.done ? color.cyan().underline(p.toString()) : p), []).join("")
-        ].join(" ");
-        if (this.error) {
-          this.outputText += this.errorMsg.split("\n").reduce(
-            (a, l, i) => a + `
-${i ? ` ` : figures.pointerSmall} ${color.red().italic(l)}`,
-            ``
-          );
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = DatePrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/number.js
-var require_number2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/number.js"(exports2, module2) {
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { cursor, erase } = require_src();
-    var { style, figures, clear, lines } = require_util2();
-    var isNumber = /[0-9]/;
-    var isDef = (any) => any !== void 0;
-    var round = (number3, precision) => {
-      let factor = Math.pow(10, precision);
-      return Math.round(number3 * factor) / factor;
-    };
-    var NumberPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.transform = style.render(opts.style);
-        this.msg = opts.message;
-        this.initial = isDef(opts.initial) ? opts.initial : "";
-        this.float = !!opts.float;
-        this.round = opts.round || 2;
-        this.inc = opts.increment || 1;
-        this.min = isDef(opts.min) ? opts.min : -Infinity;
-        this.max = isDef(opts.max) ? opts.max : Infinity;
-        this.errorMsg = opts.error || `Please Enter A Valid Value`;
-        this.validator = opts.validate || (() => true);
-        this.color = `cyan`;
-        this.value = ``;
-        this.typed = ``;
-        this.lastHit = 0;
-        this.render();
-      }
-      set value(v) {
-        if (!v && v !== 0) {
-          this.placeholder = true;
-          this.rendered = color.gray(this.transform.render(`${this.initial}`));
-          this._value = ``;
-        } else {
-          this.placeholder = false;
-          this.rendered = this.transform.render(`${round(v, this.round)}`);
-          this._value = round(v, this.round);
-        }
-        this.fire();
-      }
-      get value() {
-        return this._value;
-      }
-      parse(x) {
-        return this.float ? parseFloat(x) : parseInt(x);
-      }
-      valid(c) {
-        return c === `-` || c === `.` && this.float || isNumber.test(c);
-      }
-      reset() {
-        this.typed = ``;
-        this.value = ``;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        let x = this.value;
-        this.value = x !== `` ? x : this.initial;
-        this.done = this.aborted = true;
-        this.error = false;
-        this.fire();
-        this.render();
-        this.out.write(`
-`);
-        this.close();
-      }
-      async validate() {
-        let valid = await this.validator(this.value);
-        if (typeof valid === `string`) {
-          this.errorMsg = valid;
-          valid = false;
-        }
-        this.error = !valid;
-      }
-      async submit() {
-        await this.validate();
-        if (this.error) {
-          this.color = `red`;
-          this.fire();
-          this.render();
-          return;
-        }
-        let x = this.value;
-        this.value = x !== `` ? x : this.initial;
-        this.done = true;
-        this.aborted = false;
-        this.error = false;
-        this.fire();
-        this.render();
-        this.out.write(`
-`);
-        this.close();
-      }
-      up() {
-        this.typed = ``;
-        if (this.value === "") {
-          this.value = this.min - this.inc;
-        }
-        if (this.value >= this.max) return this.bell();
-        this.value += this.inc;
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      down() {
-        this.typed = ``;
-        if (this.value === "") {
-          this.value = this.min + this.inc;
-        }
-        if (this.value <= this.min) return this.bell();
-        this.value -= this.inc;
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      delete() {
-        let val = this.value.toString();
-        if (val.length === 0) return this.bell();
-        this.value = this.parse(val = val.slice(0, -1)) || ``;
-        if (this.value !== "" && this.value < this.min) {
-          this.value = this.min;
-        }
-        this.color = `cyan`;
-        this.fire();
-        this.render();
-      }
-      next() {
-        this.value = this.initial;
-        this.fire();
-        this.render();
-      }
-      _(c, key) {
-        if (!this.valid(c)) return this.bell();
-        const now = Date.now();
-        if (now - this.lastHit > 1e3) this.typed = ``;
-        this.typed += c;
-        this.lastHit = now;
-        this.color = `cyan`;
-        if (c === `.`) return this.fire();
-        this.value = Math.min(this.parse(this.typed), this.max);
-        if (this.value > this.max) this.value = this.max;
-        if (this.value < this.min) this.value = this.min;
-        this.fire();
-        this.render();
-      }
-      render() {
-        if (this.closed) return;
-        if (!this.firstRender) {
-          if (this.outputError)
-            this.out.write(cursor.down(lines(this.outputError, this.out.columns) - 1) + clear(this.outputError, this.out.columns));
-          this.out.write(clear(this.outputText, this.out.columns));
-        }
-        super.render();
-        this.outputError = "";
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(this.done),
-          !this.done || !this.done && !this.placeholder ? color[this.color]().underline(this.rendered) : this.rendered
-        ].join(` `);
-        if (this.error) {
-          this.outputError += this.errorMsg.split(`
-`).reduce((a, l, i) => a + `
-${i ? ` ` : figures.pointerSmall} ${color.red().italic(l)}`, ``);
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText + cursor.save + this.outputError + cursor.restore);
-      }
-    };
-    module2.exports = NumberPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/multiselect.js
-var require_multiselect2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/multiselect.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var { cursor } = require_src();
-    var Prompt = require_prompt2();
-    var { clear, figures, style, wrap, entriesToDisplay } = require_util2();
-    var MultiselectPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.cursor = opts.cursor || 0;
-        this.scrollIndex = opts.cursor || 0;
-        this.hint = opts.hint || "";
-        this.warn = opts.warn || "- This option is disabled -";
-        this.minSelected = opts.min;
-        this.showMinError = false;
-        this.maxChoices = opts.max;
-        this.instructions = opts.instructions;
-        this.optionsPerPage = opts.optionsPerPage || 10;
-        this.value = opts.choices.map((ch, idx) => {
-          if (typeof ch === "string")
-            ch = { title: ch, value: idx };
-          return {
-            title: ch && (ch.title || ch.value || ch),
-            description: ch && ch.description,
-            value: ch && (ch.value === void 0 ? idx : ch.value),
-            selected: ch && ch.selected,
-            disabled: ch && ch.disabled
-          };
-        });
-        this.clear = clear("", this.out.columns);
-        if (!opts.overrideRender) {
-          this.render();
-        }
-      }
-      reset() {
-        this.value.map((v) => !v.selected);
-        this.cursor = 0;
-        this.fire();
-        this.render();
-      }
-      selected() {
-        return this.value.filter((v) => v.selected);
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        const selected = this.value.filter((e) => e.selected);
-        if (this.minSelected && selected.length < this.minSelected) {
-          this.showMinError = true;
-          this.render();
-        } else {
-          this.done = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        }
-      }
-      first() {
-        this.cursor = 0;
-        this.render();
-      }
-      last() {
-        this.cursor = this.value.length - 1;
-        this.render();
-      }
-      next() {
-        this.cursor = (this.cursor + 1) % this.value.length;
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.cursor = this.value.length - 1;
-        } else {
-          this.cursor--;
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.value.length - 1) {
-          this.cursor = 0;
-        } else {
-          this.cursor++;
-        }
-        this.render();
-      }
-      left() {
-        this.value[this.cursor].selected = false;
-        this.render();
-      }
-      right() {
-        if (this.value.filter((e) => e.selected).length >= this.maxChoices) return this.bell();
-        this.value[this.cursor].selected = true;
-        this.render();
-      }
-      handleSpaceToggle() {
-        const v = this.value[this.cursor];
-        if (v.selected) {
-          v.selected = false;
-          this.render();
-        } else if (v.disabled || this.value.filter((e) => e.selected).length >= this.maxChoices) {
-          return this.bell();
-        } else {
-          v.selected = true;
-          this.render();
-        }
-      }
-      toggleAll() {
-        if (this.maxChoices !== void 0 || this.value[this.cursor].disabled) {
-          return this.bell();
-        }
-        const newSelected = !this.value[this.cursor].selected;
-        this.value.filter((v) => !v.disabled).forEach((v) => v.selected = newSelected);
-        this.render();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.handleSpaceToggle();
-        } else if (c === "a") {
-          this.toggleAll();
-        } else {
-          return this.bell();
-        }
-      }
-      renderInstructions() {
-        if (this.instructions === void 0 || this.instructions) {
-          if (typeof this.instructions === "string") {
-            return this.instructions;
-          }
-          return `
-Instructions:
-    ${figures.arrowUp}/${figures.arrowDown}: Highlight option
-    ${figures.arrowLeft}/${figures.arrowRight}/[space]: Toggle selection
-` + (this.maxChoices === void 0 ? `    a: Toggle all
-` : "") + `    enter/return: Complete answer`;
-        }
-        return "";
-      }
-      renderOption(cursor2, v, i, arrowIndicator) {
-        const prefix = (v.selected ? color.green(figures.radioOn) : figures.radioOff) + " " + arrowIndicator + " ";
-        let title, desc;
-        if (v.disabled) {
-          title = cursor2 === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-        } else {
-          title = cursor2 === i ? color.cyan().underline(v.title) : v.title;
-          if (cursor2 === i && v.description) {
-            desc = ` - ${v.description}`;
-            if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-              desc = "\n" + wrap(v.description, { margin: prefix.length, width: this.out.columns });
-            }
-          }
-        }
-        return prefix + title + color.gray(desc || "");
-      }
-      // shared with autocompleteMultiselect
-      paginateOptions(options) {
-        if (options.length === 0) {
-          return color.red("No matches for this query.");
-        }
-        let { startIndex, endIndex } = entriesToDisplay(this.cursor, options.length, this.optionsPerPage);
-        let prefix, styledOptions = [];
-        for (let i = startIndex; i < endIndex; i++) {
-          if (i === startIndex && startIndex > 0) {
-            prefix = figures.arrowUp;
-          } else if (i === endIndex - 1 && endIndex < options.length) {
-            prefix = figures.arrowDown;
-          } else {
-            prefix = " ";
-          }
-          styledOptions.push(this.renderOption(this.cursor, options[i], i, prefix));
-        }
-        return "\n" + styledOptions.join("\n");
-      }
-      // shared with autocomleteMultiselect
-      renderOptions(options) {
-        if (!this.done) {
-          return this.paginateOptions(options);
-        }
-        return "";
-      }
-      renderDoneOrInstructions() {
-        if (this.done) {
-          return this.value.filter((e) => e.selected).map((v) => v.title).join(", ");
-        }
-        const output = [color.gray(this.hint), this.renderInstructions()];
-        if (this.value[this.cursor].disabled) {
-          output.push(color.yellow(this.warn));
-        }
-        return output.join(" ");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        super.render();
-        let prompt = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(false),
-          this.renderDoneOrInstructions()
-        ].join(" ");
-        if (this.showMinError) {
-          prompt += color.red(`You must select a minimum of ${this.minSelected} choices.`);
-          this.showMinError = false;
-        }
-        prompt += this.renderOptions(this.value);
-        this.out.write(this.clear + prompt);
-        this.clear = clear(prompt, this.out.columns);
-      }
-    };
-    module2.exports = MultiselectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/autocomplete.js
-var require_autocomplete2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/autocomplete.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { erase, cursor } = require_src();
-    var { style, clear, figures, wrap, entriesToDisplay } = require_util2();
-    var getVal = (arr, i) => arr[i] && (arr[i].value || arr[i].title || arr[i]);
-    var getTitle = (arr, i) => arr[i] && (arr[i].title || arr[i].value || arr[i]);
-    var getIndex = (arr, valOrTitle) => {
-      const index = arr.findIndex((el) => el.value === valOrTitle || el.title === valOrTitle);
-      return index > -1 ? index : void 0;
-    };
-    var AutocompletePrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.suggest = opts.suggest;
-        this.choices = opts.choices;
-        this.initial = typeof opts.initial === "number" ? opts.initial : getIndex(opts.choices, opts.initial);
-        this.select = this.initial || opts.cursor || 0;
-        this.i18n = { noMatches: opts.noMatches || "no matches found" };
-        this.fallback = opts.fallback || this.initial;
-        this.clearFirst = opts.clearFirst || false;
-        this.suggestions = [];
-        this.input = "";
-        this.limit = opts.limit || 10;
-        this.cursor = 0;
-        this.transform = style.render(opts.style);
-        this.scale = this.transform.scale;
-        this.render = this.render.bind(this);
-        this.complete = this.complete.bind(this);
-        this.clear = clear("", this.out.columns);
-        this.complete(this.render);
-        this.render();
-      }
-      set fallback(fb) {
-        this._fb = Number.isSafeInteger(parseInt(fb)) ? parseInt(fb) : fb;
-      }
-      get fallback() {
-        let choice;
-        if (typeof this._fb === "number")
-          choice = this.choices[this._fb];
-        else if (typeof this._fb === "string")
-          choice = { title: this._fb };
-        return choice || this._fb || { title: this.i18n.noMatches };
-      }
-      moveSelect(i) {
-        this.select = i;
-        if (this.suggestions.length > 0)
-          this.value = getVal(this.suggestions, i);
-        else this.value = this.fallback.value;
-        this.fire();
-      }
-      async complete(cb) {
-        const p = this.completing = this.suggest(this.input, this.choices);
-        const suggestions = await p;
-        if (this.completing !== p) return;
-        this.suggestions = suggestions.map((s, i, arr) => ({ title: getTitle(arr, i), value: getVal(arr, i), description: s.description }));
-        this.completing = false;
-        const l = Math.max(suggestions.length - 1, 0);
-        this.moveSelect(Math.min(l, this.select));
-        cb && cb();
-      }
-      reset() {
-        this.input = "";
-        this.complete(() => {
-          this.moveSelect(this.initial !== void 0 ? this.initial : 0);
-          this.render();
-        });
-        this.render();
-      }
-      exit() {
-        if (this.clearFirst && this.input.length > 0) {
-          this.reset();
-        } else {
-          this.done = this.exited = true;
-          this.aborted = false;
-          this.fire();
-          this.render();
-          this.out.write("\n");
-          this.close();
-        }
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.exited = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.done = true;
-        this.aborted = this.exited = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      _(c, key) {
-        let s1 = this.input.slice(0, this.cursor);
-        let s2 = this.input.slice(this.cursor);
-        this.input = `${s1}${c}${s2}`;
-        this.cursor = s1.length + 1;
-        this.complete(this.render);
-        this.render();
-      }
-      delete() {
-        if (this.cursor === 0) return this.bell();
-        let s1 = this.input.slice(0, this.cursor - 1);
-        let s2 = this.input.slice(this.cursor);
-        this.input = `${s1}${s2}`;
-        this.complete(this.render);
-        this.cursor = this.cursor - 1;
-        this.render();
-      }
-      deleteForward() {
-        if (this.cursor * this.scale >= this.rendered.length) return this.bell();
-        let s1 = this.input.slice(0, this.cursor);
-        let s2 = this.input.slice(this.cursor + 1);
-        this.input = `${s1}${s2}`;
-        this.complete(this.render);
-        this.render();
-      }
-      first() {
-        this.moveSelect(0);
-        this.render();
-      }
-      last() {
-        this.moveSelect(this.suggestions.length - 1);
-        this.render();
-      }
-      up() {
-        if (this.select === 0) {
-          this.moveSelect(this.suggestions.length - 1);
-        } else {
-          this.moveSelect(this.select - 1);
-        }
-        this.render();
-      }
-      down() {
-        if (this.select === this.suggestions.length - 1) {
-          this.moveSelect(0);
-        } else {
-          this.moveSelect(this.select + 1);
-        }
-        this.render();
-      }
-      next() {
-        if (this.select === this.suggestions.length - 1) {
-          this.moveSelect(0);
-        } else this.moveSelect(this.select + 1);
-        this.render();
-      }
-      nextPage() {
-        this.moveSelect(Math.min(this.select + this.limit, this.suggestions.length - 1));
-        this.render();
-      }
-      prevPage() {
-        this.moveSelect(Math.max(this.select - this.limit, 0));
-        this.render();
-      }
-      left() {
-        if (this.cursor <= 0) return this.bell();
-        this.cursor = this.cursor - 1;
-        this.render();
-      }
-      right() {
-        if (this.cursor * this.scale >= this.rendered.length) return this.bell();
-        this.cursor = this.cursor + 1;
-        this.render();
-      }
-      renderOption(v, hovered, isStart, isEnd) {
-        let desc;
-        let prefix = isStart ? figures.arrowUp : isEnd ? figures.arrowDown : " ";
-        let title = hovered ? color.cyan().underline(v.title) : v.title;
-        prefix = (hovered ? color.cyan(figures.pointer) + " " : "  ") + prefix;
-        if (v.description) {
-          desc = ` - ${v.description}`;
-          if (prefix.length + title.length + desc.length >= this.out.columns || v.description.split(/\r?\n/).length > 1) {
-            desc = "\n" + wrap(v.description, { margin: 3, width: this.out.columns });
-          }
-        }
-        return prefix + " " + title + color.gray(desc || "");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        let { startIndex, endIndex } = entriesToDisplay(this.select, this.choices.length, this.limit);
-        this.outputText = [
-          style.symbol(this.done, this.aborted, this.exited),
-          color.bold(this.msg),
-          style.delimiter(this.completing),
-          this.done && this.suggestions[this.select] ? this.suggestions[this.select].title : this.rendered = this.transform.render(this.input)
-        ].join(" ");
-        if (!this.done) {
-          const suggestions = this.suggestions.slice(startIndex, endIndex).map((item, i) => this.renderOption(
-            item,
-            this.select === i + startIndex,
-            i === 0 && startIndex > 0,
-            i + startIndex === endIndex - 1 && endIndex < this.choices.length
-          )).join("\n");
-          this.outputText += `
-` + (suggestions || color.gray(this.fallback.title));
-        }
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = AutocompletePrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/autocompleteMultiselect.js
-var require_autocompleteMultiselect2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/autocompleteMultiselect.js"(exports2, module2) {
-    "use strict";
-    var color = require_kleur();
-    var { cursor } = require_src();
-    var MultiselectPrompt = require_multiselect2();
-    var { clear, style, figures } = require_util2();
-    var AutocompleteMultiselectPrompt = class extends MultiselectPrompt {
-      constructor(opts = {}) {
-        opts.overrideRender = true;
-        super(opts);
-        this.inputValue = "";
-        this.clear = clear("", this.out.columns);
-        this.filteredOptions = this.value;
-        this.render();
-      }
-      last() {
-        this.cursor = this.filteredOptions.length - 1;
-        this.render();
-      }
-      next() {
-        this.cursor = (this.cursor + 1) % this.filteredOptions.length;
-        this.render();
-      }
-      up() {
-        if (this.cursor === 0) {
-          this.cursor = this.filteredOptions.length - 1;
-        } else {
-          this.cursor--;
-        }
-        this.render();
-      }
-      down() {
-        if (this.cursor === this.filteredOptions.length - 1) {
-          this.cursor = 0;
-        } else {
-          this.cursor++;
-        }
-        this.render();
-      }
-      left() {
-        this.filteredOptions[this.cursor].selected = false;
-        this.render();
-      }
-      right() {
-        if (this.value.filter((e) => e.selected).length >= this.maxChoices) return this.bell();
-        this.filteredOptions[this.cursor].selected = true;
-        this.render();
-      }
-      delete() {
-        if (this.inputValue.length) {
-          this.inputValue = this.inputValue.substr(0, this.inputValue.length - 1);
-          this.updateFilteredOptions();
-        }
-      }
-      updateFilteredOptions() {
-        const currentHighlight = this.filteredOptions[this.cursor];
-        this.filteredOptions = this.value.filter((v) => {
-          if (this.inputValue) {
-            if (typeof v.title === "string") {
-              if (v.title.toLowerCase().includes(this.inputValue.toLowerCase())) {
-                return true;
-              }
-            }
-            if (typeof v.value === "string") {
-              if (v.value.toLowerCase().includes(this.inputValue.toLowerCase())) {
-                return true;
-              }
-            }
-            return false;
-          }
-          return true;
-        });
-        const newHighlightIndex = this.filteredOptions.findIndex((v) => v === currentHighlight);
-        this.cursor = newHighlightIndex < 0 ? 0 : newHighlightIndex;
-        this.render();
-      }
-      handleSpaceToggle() {
-        const v = this.filteredOptions[this.cursor];
-        if (v.selected) {
-          v.selected = false;
-          this.render();
-        } else if (v.disabled || this.value.filter((e) => e.selected).length >= this.maxChoices) {
-          return this.bell();
-        } else {
-          v.selected = true;
-          this.render();
-        }
-      }
-      handleInputChange(c) {
-        this.inputValue = this.inputValue + c;
-        this.updateFilteredOptions();
-      }
-      _(c, key) {
-        if (c === " ") {
-          this.handleSpaceToggle();
-        } else {
-          this.handleInputChange(c);
-        }
-      }
-      renderInstructions() {
-        if (this.instructions === void 0 || this.instructions) {
-          if (typeof this.instructions === "string") {
-            return this.instructions;
-          }
-          return `
-Instructions:
-    ${figures.arrowUp}/${figures.arrowDown}: Highlight option
-    ${figures.arrowLeft}/${figures.arrowRight}/[space]: Toggle selection
-    [a,b,c]/delete: Filter choices
-    enter/return: Complete answer
-`;
-        }
-        return "";
-      }
-      renderCurrentInput() {
-        return `
-Filtered results for: ${this.inputValue ? this.inputValue : color.gray("Enter something to filter")}
-`;
-      }
-      renderOption(cursor2, v, i) {
-        let title;
-        if (v.disabled) title = cursor2 === i ? color.gray().underline(v.title) : color.strikethrough().gray(v.title);
-        else title = cursor2 === i ? color.cyan().underline(v.title) : v.title;
-        return (v.selected ? color.green(figures.radioOn) : figures.radioOff) + "  " + title;
-      }
-      renderDoneOrInstructions() {
-        if (this.done) {
-          return this.value.filter((e) => e.selected).map((v) => v.title).join(", ");
-        }
-        const output = [color.gray(this.hint), this.renderInstructions(), this.renderCurrentInput()];
-        if (this.filteredOptions.length && this.filteredOptions[this.cursor].disabled) {
-          output.push(color.yellow(this.warn));
-        }
-        return output.join(" ");
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        super.render();
-        let prompt = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(false),
-          this.renderDoneOrInstructions()
-        ].join(" ");
-        if (this.showMinError) {
-          prompt += color.red(`You must select a minimum of ${this.minSelected} choices.`);
-          this.showMinError = false;
-        }
-        prompt += this.renderOptions(this.filteredOptions);
-        this.out.write(this.clear + prompt);
-        this.clear = clear(prompt, this.out.columns);
-      }
-    };
-    module2.exports = AutocompleteMultiselectPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/confirm.js
-var require_confirm2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/confirm.js"(exports2, module2) {
-    var color = require_kleur();
-    var Prompt = require_prompt2();
-    var { style, clear } = require_util2();
-    var { erase, cursor } = require_src();
-    var ConfirmPrompt = class extends Prompt {
-      constructor(opts = {}) {
-        super(opts);
-        this.msg = opts.message;
-        this.value = opts.initial;
-        this.initialValue = !!opts.initial;
-        this.yesMsg = opts.yes || "yes";
-        this.yesOption = opts.yesOption || "(Y/n)";
-        this.noMsg = opts.no || "no";
-        this.noOption = opts.noOption || "(y/N)";
-        this.render();
-      }
-      reset() {
-        this.value = this.initialValue;
-        this.fire();
-        this.render();
-      }
-      exit() {
-        this.abort();
-      }
-      abort() {
-        this.done = this.aborted = true;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      submit() {
-        this.value = this.value || false;
-        this.done = true;
-        this.aborted = false;
-        this.fire();
-        this.render();
-        this.out.write("\n");
-        this.close();
-      }
-      _(c, key) {
-        if (c.toLowerCase() === "y") {
-          this.value = true;
-          return this.submit();
-        }
-        if (c.toLowerCase() === "n") {
-          this.value = false;
-          return this.submit();
-        }
-        return this.bell();
-      }
-      render() {
-        if (this.closed) return;
-        if (this.firstRender) this.out.write(cursor.hide);
-        else this.out.write(clear(this.outputText, this.out.columns));
-        super.render();
-        this.outputText = [
-          style.symbol(this.done, this.aborted),
-          color.bold(this.msg),
-          style.delimiter(this.done),
-          this.done ? this.value ? this.yesMsg : this.noMsg : color.gray(this.initialValue ? this.yesOption : this.noOption)
-        ].join(" ");
-        this.out.write(erase.line + cursor.to(0) + this.outputText);
-      }
-    };
-    module2.exports = ConfirmPrompt;
-  }
-});
-
-// ../../node_modules/prompts/lib/elements/index.js
-var require_elements2 = __commonJS({
-  "../../node_modules/prompts/lib/elements/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = {
-      TextPrompt: require_text2(),
-      SelectPrompt: require_select2(),
-      TogglePrompt: require_toggle2(),
-      DatePrompt: require_date2(),
-      NumberPrompt: require_number2(),
-      MultiselectPrompt: require_multiselect2(),
-      AutocompletePrompt: require_autocomplete2(),
-      AutocompleteMultiselectPrompt: require_autocompleteMultiselect2(),
-      ConfirmPrompt: require_confirm2()
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/prompts.js
-var require_prompts2 = __commonJS({
-  "../../node_modules/prompts/lib/prompts.js"(exports2) {
-    "use strict";
-    var $ = exports2;
-    var el = require_elements2();
-    var noop = (v) => v;
-    function toPrompt(type, args, opts = {}) {
-      return new Promise((res, rej) => {
-        const p = new el[type](args);
-        const onAbort = opts.onAbort || noop;
-        const onSubmit = opts.onSubmit || noop;
-        const onExit = opts.onExit || noop;
-        p.on("state", args.onState || noop);
-        p.on("submit", (x) => res(onSubmit(x)));
-        p.on("exit", (x) => res(onExit(x)));
-        p.on("abort", (x) => rej(onAbort(x)));
-      });
-    }
-    $.text = (args) => toPrompt("TextPrompt", args);
-    $.password = (args) => {
-      args.style = "password";
-      return $.text(args);
-    };
-    $.invisible = (args) => {
-      args.style = "invisible";
-      return $.text(args);
-    };
-    $.number = (args) => toPrompt("NumberPrompt", args);
-    $.date = (args) => toPrompt("DatePrompt", args);
-    $.confirm = (args) => toPrompt("ConfirmPrompt", args);
-    $.list = (args) => {
-      const sep2 = args.separator || ",";
-      return toPrompt("TextPrompt", args, {
-        onSubmit: (str) => str.split(sep2).map((s) => s.trim())
-      });
-    };
-    $.toggle = (args) => toPrompt("TogglePrompt", args);
-    $.select = (args) => toPrompt("SelectPrompt", args);
-    $.multiselect = (args) => {
-      args.choices = [].concat(args.choices || []);
-      const toSelected = (items) => items.filter((item) => item.selected).map((item) => item.value);
-      return toPrompt("MultiselectPrompt", args, {
-        onAbort: toSelected,
-        onSubmit: toSelected
-      });
-    };
-    $.autocompleteMultiselect = (args) => {
-      args.choices = [].concat(args.choices || []);
-      const toSelected = (items) => items.filter((item) => item.selected).map((item) => item.value);
-      return toPrompt("AutocompleteMultiselectPrompt", args, {
-        onAbort: toSelected,
-        onSubmit: toSelected
-      });
-    };
-    var byTitle = (input, choices) => Promise.resolve(
-      choices.filter((item) => item.title.slice(0, input.length).toLowerCase() === input.toLowerCase())
-    );
-    $.autocomplete = (args) => {
-      args.suggest = args.suggest || byTitle;
-      args.choices = [].concat(args.choices || []);
-      return toPrompt("AutocompletePrompt", args);
-    };
-  }
-});
-
-// ../../node_modules/prompts/lib/index.js
-var require_lib = __commonJS({
-  "../../node_modules/prompts/lib/index.js"(exports2, module2) {
-    "use strict";
-    var prompts2 = require_prompts2();
-    var passOn = ["suggest", "format", "onState", "validate", "onRender", "type"];
-    var noop = () => {
-    };
-    async function prompt(questions = [], { onSubmit = noop, onCancel = noop } = {}) {
-      const answers = {};
-      const override2 = prompt._override || {};
-      questions = [].concat(questions);
-      let answer, question, quit, name, type, lastPrompt;
-      const getFormattedAnswer = async (question2, answer2, skipValidation = false) => {
-        if (!skipValidation && question2.validate && question2.validate(answer2) !== true) {
-          return;
-        }
-        return question2.format ? await question2.format(answer2, answers) : answer2;
-      };
-      for (question of questions) {
-        ({ name, type } = question);
-        if (typeof type === "function") {
-          type = await type(answer, { ...answers }, question);
-          question["type"] = type;
-        }
-        if (!type) continue;
-        for (let key in question) {
-          if (passOn.includes(key)) continue;
-          let value = question[key];
-          question[key] = typeof value === "function" ? await value(answer, { ...answers }, lastPrompt) : value;
-        }
-        lastPrompt = question;
-        if (typeof question.message !== "string") {
-          throw new Error("prompt message is required");
-        }
-        ({ name, type } = question);
-        if (prompts2[type] === void 0) {
-          throw new Error(`prompt type (${type}) is not defined`);
-        }
-        if (override2[question.name] !== void 0) {
-          answer = await getFormattedAnswer(question, override2[question.name]);
-          if (answer !== void 0) {
-            answers[name] = answer;
-            continue;
-          }
-        }
-        try {
-          answer = prompt._injected ? getInjectedAnswer(prompt._injected, question.initial) : await prompts2[type](question);
-          answers[name] = answer = await getFormattedAnswer(question, answer, true);
-          quit = await onSubmit(question, answer, answers);
-        } catch (err) {
-          quit = !await onCancel(question, answers);
-        }
-        if (quit) return answers;
-      }
-      return answers;
-    }
-    function getInjectedAnswer(injected, deafultValue) {
-      const answer = injected.shift();
-      if (answer instanceof Error) {
-        throw answer;
-      }
-      return answer === void 0 ? deafultValue : answer;
-    }
-    function inject(answers) {
-      prompt._injected = (prompt._injected || []).concat(answers);
-    }
-    function override(answers) {
-      prompt._override = Object.assign({}, answers);
-    }
-    module2.exports = Object.assign(prompt, { prompt, prompts: prompts2, inject, override });
-  }
-});
-
-// ../../node_modules/prompts/index.js
-var require_prompts3 = __commonJS({
-  "../../node_modules/prompts/index.js"(exports2, module2) {
-    function isNodeLT(tar) {
-      tar = (Array.isArray(tar) ? tar : tar.split(".")).map(Number);
-      let i = 0, src = process.versions.node.split(".").map(Number);
-      for (; i < tar.length; i++) {
-        if (src[i] > tar[i]) return false;
-        if (tar[i] > src[i]) return true;
-      }
-      return false;
-    }
-    module2.exports = isNodeLT("8.6.0") ? require_dist() : require_lib();
-  }
-});
-
 // ../../node_modules/ajv/dist/compile/codegen/code.js
 var require_code = __commonJS({
   "../../node_modules/ajv/dist/compile/codegen/code.js"(exports2) {
@@ -5904,7 +1054,7 @@ var require_codegen = __commonJS({
 });
 
 // ../../node_modules/ajv/dist/compile/util.js
-var require_util3 = __commonJS({
+var require_util = __commonJS({
   "../../node_modules/ajv/dist/compile/util.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -6116,7 +1266,7 @@ var require_errors = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendErrors = exports2.resetErrorsCount = exports2.reportExtraError = exports2.reportError = exports2.keyword$DataError = exports2.keywordError = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var names_1 = require_names();
     exports2.keywordError = {
       message: ({ keyword }) => (0, codegen_1.str)`must pass "${keyword}" keyword validation`
@@ -6346,7 +1496,7 @@ var require_dataType = __commonJS({
     var applicability_1 = require_applicability();
     var errors_1 = require_errors();
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var DataType;
     (function(DataType2) {
       DataType2[DataType2["Correct"] = 0] = "Correct";
@@ -6527,7 +1677,7 @@ var require_defaults = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.assignDefaults = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     function assignDefaults(it, ty) {
       const { properties, items } = it.schema;
       if (ty === "object" && properties) {
@@ -6564,9 +1714,9 @@ var require_code2 = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateUnion = exports2.validateArray = exports2.usePattern = exports2.callValidateCode = exports2.schemaProperties = exports2.allSchemaProperties = exports2.noPropertyInData = exports2.propertyInData = exports2.isOwnProperty = exports2.hasPropFunc = exports2.reportMissingProp = exports2.checkMissingProp = exports2.checkReportMissingProp = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var names_1 = require_names();
-    var util_2 = require_util3();
+    var util_2 = require_util();
     function checkReportMissingProp(cxt, prop) {
       const { gen, data, it } = cxt;
       gen.if(noPropertyInData(gen, data, prop, it.opts.ownProperties), () => {
@@ -6815,7 +1965,7 @@ var require_subschema = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.extendSubschemaMode = exports2.extendSubschemaData = exports2.getSubschema = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     function getSubschema(it, { keyword, schemaProp, schema, schemaPath, errSchemaPath, topSchemaRef }) {
       if (keyword !== void 0 && schema !== void 0) {
         throw new Error('both "keyword" and "schema" passed, only one allowed');
@@ -7020,7 +2170,7 @@ var require_resolve = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.getSchemaRefs = exports2.resolveUrl = exports2.normalizeId = exports2._getFullPath = exports2.getFullPath = exports2.inlineRef = void 0;
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var equal = require_fast_deep_equal();
     var traverse = require_json_schema_traverse();
     var SIMPLE_INLINED = /* @__PURE__ */ new Set([
@@ -7186,7 +2336,7 @@ var require_validate = __commonJS({
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var resolve_1 = require_resolve();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var errors_1 = require_errors();
     function validateFunctionCode(it) {
       if (isSchemaObj(it)) {
@@ -7721,7 +2871,7 @@ var require_compile = __commonJS({
     var validation_error_1 = require_validation_error();
     var names_1 = require_names();
     var resolve_1 = require_resolve();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var validate_1 = require_validate();
     var SchemaEnv = class {
       constructor(env) {
@@ -8080,8 +3230,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path6) {
-      let input = path6;
+    function removeDotSegments(path5) {
+      let input = path5;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -8333,8 +3483,8 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path6, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
+        const [path5, query] = wsComponent.resourceName.split("?");
+        wsComponent.path = path5 && path5 !== "/" ? path5 : void 0;
         wsComponent.query = query;
         wsComponent.resourceName = void 0;
       }
@@ -8495,7 +3645,12 @@ var require_fast_uri = __commonJS({
     }
     function resolve2(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
-      const resolved = resolveComponent(parse3(baseURI, schemelessOptions), parse3(relativeURI, schemelessOptions), schemelessOptions, true);
+      const { parsed: baseParsed, malformedAuthorityOrPort: baseMalformed } = parseWithStatus(baseURI, schemelessOptions);
+      const { parsed: relativeParsed, malformedAuthorityOrPort: relativeMalformed } = parseWithStatus(relativeURI, schemelessOptions);
+      if (baseMalformed || relativeMalformed) {
+        throw new Error(baseParsed.error || relativeParsed.error || "URI is malformed.");
+      }
+      const resolved = resolveComponent(baseParsed, relativeParsed, schemelessOptions, true);
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
@@ -8621,6 +3776,7 @@ var require_fast_uri = __commonJS({
     }
     var URI_PARSE = /^(?:([^#/:?]+):)?(?:\/\/((?:([^#/?@]*)@)?(\[[^#/?\]]+\]|[^#/:?]*)(?::(\d*))?))?([^#?]*)(?:\?([^#]*))?(?:#((?:.|[\n\r])*))?/u;
     var AUTHORITY_PREFIX = /^(?:[^#/:?]+:)?\/\/([^/?#]*)/;
+    var AUTHORITY_INTRODUCER_REGION = /^(?:[^#/:?]+:)?([/\\\t\n\r]*)/;
     function getParseError(parsed, matches) {
       if (matches[2] !== void 0 && parsed.path && parsed.path[0] !== "/") {
         return 'URI path must start with "/" when authority is present.';
@@ -8654,6 +3810,20 @@ var require_fast_uri = __commonJS({
       if (authorityMatch !== null && authorityMatch[1].indexOf("\\") !== -1) {
         parsed.error = "URI authority must not contain a literal backslash.";
         malformedAuthorityOrPort = true;
+      }
+      const introducerMatch = uri.match(AUTHORITY_INTRODUCER_REGION);
+      if (introducerMatch !== null) {
+        const region = introducerMatch[1];
+        const normalizedRegion = region.replace(/[\t\n\r]/g, "");
+        if (normalizedRegion.length >= 2) {
+          if (normalizedRegion.slice(0, 2) !== "//") {
+            parsed.error = parsed.error || "URI authority must not contain a literal backslash.";
+            malformedAuthorityOrPort = true;
+          } else if (region.length !== normalizedRegion.length) {
+            parsed.error = parsed.error || "URI authority introducer must not contain whitespace.";
+            malformedAuthorityOrPort = true;
+          }
+        }
       }
       const matches = uri.match(URI_PARSE);
       if (matches) {
@@ -8816,7 +3986,7 @@ var require_core = __commonJS({
     var codegen_2 = require_codegen();
     var resolve_1 = require_resolve();
     var dataType_1 = require_dataType();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var $dataRefSchema = require_data();
     var uri_1 = require_uri();
     var defaultRegExp = (str, flags) => new RegExp(str, flags);
@@ -9417,7 +4587,7 @@ var require_ref = __commonJS({
     var codegen_1 = require_codegen();
     var names_1 = require_names();
     var compile_1 = require_compile();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var def = {
       keyword: "$ref",
       schemaType: "string",
@@ -9641,7 +4811,7 @@ var require_limitLength = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var ucs2length_1 = require_ucs2length();
     var error2 = {
       message({ keyword, schemaCode }) {
@@ -9673,7 +4843,7 @@ var require_pattern = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var codegen_1 = require_codegen();
     var error2 = {
       message: ({ schemaCode }) => (0, codegen_1.str)`must match pattern "${schemaCode}"`,
@@ -9740,7 +4910,7 @@ var require_required = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: ({ params: { missingProperty } }) => (0, codegen_1.str)`must have required property '${missingProperty}'`,
       params: ({ params: { missingProperty } }) => (0, codegen_1._)`{missingProperty: ${missingProperty}}`
@@ -9862,7 +5032,7 @@ var require_uniqueItems = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var dataType_1 = require_dataType();
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var equal_1 = require_equal();
     var error2 = {
       message: ({ params: { i, j } }) => (0, codegen_1.str)`must NOT have duplicate items (items ## ${j} and ${i} are identical)`,
@@ -9928,7 +5098,7 @@ var require_const = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var equal_1 = require_equal();
     var error2 = {
       message: "must be equal to constant",
@@ -9957,7 +5127,7 @@ var require_enum = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var equal_1 = require_equal();
     var error2 = {
       message: "must be equal to one of the allowed values",
@@ -10045,7 +5215,7 @@ var require_additionalItems = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateAdditionalItems = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: ({ params: { len } }) => (0, codegen_1.str)`must NOT have more than ${len} items`,
       params: ({ params: { len } }) => (0, codegen_1._)`{limit: ${len}}`
@@ -10098,7 +5268,7 @@ var require_items = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateTuple = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var code_1 = require_code2();
     var def = {
       keyword: "items",
@@ -10171,7 +5341,7 @@ var require_items2020 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var code_1 = require_code2();
     var additionalItems_1 = require_additionalItems();
     var error2 = {
@@ -10206,7 +5376,7 @@ var require_contains = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: ({ params: { min, max } }) => max === void 0 ? (0, codegen_1.str)`must contain at least ${min} valid item(s)` : (0, codegen_1.str)`must contain at least ${min} and no more than ${max} valid item(s)`,
       params: ({ params: { min, max } }) => max === void 0 ? (0, codegen_1._)`{minContains: ${min}}` : (0, codegen_1._)`{minContains: ${min}, maxContains: ${max}}`
@@ -10301,7 +5471,7 @@ var require_dependencies = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.validateSchemaDeps = exports2.validatePropertyDeps = exports2.error = void 0;
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var code_1 = require_code2();
     exports2.error = {
       message: ({ params: { property, depsCount, deps } }) => {
@@ -10394,7 +5564,7 @@ var require_propertyNames = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: "property name must be valid",
       params: ({ params }) => (0, codegen_1._)`{propertyName: ${params.propertyName}}`
@@ -10439,7 +5609,7 @@ var require_additionalProperties = __commonJS({
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
     var names_1 = require_names();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: "must NOT have additional properties",
       params: ({ params }) => (0, codegen_1._)`{additionalProperty: ${params.additionalProperty}}`
@@ -10544,7 +5714,7 @@ var require_properties = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var validate_1 = require_validate();
     var code_1 = require_code2();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var additionalProperties_1 = require_additionalProperties();
     var def = {
       keyword: "properties",
@@ -10602,8 +5772,8 @@ var require_patternProperties = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     var code_1 = require_code2();
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
-    var util_2 = require_util3();
+    var util_1 = require_util();
+    var util_2 = require_util();
     var def = {
       keyword: "patternProperties",
       type: "object",
@@ -10674,7 +5844,7 @@ var require_not = __commonJS({
   "../../node_modules/ajv/dist/vocabularies/applicator/not.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var def = {
       keyword: "not",
       schemaType: ["object", "boolean"],
@@ -10723,7 +5893,7 @@ var require_oneOf = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: "must match exactly one schema in oneOf",
       params: ({ params }) => (0, codegen_1._)`{passingSchemas: ${params.passing}}`
@@ -10780,7 +5950,7 @@ var require_allOf = __commonJS({
   "../../node_modules/ajv/dist/vocabularies/applicator/allOf.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var def = {
       keyword: "allOf",
       schemaType: "array",
@@ -10808,7 +5978,7 @@ var require_if = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     var codegen_1 = require_codegen();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: ({ params }) => (0, codegen_1.str)`must match "${params.ifClause}" schema`,
       params: ({ params }) => (0, codegen_1._)`{failingKeyword: ${params.ifClause}}`
@@ -10876,7 +6046,7 @@ var require_thenElse = __commonJS({
   "../../node_modules/ajv/dist/vocabularies/applicator/thenElse.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var def = {
       keyword: ["then", "else"],
       schemaType: ["object", "boolean"],
@@ -11106,7 +6276,7 @@ var require_discriminator = __commonJS({
     var types_1 = require_types();
     var compile_1 = require_compile();
     var ref_error_1 = require_ref_error();
-    var util_1 = require_util3();
+    var util_1 = require_util();
     var error2 = {
       message: ({ params: { discrError, tagName } }) => discrError === types_1.DiscrError.Tag ? `tag "${tagName}" must be string` : `value of tag "${tagName}" must be in oneOf`,
       params: ({ params: { discrError, tag, tagName } }) => (0, codegen_1._)`{error: ${discrError}, tag: ${tagName}, tagValue: ${tag}}`
@@ -11705,7 +6875,7 @@ var require_limit = __commonJS({
 });
 
 // ../../node_modules/ajv-formats/dist/index.js
-var require_dist2 = __commonJS({
+var require_dist = __commonJS({
   "../../node_modules/ajv-formats/dist/index.js"(exports2, module2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -11733,12 +6903,12 @@ var require_dist2 = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs7, exportName) {
+    function addFormats(ajv, list, fs5, exportName) {
       var _a;
       var _b;
       (_a = (_b = ajv.opts.code).formats) !== null && _a !== void 0 ? _a : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs7[f]);
+        ajv.addFormat(f, fs5[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -11747,9 +6917,7 @@ var require_dist2 = __commonJS({
 });
 
 // src/cli.ts
-var import_node_fs5 = __toESM(require("node:fs"), 1);
-var import_node_child_process = require("node:child_process");
-var import_prompts = __toESM(require_prompts3(), 1);
+var import_node_module3 = require("node:module");
 
 // src/cloud-client.ts
 var import_node_fs2 = __toESM(require("node:fs"), 1);
@@ -11774,9 +6942,6 @@ function localStorePath(env = process.env) {
 }
 function cloudTokenPath(env = process.env) {
   return import_node_path.default.join(askTheWDataDir(env), "cloud-token.json");
-}
-function installMetadataPath(env = process.env) {
-  return import_node_path.default.join(askTheWDataDir(env), "install.json");
 }
 function signalAuthorizationPath(env = process.env) {
   return import_node_path.default.join(askTheWDataDir(env), "consent.json");
@@ -12191,9 +7356,8 @@ var STALE_TOKEN_CODES = /* @__PURE__ */ new Set([
   "install_revoked",
   "install_not_found"
 ]);
-var DEFAULT_API_URL = "https://my.askthew.com";
 function trimBaseUrl(value) {
-  return (value?.trim() || DEFAULT_API_URL).replace(/\/+$/, "");
+  return (value?.trim() || "https://my.askthew.com").replace(/\/+$/, "");
 }
 function errorMessage(error2, fallback) {
   return error2 instanceof Error && error2.message ? error2.message : fallback;
@@ -12230,13 +7394,6 @@ function networkFailure(error2) {
 }
 function loadCloudToken(env = process.env) {
   return readJsonFile(cloudTokenPath(env));
-}
-function resolveApiUrl(input = {}) {
-  const env = input.env ?? process.env;
-  const tokenFile = input.tokenFile !== void 0 ? input.tokenFile : loadCloudToken(env);
-  return trimBaseUrl(
-    input.apiUrl?.trim() || env.ASKTHEW_API_URL?.trim() || tokenFile?.api_url
-  );
 }
 function saveCloudToken(tokenFile, env = process.env) {
   writePrivateJson(cloudTokenPath(env), tokenFile);
@@ -12293,6 +7450,10 @@ function appendManualRequestParams(params, input) {
   if (requestIntent) params.set("request_intent", requestIntent);
   if (originatingPrompt) params.set("originating_prompt", originatingPrompt);
 }
+function writeIdempotencyHeaders(key) {
+  const trimmed = key?.trim();
+  return trimmed ? { "Idempotency-Key": trimmed } : {};
+}
 function manualRequestBody(input) {
   return {
     request_intent: input.requestIntent,
@@ -12313,12 +7474,14 @@ var AskTheWCloudClient = class {
   apiUrl;
   token;
   fetcher;
+  env;
   redactionOptions;
   constructor(options = {}) {
     const tokenFile = loadCloudToken(options.env);
-    this.apiUrl = resolveApiUrl({ apiUrl: options.apiUrl, env: options.env, tokenFile });
+    this.apiUrl = trimBaseUrl(options.apiUrl ?? tokenFile?.api_url);
     this.token = options.token ?? tokenFile?.token;
     this.fetcher = options.fetcher ?? fetch;
+    this.env = options.env ?? process.env;
     this.redactionOptions = {
       env: options.env,
       cwd: options.env?.ASKTHEW_REPO_ROOT ?? options.env?.ASKTHEW_PROJECT_ROOT
@@ -12327,20 +7490,20 @@ var AskTheWCloudClient = class {
   hasToken() {
     return Boolean(this.token);
   }
-  async request(path6, init = {}) {
+  async request(path5, init = {}) {
     if (!this.token) {
       return {
         ok: false,
         status: 401,
         body: {
           ok: false,
-          code: "needs_signup",
-          message: "Ask The W needs signup. Call askthew_start_signup, then askthew_complete_signup."
+          code: "needs_paid_workspace",
+          message: "Ask The W needs a project connection. Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed."
         }
       };
     }
     try {
-      const response = await this.fetcher(`${this.apiUrl}/api/v1/agent${path6}`, {
+      const response = await this.fetcher(`${this.apiUrl}/api/v1/agent${path5}`, {
         ...init,
         headers: {
           "Content-Type": "application/json",
@@ -12366,6 +7529,7 @@ var AskTheWCloudClient = class {
     if (input.sessionId) params.set("session_id", input.sessionId);
     if (input.since) params.set("since", input.since);
     if (input.limit) params.set("limit", String(input.limit));
+    if (input.cursor) params.set("cursor", input.cursor);
     appendScopeParam(params, input.scopeKey);
     const result = await this.request(`/signals${params.size ? `?${params.toString()}` : ""}`);
     return { ...result, body: camelize(result.body) };
@@ -12386,6 +7550,7 @@ var AskTheWCloudClient = class {
   async listDecisions(input = {}) {
     const params = new URLSearchParams();
     if (input.limit) params.set("limit", String(input.limit));
+    if (input.cursor) params.set("cursor", input.cursor);
     appendScopeParam(params, input.scopeKey);
     appendManualRequestParams(params, input);
     const result = await this.request(`/decisions${params.size ? `?${params.toString()}` : ""}`);
@@ -12415,6 +7580,27 @@ var AskTheWCloudClient = class {
     const result = await this.request(`/docs?${params.toString()}`);
     return { ...result, body: camelize(result.body) };
   }
+  /**
+   * Append a version to one Project file, or create one at a path. The server
+   * owns every rule: markdown only, 1 MB, the per-Project write ceiling, and
+   * the refusal on a file a person maintains. Nothing here restates them, so
+   * the plugin cannot drift from what the Project actually enforces.
+   */
+  async writeProjectDoc(input) {
+    const result = await this.request("/docs", {
+      method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
+      body: JSON.stringify({
+        ...manualRequestBody(input),
+        artifact_id: input.artifactId,
+        path: input.path,
+        markdown: redactFreeText(input.markdown, this.redactionOptions),
+        scope_key: input.scopeKey,
+        idempotency_key: input.idempotencyKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
   async recap(input) {
     return this.request("/recap", {
       method: "POST",
@@ -12425,6 +7611,46 @@ var AskTheWCloudClient = class {
         scope_key: input.scopeKey
       })
     });
+  }
+  async getProjectContext(input = {}) {
+    return this.request("/project-context", {
+      method: "POST",
+      body: JSON.stringify({
+        scope_key: input.scopeKey
+      })
+    });
+  }
+  async requestWorldAnalysis(input) {
+    return this.requestProductRefresh({ ...input, productId: "world" });
+  }
+  async requestWhiteboardMap(input) {
+    return this.requestProductRefresh({ ...input, productId: "whiteboard" });
+  }
+  async getWorldAnalysisStatus(input = {}) {
+    return this.getProductRefreshStatus({ productId: "world", scopeKey: input.scopeKey });
+  }
+  async getWhiteboardMapStatus(input = {}) {
+    return this.getProductRefreshStatus({ productId: "whiteboard", scopeKey: input.scopeKey });
+  }
+  async requestProductRefresh(input) {
+    const result = await this.request("/product-refresh", {
+      method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
+      body: JSON.stringify({
+        ...manualRequestBody(input),
+        product_id: input.productId,
+        scope_key: input.scopeKey,
+        idempotency_key: input.idempotencyKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async getProductRefreshStatus(input) {
+    const params = new URLSearchParams();
+    params.set("product_id", input.productId);
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/product-refresh?${params.toString()}`, { method: "GET" });
+    return { ...result, body: camelize(result.body) };
   }
   async coach(input) {
     return this.request("/coach", {
@@ -12481,12 +7707,14 @@ var AskTheWCloudClient = class {
   async completeWork(input) {
     const result = await this.request(`/work/${encodeURIComponent(input.runId)}/complete`, {
       method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
       body: JSON.stringify({
         summary: redactFreeText(input.summary, this.redactionOptions),
         files_touched: redactFilesTouched(input.filesTouched ?? [], this.redactionOptions),
         checks: redactMetadataRecord(input.checks, this.redactionOptions),
         commit_ref: input.commitRef ?? null,
-        scope_key: input.scopeKey
+        scope_key: input.scopeKey,
+        idempotency_key: input.idempotencyKey
       })
     });
     return { ...result, body: camelize(result.body) };
@@ -12505,11 +7733,13 @@ var AskTheWCloudClient = class {
   async fileRequest(input) {
     const result = await this.request("/requests", {
       method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
       body: JSON.stringify({
         title: redactFreeText(input.title, this.redactionOptions),
         body: redactFreeText(input.body, this.redactionOptions),
         scope_key: input.scopeKey,
-        metadata: redactMetadataRecord(input.metadata, this.redactionOptions)
+        metadata: redactMetadataRecord(input.metadata, this.redactionOptions),
+        idempotency_key: input.idempotencyKey
       })
     });
     return { ...result, body: camelize(result.body) };
@@ -12518,6 +7748,7 @@ var AskTheWCloudClient = class {
     const sanitizedBody = redactFreeText(input.body, this.redactionOptions);
     const result = await this.request("/requests", {
       method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
       body: JSON.stringify({
         title: "Draft a Wire message",
         body: sanitizedBody,
@@ -12533,13 +7764,37 @@ var AskTheWCloudClient = class {
           request_intent: input.requestIntent,
           originating_prompt: redactFreeText(input.originatingPrompt, this.redactionOptions),
           delivery: "draft_only"
-        }
+        },
+        idempotency_key: input.idempotencyKey
       })
     });
     return { ...result, body: camelize(result.body) };
   }
-  async startPaidBind() {
-    return this.request("/paid/bind/start", { method: "POST", body: "{}" });
+  async startPaidBind(input = {}) {
+    const body = JSON.stringify(input.clientHint ? { client_hint: input.clientHint } : {});
+    if (this.token) {
+      return this.request("/paid/bind/start", { method: "POST", body });
+    }
+    try {
+      const response = await this.fetcher(`${this.apiUrl}/api/v1/agent/paid/bind/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body
+      });
+      const payload = await readResponseBody(response);
+      if (response.ok && payload.ok && typeof payload.token === "string" && typeof payload.install_id === "string") {
+        saveCloudToken({
+          token: payload.token,
+          install_id: payload.install_id,
+          tier: "free",
+          token_purpose: "device",
+          api_url: this.apiUrl
+        }, this.env);
+      }
+      return { ok: response.ok, status: response.status, body: payload };
+    } catch (error2) {
+      return { ok: false, status: 0, body: networkFailure(error2) };
+    }
   }
   async paidBindStatus(input) {
     const params = new URLSearchParams();
@@ -12554,49 +7809,6 @@ var AskTheWCloudClient = class {
     return { ...result, body: camelize(result.body) };
   }
 };
-async function startSignup(input) {
-  const base = resolveApiUrl({ apiUrl: input.apiUrl, env: input.env, tokenFile: null });
-  try {
-    const response = await (input.fetcher ?? fetch)(`${base}/api/v1/agent/signup`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: input.email, client_hint: input.clientHint })
-    });
-    return readResponseBody(response);
-  } catch (error2) {
-    return networkFailure(error2);
-  }
-}
-async function completeSignup(input) {
-  const base = resolveApiUrl({ apiUrl: input.apiUrl, env: input.env, tokenFile: null });
-  let response;
-  let body;
-  try {
-    response = await (input.fetcher ?? fetch)(`${base}/api/v1/agent/verify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: input.email,
-        code: input.code,
-        client_hint: input.clientHint,
-        token_purpose: input.tokenPurpose ?? "device"
-      })
-    });
-    body = await readResponseBody(response);
-  } catch (error2) {
-    return networkFailure(error2);
-  }
-  if (response.ok && typeof body === "object" && body !== null && "ok" in body && body.ok && "token" in body && typeof body.token === "string" && "install_id" in body && typeof body.install_id === "string") {
-    saveCloudToken({
-      token: body.token,
-      install_id: body.install_id,
-      tier: "free",
-      token_purpose: input.tokenPurpose ?? "device",
-      api_url: base
-    }, input.env);
-  }
-  return body;
-}
 
 // src/outbox.ts
 var import_node_fs3 = __toESM(require("node:fs"), 1);
@@ -12616,12 +7828,6 @@ function loadSqliteDatabase() {
 }
 function fallbackOutboxPath(storePath) {
   return storePath.endsWith(".sqlite") ? storePath.replace(/\.sqlite$/, ".json") : `${storePath}.json`;
-}
-function outboxStoragePaths(storePath = localStorePath()) {
-  return {
-    sqlite: storePath,
-    file: fallbackOutboxPath(storePath)
-  };
 }
 var SqliteOutbox = class {
   db;
@@ -12876,538 +8082,6 @@ async function sendOutboxPayload(client, payload, attempts = 0) {
   } catch {
     return { kind: "queued", retryAfterSeconds: BACKOFF_SECONDS[Math.min(attempts, BACKOFF_SECONDS.length - 1)] };
   }
-}
-
-// src/install.ts
-var import_node_fs4 = __toESM(require("node:fs"), 1);
-var import_node_module2 = require("node:module");
-var import_node_os3 = __toESM(require("node:os"), 1);
-var import_node_path4 = __toESM(require("node:path"), 1);
-var import_meta2 = {};
-var requirePackageJson = (0, import_node_module2.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta2.url);
-var INSTRUCTIONS_START = "<!-- ASKTHEW BEGIN -->";
-var INSTRUCTIONS_END = "<!-- ASKTHEW END -->";
-var LEGACY_INSTRUCTIONS_START = "<!-- ASKTHEW_PLUGIN_INSTRUCTIONS_START -->";
-var LEGACY_INSTRUCTIONS_END = "<!-- ASKTHEW_PLUGIN_INSTRUCTIONS_END -->";
-var DEFAULT_SERVER_NAME = "askthew";
-var SETTINGS_LOCK_STALE_MS = 3e4;
-var SETTINGS_LOCK_WAIT_MS = 10;
-var SETTINGS_LOCK_TIMEOUT_MS = 5e3;
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function packageVersion() {
-  try {
-    const manifest = requirePackageJson("../package.json");
-    return typeof manifest.version === "string" ? manifest.version : "unknown";
-  } catch {
-    return "unknown";
-  }
-}
-function packageSpecFromPin(env = process.env) {
-  const pin = env.ASKTHEW_PIN?.trim() || packageVersion();
-  if (!pin || pin === "unknown") return "@askthew/mcp-plugin@latest";
-  if (pin.startsWith("@askthew/mcp-plugin@")) return pin;
-  return `@askthew/mcp-plugin@${pin}`;
-}
-function resolveSettingsPath(input) {
-  const homeDirectory = input.homeDirectory ?? import_node_os3.default.homedir();
-  if (input.hostType === "codex") return import_node_path4.default.join(homeDirectory, ".codex", "config.toml");
-  if (input.hostType === "cursor") return import_node_path4.default.join(homeDirectory, ".cursor", "mcp.json");
-  return import_node_path4.default.join(homeDirectory, ".claude.json");
-}
-function createServerEntry(input) {
-  const scope = resolvePluginScope(input.cwd ?? process.cwd());
-  if (input.serverEntrypoint) {
-    return {
-      command: "node",
-      args: [import_node_path4.default.resolve(input.serverEntrypoint)],
-      env: serverEnvironment(input, scope)
-    };
-  }
-  return {
-    command: "npx",
-    args: ["-y", "--package", packageSpecFromPin(), "askthew-mcp"],
-    env: serverEnvironment(input, scope)
-  };
-}
-function serverEnvironment(input, scope) {
-  return {
-    ASKTHEW_API_URL: (input.apiUrl ?? DEFAULT_API_URL).replace(/\/+$/, ""),
-    ASKTHEW_HOST_TYPE: input.hostType,
-    ASKTHEW_REPO_NAME: scope.repoName,
-    ...scope.repoRoot ? { ASKTHEW_REPO_ROOT: scope.repoRoot } : {},
-    ...scope.appPath ? { ASKTHEW_APP_PATH: scope.appPath } : {},
-    ...scope.serviceName ? { ASKTHEW_SERVICE_NAME: scope.serviceName } : {}
-  };
-}
-function escapeTomlString(value) {
-  return JSON.stringify(value);
-}
-function tomlKey(value) {
-  return /^[A-Za-z0-9_-]+$/.test(value) ? value : escapeTomlString(value);
-}
-function codexTomlSection(input) {
-  const entry = createServerEntry(input);
-  const args = entry.args.map(escapeTomlString).join(", ");
-  const env = Object.entries(entry.env).map(([key, value]) => `${key} = ${escapeTomlString(String(value))}`).join(", ");
-  return [
-    `[mcp_servers.${tomlKey(input.serverName ?? DEFAULT_SERVER_NAME)}]`,
-    `command = ${escapeTomlString(entry.command)}`,
-    `args = [${args}]`,
-    `env = { ${env} }`
-  ].join("\n");
-}
-function removeCodexTomlServer(content, serverName) {
-  const escaped = serverName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const quoted = escapeTomlString(serverName).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(
-    `\\n?\\[mcp_servers\\.(?:${escaped}|${quoted})\\]\\n[\\s\\S]*?(?=\\n\\[[^\\]]+\\]|$)`,
-    "g"
-  );
-  return content.replace(pattern, "").trimEnd();
-}
-function mergeCodexSettings(input) {
-  const serverName = input.serverName ?? DEFAULT_SERVER_NAME;
-  const existing = removeCodexTomlServer(input.existingSettings.trimEnd(), serverName);
-  return `${existing}${existing ? "\n\n" : ""}${codexTomlSection(input)}
-`;
-}
-function mergeClaudeCodeSettings(input) {
-  const cwd = import_node_path4.default.resolve(input.cwd ?? process.cwd());
-  const serverName = input.serverName ?? DEFAULT_SERVER_NAME;
-  const existingSettings = isRecord(input.existingSettings) ? input.existingSettings : {};
-  const existingProjects = isRecord(existingSettings.projects) ? existingSettings.projects : {};
-  const existingProject = isRecord(existingProjects[cwd]) ? existingProjects[cwd] : {};
-  const existingMcpServers = isRecord(existingProject.mcpServers) ? existingProject.mcpServers : {};
-  return {
-    ...existingSettings,
-    projects: {
-      ...existingProjects,
-      [cwd]: {
-        ...existingProject,
-        mcpServers: {
-          ...existingMcpServers,
-          [serverName]: createServerEntry(input)
-        }
-      }
-    }
-  };
-}
-function mergeCursorSettings(input) {
-  const serverName = input.serverName ?? DEFAULT_SERVER_NAME;
-  const existingSettings = isRecord(input.existingSettings) ? input.existingSettings : {};
-  const existingMcpServers = isRecord(existingSettings.mcpServers) ? existingSettings.mcpServers : {};
-  return {
-    ...existingSettings,
-    mcpServers: {
-      ...existingMcpServers,
-      [serverName]: createServerEntry(input)
-    }
-  };
-}
-function waitForSettingsLockRetry() {
-  const deadline = Date.now() + SETTINGS_LOCK_WAIT_MS;
-  while (Date.now() < deadline) {
-  }
-}
-function acquireSettingsFileLock(settingsPath) {
-  import_node_fs4.default.mkdirSync(import_node_path4.default.dirname(settingsPath), { recursive: true });
-  const lockPath = `${settingsPath}.lock`;
-  const deadline = Date.now() + SETTINGS_LOCK_TIMEOUT_MS;
-  while (true) {
-    try {
-      const fd = import_node_fs4.default.openSync(lockPath, "wx");
-      import_node_fs4.default.writeFileSync(
-        fd,
-        JSON.stringify({
-          pid: process.pid,
-          createdAt: (/* @__PURE__ */ new Date()).toISOString()
-        }),
-        "utf8"
-      );
-      import_node_fs4.default.closeSync(fd);
-      return () => {
-        try {
-          import_node_fs4.default.unlinkSync(lockPath);
-        } catch {
-        }
-      };
-    } catch (error2) {
-      const code = error2.code;
-      if (code !== "EEXIST") {
-        throw error2;
-      }
-      const ageMs = Date.now() - (import_node_fs4.default.existsSync(lockPath) ? import_node_fs4.default.statSync(lockPath).mtimeMs : Date.now());
-      if (ageMs > SETTINGS_LOCK_STALE_MS) {
-        try {
-          import_node_fs4.default.unlinkSync(lockPath);
-          continue;
-        } catch {
-        }
-      }
-      if (Date.now() >= deadline) {
-        throw new Error(`Timed out waiting for settings lock at ${lockPath}`);
-      }
-      waitForSettingsLockRetry();
-    }
-  }
-}
-function withSettingsFileLock(settingsPath, enabled, callback) {
-  if (!enabled) {
-    return callback();
-  }
-  const release = acquireSettingsFileLock(settingsPath);
-  try {
-    return callback();
-  } finally {
-    release();
-  }
-}
-function installHostConfig(input) {
-  const settingsPath = resolveSettingsPath({
-    hostType: input.hostType,
-    homeDirectory: input.homeDirectory
-  });
-  return withSettingsFileLock(settingsPath, !input.dryRun, () => {
-    let existingSettings = {};
-    let existingText = "";
-    if (import_node_fs4.default.existsSync(settingsPath)) {
-      const raw = import_node_fs4.default.readFileSync(settingsPath, "utf8");
-      existingText = raw;
-      if (raw.trim().length > 0 && input.hostType !== "codex") {
-        try {
-          existingSettings = JSON.parse(raw);
-        } catch (error2) {
-          const detail = error2 instanceof Error ? error2.message : "Unknown parse failure.";
-          throw new Error(`Could not parse existing settings JSON at ${settingsPath}: ${detail}`);
-        }
-      }
-    }
-    const hostInput = {
-      hostType: input.hostType,
-      apiUrl: input.apiUrl,
-      serverName: input.serverName ?? DEFAULT_SERVER_NAME,
-      cwd: input.cwd,
-      serverEntrypoint: input.serverEntrypoint
-    };
-    const json = input.hostType === "codex" ? mergeCodexSettings({ ...hostInput, existingSettings: existingText }) : JSON.stringify(
-      input.hostType === "claude_code" ? mergeClaudeCodeSettings({ ...hostInput, existingSettings, cwd: input.cwd }) : mergeCursorSettings({ ...hostInput, existingSettings }),
-      null,
-      2
-    );
-    if (!input.dryRun) {
-      import_node_fs4.default.mkdirSync(import_node_path4.default.dirname(settingsPath), { recursive: true });
-      import_node_fs4.default.writeFileSync(settingsPath, json.endsWith("\n") ? json : `${json}
-`, "utf8");
-    }
-    return {
-      settingsPath,
-      json,
-      wroteFile: !input.dryRun
-    };
-  });
-}
-function uninstallHostConfig(input) {
-  const settingsPath = resolveSettingsPath({
-    hostType: input.hostType,
-    homeDirectory: input.homeDirectory
-  });
-  return withSettingsFileLock(settingsPath, !input.dryRun, () => {
-    const serverName = input.serverName ?? DEFAULT_SERVER_NAME;
-    if (!import_node_fs4.default.existsSync(settingsPath)) {
-      return { settingsPath, removed: false, wroteFile: false };
-    }
-    const raw = import_node_fs4.default.readFileSync(settingsPath, "utf8");
-    let next = raw;
-    let removed = false;
-    if (input.hostType === "codex") {
-      const stripped = removeCodexTomlServer(raw, serverName);
-      next = `${stripped}${stripped ? "\n" : ""}`;
-      removed = stripped.trimEnd() !== raw.trimEnd();
-    } else {
-      const parsed = raw.trim() ? JSON.parse(raw) : {};
-      if (input.hostType === "claude_code") {
-        const cwd = import_node_path4.default.resolve(input.cwd ?? process.cwd());
-        const projects = isRecord(parsed.projects) ? { ...parsed.projects } : {};
-        const project = isRecord(projects[cwd]) ? { ...projects[cwd] } : {};
-        const servers = isRecord(project.mcpServers) ? { ...project.mcpServers } : {};
-        removed = serverName in servers;
-        delete servers[serverName];
-        project.mcpServers = servers;
-        projects[cwd] = project;
-        next = `${JSON.stringify({ ...parsed, projects }, null, 2)}
-`;
-      } else {
-        const servers = isRecord(parsed.mcpServers) ? { ...parsed.mcpServers } : {};
-        removed = serverName in servers;
-        delete servers[serverName];
-        next = `${JSON.stringify({ ...parsed, mcpServers: servers }, null, 2)}
-`;
-      }
-    }
-    if (removed && !input.dryRun) import_node_fs4.default.writeFileSync(settingsPath, next, "utf8");
-    return { settingsPath, removed, wroteFile: removed && !input.dryRun };
-  });
-}
-function instructionFileForHost(hostType, cwd = process.cwd()) {
-  return import_node_path4.default.join(import_node_path4.default.resolve(cwd), hostType === "claude_code" ? "CLAUDE.md" : "AGENTS.md");
-}
-function installBehaviorInstructions(input) {
-  const cwd = import_node_path4.default.resolve(input.cwd ?? process.cwd());
-  const scope = resolvePluginScope(cwd);
-  const projectRoot = import_node_path4.default.resolve(scope.repoRoot ?? cwd);
-  const scopeKey = scopeKeyForScope(scope);
-  return [
-    INSTRUCTIONS_START,
-    "## Ask The W",
-    "",
-    "This project has an authorized Ask The W connector. Send compact, policy-sanitized signals via MCP tool",
-    `\`capture_session_signal\` (often shown as \`mcp__askthew__capture_session_signal\`) with \`scopeKey: "${scopeKey}"\`.`,
-    `Bound workspace root: \`${projectRoot}\`.`,
-    "",
-    "**Authorization.** The Ask The W install or project-bind confirmation authorizes compact session signals for this project. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
-    "",
-    "Recommended quiet cadence when the connector is active:",
-    "1. **Routine setup/checkpoints stay local** - do not send `setup_complete` or `session_checkpoint` for normal tool availability or progress bookkeeping.",
-    '2. **Verification** - send `kind: "verification_result"` after meaningful tests, builds, migrations, or production-impacting verification.',
-    '3. **Direction changes** - send `kind: "direction_change"` only when user/product direction materially changed. Send `kind: "implementation_update"` only when it is explicitly durable project context and include `metadata.project_to_workspace=true`.',
-    '4. **Final** - before a substantive final reply, send one `kind: "final_summary"` summarizing what changed, what was verified, and remaining risk.',
-    "",
-    "Aim for 1-3 signals per substantive session.",
-    "",
-    "**Tool loading.** If `capture_session_signal` appears in your deferred-tools list rather than your active list, load it with `ToolSearch select:mcp__askthew__capture_session_signal` first. Deferred does not equal unavailable.",
-    "",
-    "**Plan mode.** Signals are read-only observability. If a substantive verification or final summary belongs in the project, it may be emitted in plan mode, but do not emit routine planning checkpoints.",
-    "",
-    "**Inactivity (narrow).** Skip this entire block only if no `mcp__askthew__*` tool appears anywhere: active or deferred. Workspace ambiguity, plan mode, and deferred-tool mode do not count.",
-    "",
-    "**Payload guardrails.** Prefer a short summary, relative files touched, verification status, and useful non-sensitive metadata. Omit `commandsRun` unless the command materially explains verification or failure; when included, keep it short and avoid inline environment values. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
-    "",
-    "**Startup work check.** After the project binding is active, `list_ready_work` may be called at session start/resume. If work is returned, present the list and ask the human which item to claim. Never call `claim_work` silently.",
-    "",
-    "Related tools: `recap`, `coach`, `next_moves`, `list_decisions`, `list_outcomes`, and `create_decision` are manual-only: use them only when the user explicitly asks for that Ask The W action.",
-    "",
-    "**Manual-only tools.** Only `capture_session_signal` and startup `list_ready_work` may be called automatically. Do not call `claim_work`, `complete_work`, `release_work`, `recap`, `coach`, `next_moves`, `list_decisions`, `list_outcomes`, or `create_decision` during routine setup, checkpoint, planning, verification, or final-summary cadence unless the user explicitly asks for that Ask The W action.",
-    INSTRUCTIONS_END,
-    ""
-  ].join("\n");
-}
-function removeMarkedBlockByMarkers(existing, startMarker, endMarker) {
-  const start = existing.indexOf(startMarker);
-  const end = existing.indexOf(endMarker);
-  if (start < 0 || end < start) {
-    return { text: existing, removed: false };
-  }
-  const after = end + endMarker.length;
-  const text = `${existing.slice(0, start).trimEnd()}${existing.slice(after).trimStart() ? "\n\n" : ""}${existing.slice(after).trimStart()}`.trimEnd();
-  return { text: text ? `${text}
-` : "", removed: true };
-}
-function removeAllMarkedBlocksByMarkers(existing, startMarker, endMarker) {
-  let next = existing;
-  while (true) {
-    const removed = removeMarkedBlockByMarkers(next, startMarker, endMarker);
-    if (!removed.removed) return next;
-    next = removed.text;
-  }
-}
-function replaceMarkedBlockByMarkers(existing, block, startMarker, endMarker) {
-  const start = existing.indexOf(startMarker);
-  const end = existing.indexOf(endMarker);
-  if (start >= 0 && end >= start) {
-    const after = end + endMarker.length;
-    return `${existing.slice(0, start).trimEnd()}
-
-${block}${existing.slice(after).trimStart()}`.trimEnd() + "\n";
-  }
-  return `${existing.trimEnd()}${existing.trim() ? "\n\n" : ""}${block}`.trimEnd() + "\n";
-}
-function replaceMarkedBlock(existing, block) {
-  const withoutLegacy = removeAllMarkedBlocksByMarkers(
-    existing,
-    LEGACY_INSTRUCTIONS_START,
-    LEGACY_INSTRUCTIONS_END
-  );
-  return replaceMarkedBlockByMarkers(withoutLegacy, block, INSTRUCTIONS_START, INSTRUCTIONS_END);
-}
-function writeBehaviorInstructions(input) {
-  const filePath = instructionFileForHost(input.hostType, input.cwd);
-  const block = installBehaviorInstructions(input);
-  const existing = import_node_fs4.default.existsSync(filePath) ? import_node_fs4.default.readFileSync(filePath, "utf8") : "";
-  const next = replaceMarkedBlock(existing, block);
-  if (!input.dryRun) {
-    import_node_fs4.default.writeFileSync(filePath, next, "utf8");
-  }
-  return {
-    filePath,
-    text: next,
-    wroteFile: !input.dryRun
-  };
-}
-function removeMarkedBlock(existing) {
-  const withoutCurrent = removeMarkedBlockByMarkers(existing, INSTRUCTIONS_START, INSTRUCTIONS_END);
-  const withoutLegacy = removeAllMarkedBlocksByMarkers(
-    withoutCurrent.text,
-    LEGACY_INSTRUCTIONS_START,
-    LEGACY_INSTRUCTIONS_END
-  );
-  return {
-    text: withoutLegacy,
-    removed: withoutCurrent.removed || withoutLegacy !== withoutCurrent.text
-  };
-}
-function removeBehaviorInstructions(input) {
-  const filePath = instructionFileForHost(input.hostType, input.cwd);
-  if (!import_node_fs4.default.existsSync(filePath)) {
-    return {
-      filePath,
-      removed: false,
-      wroteFile: false
-    };
-  }
-  const existing = import_node_fs4.default.readFileSync(filePath, "utf8");
-  const next = removeMarkedBlock(existing);
-  if (next.removed && !input.dryRun) {
-    import_node_fs4.default.writeFileSync(filePath, next.text, "utf8");
-  }
-  return {
-    filePath,
-    removed: next.removed,
-    wroteFile: next.removed && !input.dryRun
-  };
-}
-var SUPPORTED_HOST_TYPES = ["claude_code", "codex", "cursor"];
-var SIGNAL_ALLOWED_FIELDS = [
-  "kind",
-  "summary",
-  "sessionId",
-  "sequence",
-  "idempotencyKey",
-  "clientId",
-  "scopeKey",
-  "filesTouched",
-  "commandsRun",
-  "metadata",
-  "evidence"
-];
-var SIGNAL_DISALLOWED_FIELDS = [
-  "full transcripts",
-  "secrets",
-  "credentials",
-  "private tokens",
-  "large copied content",
-  "absolute local paths when a relative project path is available"
-];
-var SIGNAL_GUARDRAILS = [
-  "MCP package redacts known credential patterns before queueing or sending.",
-  "Sensitive metadata keys are replaced with [REDACTED].",
-  "Workspace and home paths are scrubbed from summaries, commands, evidence, and file references.",
-  "Sensitive local file references such as .env, private keys, and token files are replaced with [REDACTED_PATH]."
-];
-function isSupportedHostType(value) {
-  return typeof value === "string" && SUPPORTED_HOST_TYPES.includes(value);
-}
-function metadataHostFromRecord(record2, fallbackHost) {
-  const host = isSupportedHostType(record2.host) ? record2.host : fallbackHost;
-  if (!host) return null;
-  return {
-    host,
-    version: typeof record2.version === "string" ? record2.version : "unknown",
-    api_url: typeof record2.api_url === "string" ? record2.api_url : DEFAULT_API_URL,
-    tier: record2.tier === "paid" ? "paid" : "free",
-    project_id: typeof record2.project_id === "string" ? record2.project_id : null,
-    last_sync: typeof record2.last_sync === "string" ? record2.last_sync : (/* @__PURE__ */ new Date()).toISOString()
-  };
-}
-function readInstallMetadata(env = process.env) {
-  const raw = readJsonFile(installMetadataPath(env));
-  const metadata = { version: 2, hosts: {} };
-  if (!isRecord(raw)) return metadata;
-  if (raw.version === 2 && isRecord(raw.hosts)) {
-    for (const host of SUPPORTED_HOST_TYPES) {
-      const entry = raw.hosts[host];
-      if (isRecord(entry)) {
-        const parsed = metadataHostFromRecord(entry, host);
-        if (parsed) metadata.hosts[host] = parsed;
-      }
-    }
-    return metadata;
-  }
-  const v1Entry = metadataHostFromRecord(raw);
-  if (v1Entry) metadata.hosts[v1Entry.host] = v1Entry;
-  return metadata;
-}
-function loadInstallMetadata(hostType, env = process.env) {
-  return readInstallMetadata(env).hosts[hostType] ?? null;
-}
-function readSignalAuthorizationFile(env = process.env) {
-  const raw = readJsonFile(signalAuthorizationPath(env));
-  if (!isRecord(raw) || raw.version !== 1 || !isRecord(raw.authorizations)) {
-    return { version: 1, authorizations: {} };
-  }
-  const authorizations = {};
-  for (const host of SUPPORTED_HOST_TYPES) {
-    const entry = raw.authorizations[host];
-    if (!isRecord(entry)) continue;
-    authorizations[host] = {
-      version: 1,
-      host,
-      granted_at: typeof entry.granted_at === "string" ? entry.granted_at : (/* @__PURE__ */ new Date()).toISOString(),
-      source: entry.source === "workspace_bind" || entry.source === "mcp_workspace_bind" || entry.source === "plugin_install" ? entry.source : "plugin_install",
-      scope_key: typeof entry.scope_key === "string" ? entry.scope_key : "global",
-      project_id: typeof entry.project_id === "string" ? entry.project_id : null,
-      allowed_fields: Array.isArray(entry.allowed_fields) ? entry.allowed_fields.map(String) : SIGNAL_ALLOWED_FIELDS,
-      disallowed_fields: Array.isArray(entry.disallowed_fields) ? entry.disallowed_fields.map(String) : SIGNAL_DISALLOWED_FIELDS,
-      guardrails: Array.isArray(entry.guardrails) ? entry.guardrails.map(String) : SIGNAL_GUARDRAILS
-    };
-  }
-  return { version: 1, authorizations };
-}
-function loadSignalAuthorizationReceipt(hostType, env = process.env) {
-  return readSignalAuthorizationFile(env).authorizations[hostType] ?? null;
-}
-function writeSignalAuthorizationReceipt(input) {
-  const file = readSignalAuthorizationFile(input.env);
-  const scopeKey = input.scopeKey ?? scopeKeyForScope(resolvePluginScope(input.cwd ?? process.cwd(), input.env ?? process.env));
-  const receipt = {
-    version: 1,
-    host: input.hostType,
-    granted_at: (/* @__PURE__ */ new Date()).toISOString(),
-    source: input.source ?? (input.projectId ? "workspace_bind" : "plugin_install"),
-    scope_key: scopeKey,
-    project_id: input.projectId ?? null,
-    allowed_fields: SIGNAL_ALLOWED_FIELDS,
-    disallowed_fields: SIGNAL_DISALLOWED_FIELDS,
-    guardrails: SIGNAL_GUARDRAILS
-  };
-  file.authorizations[input.hostType] = receipt;
-  writePrivateJson(signalAuthorizationPath(input.env), file);
-  return receipt;
-}
-function writeInstallMetadata(input) {
-  const metadata = readInstallMetadata(input.env);
-  const hostMetadata = {
-    host: input.hostType,
-    version: packageVersion(),
-    api_url: input.apiUrl ?? DEFAULT_API_URL,
-    tier: input.tier ?? "free",
-    project_id: input.projectId ?? null,
-    last_sync: (/* @__PURE__ */ new Date()).toISOString()
-  };
-  metadata.hosts[input.hostType] = hostMetadata;
-  writePrivateJson(installMetadataPath(input.env), metadata);
-  writeSignalAuthorizationReceipt({
-    hostType: input.hostType,
-    projectId: input.projectId,
-    source: input.signalAuthorizationSource,
-    cwd: input.cwd,
-    env: input.env
-  });
-  return metadata;
-}
-function dataDirSummary(env = process.env) {
-  return askTheWDataDir(env);
 }
 
 // ../../node_modules/zod/v3/external.js
@@ -13888,8 +8562,8 @@ function getErrorMap() {
 
 // ../../node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path6, errorMaps, issueData } = params;
-  const fullPath = [...path6, ...issueData.path || []];
+  const { data, path: path5, errorMaps, issueData } = params;
+  const fullPath = [...path5, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -14005,11 +8679,11 @@ var errorUtil;
 
 // ../../node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path6, key) {
+  constructor(parent, value, path5, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path6;
+    this._path = path5;
     this._key = key;
   }
   get path() {
@@ -17646,10 +12320,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path6) {
-  if (!path6)
+function getElementAtPath(obj, path5) {
+  if (!path5)
     return obj;
-  return path6.reduce((acc, key) => acc?.[key], obj);
+  return path5.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -17969,11 +12643,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path6, issues) {
+function prefixIssues(path5, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path6);
+    iss.path.unshift(path5);
     return iss;
   });
 }
@@ -21384,16 +16058,32 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
+function getDotPath(path5) {
+  if (path5.length === 0) {
+    return "object root";
+  }
+  return path5.reduce((acc, seg, index) => {
+    if (index === 0) {
+      return String(seg);
+    }
+    if (typeof seg === "number") {
+      return `${acc}[${seg}]`;
+    }
+    return `${acc}.${seg}`;
+  }, "");
+}
 function getParseErrorMessage(error2) {
   if (error2 && typeof error2 === "object") {
+    if ("issues" in error2 && Array.isArray(error2.issues) && error2.issues.length > 0) {
+      return error2.issues.map((i) => {
+        if (!i.path?.length) {
+          return i.message;
+        }
+        return `${i.message} at ${getDotPath(i.path)}`;
+      }).join("\n");
+    }
     if ("message" in error2 && typeof error2.message === "string") {
       return error2.message;
-    }
-    if ("issues" in error2 && Array.isArray(error2.issues) && error2.issues.length > 0) {
-      const firstIssue = error2.issues[0];
-      if (firstIssue && typeof firstIssue === "object" && "message" in firstIssue) {
-        return String(firstIssue.message);
-      }
     }
     try {
       return JSON.stringify(error2);
@@ -25957,7 +20647,7 @@ function mergeCapabilities(base, additional) {
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/validation/ajv-provider.js
 var import_ajv = __toESM(require_ajv(), 1);
-var import_ajv_formats = __toESM(require_dist2(), 1);
+var import_ajv_formats = __toESM(require_dist(), 1);
 function createDefaultAjvInstance() {
   const ajv = new import_ajv.default({
     strict: false,
@@ -26337,16 +21027,7 @@ var Server = class extends Protocol {
     if (!methodSchema) {
       throw new Error("Schema is missing a method literal");
     }
-    let methodValue;
-    if (isZ4Schema(methodSchema)) {
-      const v4Schema = methodSchema;
-      const v4Def = v4Schema._zod?.def;
-      methodValue = v4Def?.value ?? v4Schema.value;
-    } else {
-      const v3Schema = methodSchema;
-      const legacyDef = v3Schema._def;
-      methodValue = legacyDef?.value ?? v3Schema.value;
-    }
+    const methodValue = getLiteralValue(methodSchema);
     if (typeof methodValue !== "string") {
       throw new Error("Schema method literal must be a string");
     }
@@ -26664,6 +21345,228 @@ var McpZodTypeKind;
 (function(McpZodTypeKind2) {
   McpZodTypeKind2["Completable"] = "McpCompletable";
 })(McpZodTypeKind || (McpZodTypeKind = {}));
+
+// ../../node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
+var MAX_TEMPLATE_LENGTH = 1e6;
+var MAX_VARIABLE_LENGTH = 1e6;
+var MAX_TEMPLATE_EXPRESSIONS = 1e4;
+var MAX_REGEX_LENGTH = 1e6;
+var UriTemplate = class _UriTemplate {
+  /**
+   * Returns true if the given string contains any URI template expressions.
+   * A template expression is a sequence of characters enclosed in curly braces,
+   * like {foo} or {?bar}.
+   */
+  static isTemplate(str) {
+    return /\{[^}\s]+\}/.test(str);
+  }
+  static validateLength(str, max, context) {
+    if (str.length > max) {
+      throw new Error(`${context} exceeds maximum length of ${max} characters (got ${str.length})`);
+    }
+  }
+  get variableNames() {
+    return this.parts.flatMap((part) => typeof part === "string" ? [] : part.names);
+  }
+  constructor(template) {
+    _UriTemplate.validateLength(template, MAX_TEMPLATE_LENGTH, "Template");
+    this.template = template;
+    this.parts = this.parse(template);
+  }
+  toString() {
+    return this.template;
+  }
+  parse(template) {
+    const parts = [];
+    let currentText = "";
+    let i = 0;
+    let expressionCount = 0;
+    while (i < template.length) {
+      if (template[i] === "{") {
+        if (currentText) {
+          parts.push(currentText);
+          currentText = "";
+        }
+        const end = template.indexOf("}", i);
+        if (end === -1)
+          throw new Error("Unclosed template expression");
+        expressionCount++;
+        if (expressionCount > MAX_TEMPLATE_EXPRESSIONS) {
+          throw new Error(`Template contains too many expressions (max ${MAX_TEMPLATE_EXPRESSIONS})`);
+        }
+        const expr = template.slice(i + 1, end);
+        const operator = this.getOperator(expr);
+        const exploded = expr.includes("*");
+        const names = this.getNames(expr);
+        const name = names[0];
+        for (const name2 of names) {
+          _UriTemplate.validateLength(name2, MAX_VARIABLE_LENGTH, "Variable name");
+        }
+        parts.push({ name, operator, names, exploded });
+        i = end + 1;
+      } else {
+        currentText += template[i];
+        i++;
+      }
+    }
+    if (currentText) {
+      parts.push(currentText);
+    }
+    return parts;
+  }
+  getOperator(expr) {
+    const operators = ["+", "#", ".", "/", "?", "&"];
+    return operators.find((op) => expr.startsWith(op)) || "";
+  }
+  getNames(expr) {
+    const operator = this.getOperator(expr);
+    return expr.slice(operator.length).split(",").map((name) => name.replace("*", "").trim()).filter((name) => name.length > 0);
+  }
+  encodeValue(value, operator) {
+    _UriTemplate.validateLength(value, MAX_VARIABLE_LENGTH, "Variable value");
+    if (operator === "+" || operator === "#") {
+      return encodeURI(value);
+    }
+    return encodeURIComponent(value);
+  }
+  expandPart(part, variables) {
+    if (part.operator === "?" || part.operator === "&") {
+      const pairs = part.names.map((name) => {
+        const value2 = variables[name];
+        if (value2 === void 0)
+          return "";
+        const encoded2 = Array.isArray(value2) ? value2.map((v) => this.encodeValue(v, part.operator)).join(",") : this.encodeValue(value2.toString(), part.operator);
+        return `${name}=${encoded2}`;
+      }).filter((pair) => pair.length > 0);
+      if (pairs.length === 0)
+        return "";
+      const separator = part.operator === "?" ? "?" : "&";
+      return separator + pairs.join("&");
+    }
+    if (part.names.length > 1) {
+      const values2 = part.names.map((name) => variables[name]).filter((v) => v !== void 0);
+      if (values2.length === 0)
+        return "";
+      return values2.map((v) => Array.isArray(v) ? v[0] : v).join(",");
+    }
+    const value = variables[part.name];
+    if (value === void 0)
+      return "";
+    const values = Array.isArray(value) ? value : [value];
+    const encoded = values.map((v) => this.encodeValue(v, part.operator));
+    switch (part.operator) {
+      case "":
+        return encoded.join(",");
+      case "+":
+        return encoded.join(",");
+      case "#":
+        return "#" + encoded.join(",");
+      case ".":
+        return "." + encoded.join(".");
+      case "/":
+        return "/" + encoded.join("/");
+      default:
+        return encoded.join(",");
+    }
+  }
+  expand(variables) {
+    let result = "";
+    let hasQueryParam = false;
+    for (const part of this.parts) {
+      if (typeof part === "string") {
+        result += part;
+        continue;
+      }
+      const expanded = this.expandPart(part, variables);
+      if (!expanded)
+        continue;
+      if ((part.operator === "?" || part.operator === "&") && hasQueryParam) {
+        result += expanded.replace("?", "&");
+      } else {
+        result += expanded;
+      }
+      if (part.operator === "?" || part.operator === "&") {
+        hasQueryParam = true;
+      }
+    }
+    return result;
+  }
+  escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+  partToRegExp(part) {
+    const patterns = [];
+    for (const name2 of part.names) {
+      _UriTemplate.validateLength(name2, MAX_VARIABLE_LENGTH, "Variable name");
+    }
+    if (part.operator === "?" || part.operator === "&") {
+      for (let i = 0; i < part.names.length; i++) {
+        const name2 = part.names[i];
+        const prefix = i === 0 ? "\\" + part.operator : "&";
+        patterns.push({
+          pattern: prefix + this.escapeRegExp(name2) + "=([^&]+)",
+          name: name2
+        });
+      }
+      return patterns;
+    }
+    let pattern;
+    const name = part.name;
+    switch (part.operator) {
+      case "":
+        pattern = part.exploded ? "([^/,]+(?:,[^/,]+)*)" : "([^/,]+)";
+        break;
+      case "+":
+      case "#":
+        pattern = "(.+)";
+        break;
+      case ".":
+        pattern = "\\.([^/,]+)";
+        break;
+      case "/":
+        pattern = "/" + (part.exploded ? "([^/,]+(?:,[^/,]+)*)" : "([^/,]+)");
+        break;
+      default:
+        pattern = "([^/]+)";
+    }
+    patterns.push({ pattern, name });
+    return patterns;
+  }
+  match(uri) {
+    _UriTemplate.validateLength(uri, MAX_TEMPLATE_LENGTH, "URI");
+    let pattern = "^";
+    const names = [];
+    for (const part of this.parts) {
+      if (typeof part === "string") {
+        pattern += this.escapeRegExp(part);
+      } else {
+        const patterns = this.partToRegExp(part);
+        for (const { pattern: partPattern, name } of patterns) {
+          pattern += partPattern;
+          names.push({ name, exploded: part.exploded });
+        }
+      }
+    }
+    pattern += "$";
+    _UriTemplate.validateLength(pattern, MAX_REGEX_LENGTH, "Generated regex pattern");
+    const regex = new RegExp(pattern);
+    const match = uri.match(regex);
+    if (!match)
+      return null;
+    const result = {};
+    for (let i = 0; i < names.length; i++) {
+      const { name, exploded } = names[i];
+      const value = match[i + 1];
+      const cleanName = name.replace("*", "");
+      if (exploded && value.includes(",")) {
+        result[cleanName] = value.split(",");
+      } else {
+        result[cleanName] = value;
+      }
+    }
+    return result;
+  }
+};
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/shared/toolNameValidation.js
 var TOOL_NAME_REGEX = /^[A-Za-z0-9._-]{1,128}$/;
@@ -27454,6 +22357,30 @@ var McpServer = class {
     }
   }
 };
+var ResourceTemplate = class {
+  constructor(uriTemplate, _callbacks) {
+    this._callbacks = _callbacks;
+    this._uriTemplate = typeof uriTemplate === "string" ? new UriTemplate(uriTemplate) : uriTemplate;
+  }
+  /**
+   * Gets the URI template pattern.
+   */
+  get uriTemplate() {
+    return this._uriTemplate;
+  }
+  /**
+   * Gets the list callback, if one was provided.
+   */
+  get listCallback() {
+    return this._callbacks.list;
+  }
+  /**
+   * Gets the callback for completing a specific URI template variable, if one was provided.
+   */
+  completeCallback(variable) {
+    return this._callbacks.complete?.[variable];
+  }
+};
 var EMPTY_OBJECT_JSON_SCHEMA = {
   type: "object",
   properties: {}
@@ -27534,8 +22461,17 @@ var EMPTY_COMPLETION_RESULT = {
 var import_node_process = __toESM(require("node:process"), 1);
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/shared/stdio.js
+var STDIO_DEFAULT_MAX_BUFFER_SIZE = 10 * 1024 * 1024;
 var ReadBuffer = class {
+  constructor(options) {
+    this._maxBufferSize = options?.maxBufferSize ?? STDIO_DEFAULT_MAX_BUFFER_SIZE;
+  }
   append(chunk) {
+    const newSize = (this._buffer?.length ?? 0) + chunk.length;
+    if (newSize > this._maxBufferSize) {
+      this.clear();
+      throw new Error(`ReadBuffer exceeded maximum size of ${this._maxBufferSize} bytes`);
+    }
     this._buffer = this._buffer ? Buffer.concat([this._buffer, chunk]) : chunk;
   }
   readMessage() {
@@ -27563,18 +22499,24 @@ function serializeMessage(message) {
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js
 var StdioServerTransport = class {
-  constructor(_stdin = import_node_process.default.stdin, _stdout = import_node_process.default.stdout) {
+  constructor(_stdin = import_node_process.default.stdin, _stdout = import_node_process.default.stdout, options) {
     this._stdin = _stdin;
     this._stdout = _stdout;
-    this._readBuffer = new ReadBuffer();
     this._started = false;
     this._ondata = (chunk) => {
-      this._readBuffer.append(chunk);
-      this.processReadBuffer();
+      try {
+        this._readBuffer.append(chunk);
+        this.processReadBuffer();
+      } catch (error2) {
+        this.onerror?.(error2);
+        this.close().catch(() => {
+        });
+      }
     };
     this._onerror = (error2) => {
       this.onerror?.(error2);
     };
+    this._readBuffer = new ReadBuffer({ maxBufferSize: options?.maxBufferSize });
   }
   /**
    * Starts listening for messages on stdin.
@@ -27624,13 +22566,89 @@ var StdioServerTransport = class {
 
 // src/index.ts
 var import_node_crypto = __toESM(require("node:crypto"), 1);
-var import_node_module3 = require("node:module");
-var import_meta3 = {};
-var requirePackageJson2 = (0, import_node_module3.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta3.url);
+var import_node_module2 = require("node:module");
+
+// src/install.ts
+var SUPPORTED_HOST_TYPES = ["claude_code", "codex", "cursor"];
+var SIGNAL_ALLOWED_FIELDS = [
+  "kind",
+  "summary",
+  "sessionId",
+  "sequence",
+  "idempotencyKey",
+  "clientId",
+  "scopeKey",
+  "filesTouched",
+  "commandsRun",
+  "metadata",
+  "evidence"
+];
+var SIGNAL_DISALLOWED_FIELDS = [
+  "full transcripts",
+  "secrets",
+  "credentials",
+  "private tokens",
+  "large copied content",
+  "absolute local paths when a relative project path is available"
+];
+var SIGNAL_GUARDRAILS = [
+  "MCP package redacts known credential patterns before queueing or sending.",
+  "Sensitive metadata keys are replaced with [REDACTED].",
+  "Workspace and home paths are scrubbed from summaries, commands, evidence, and file references.",
+  "Sensitive local file references such as .env, private keys, and token files are replaced with [REDACTED_PATH]."
+];
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function readSignalAuthorizationFile(env = process.env) {
+  const raw = readJsonFile(signalAuthorizationPath(env));
+  if (!isRecord(raw) || raw.version !== 1 || !isRecord(raw.authorizations)) {
+    return { version: 1, authorizations: {} };
+  }
+  const authorizations = {};
+  for (const host of SUPPORTED_HOST_TYPES) {
+    const entry = raw.authorizations[host];
+    if (!isRecord(entry)) continue;
+    authorizations[host] = {
+      version: 1,
+      host,
+      granted_at: typeof entry.granted_at === "string" ? entry.granted_at : (/* @__PURE__ */ new Date()).toISOString(),
+      source: entry.source === "mcp_workspace_bind" || entry.source === "workspace_bind" || entry.source === "plugin_install" ? entry.source : "plugin_install",
+      scope_key: typeof entry.scope_key === "string" ? entry.scope_key : "global",
+      project_id: typeof entry.project_id === "string" ? entry.project_id : null,
+      allowed_fields: Array.isArray(entry.allowed_fields) ? entry.allowed_fields.map(String) : SIGNAL_ALLOWED_FIELDS,
+      disallowed_fields: Array.isArray(entry.disallowed_fields) ? entry.disallowed_fields.map(String) : SIGNAL_DISALLOWED_FIELDS,
+      guardrails: Array.isArray(entry.guardrails) ? entry.guardrails.map(String) : SIGNAL_GUARDRAILS
+    };
+  }
+  return { version: 1, authorizations };
+}
+function writeSignalAuthorizationReceipt(input) {
+  const file = readSignalAuthorizationFile(input.env);
+  const scopeKey = input.scopeKey ?? scopeKeyForScope(resolvePluginScope(input.cwd ?? process.cwd(), input.env ?? process.env));
+  const receipt = {
+    version: 1,
+    host: input.hostType,
+    granted_at: (/* @__PURE__ */ new Date()).toISOString(),
+    source: input.source ?? (input.projectId ? "workspace_bind" : "plugin_install"),
+    scope_key: scopeKey,
+    project_id: input.projectId ?? null,
+    allowed_fields: SIGNAL_ALLOWED_FIELDS,
+    disallowed_fields: SIGNAL_DISALLOWED_FIELDS,
+    guardrails: SIGNAL_GUARDRAILS
+  };
+  file.authorizations[input.hostType] = receipt;
+  writePrivateJson(signalAuthorizationPath(input.env), file);
+  return receipt;
+}
+
+// src/index.ts
+var import_meta2 = {};
+var requirePackageJson = (0, import_node_module2.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta2.url);
 var TOKEN_CHECK_TIMEOUT_MS = 5e3;
-function packageVersion2() {
+function packageVersion() {
   try {
-    const manifest = requirePackageJson2("../package.json");
+    const manifest = requirePackageJson("../package.json");
     return typeof manifest.version === "string" ? manifest.version : "unknown";
   } catch {
     return "unknown";
@@ -27708,6 +22726,7 @@ var completeWorkSchema = external_exports.object({
   filesTouched: external_exports.array(external_exports.string().min(1).max(500)).default([]),
   checks: external_exports.record(external_exports.string(), external_exports.unknown()).default({}),
   commitRef: external_exports.string().max(200).optional(),
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
   ...workScopeShape
 });
 var releaseWorkSchema = external_exports.object({
@@ -27720,49 +22739,100 @@ var fileRequestSchema = external_exports.object({
   title: external_exports.string().min(1).max(200),
   body: external_exports.string().min(1).max(8e3),
   metadata: external_exports.record(external_exports.string(), external_exports.unknown()).default({}),
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
   ...workScopeShape
+});
+var writeProjectDocSchema = external_exports.object({
+  ...manualRequestShape,
+  artifactId: external_exports.string().uuid().optional(),
+  path: external_exports.string().trim().min(1).max(180).optional(),
+  // A cheap pre-flight only. The Project owns the real ceiling and counts
+  // bytes, not characters; see checkWorkspaceMarkdownEdit in
+  // apps/app/server/workspace/library.ts.
+  markdown: external_exports.string().min(1).max(1e6),
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
+  scopeKey: external_exports.string().min(1).optional()
 });
 var draftWireMessageSchema = external_exports.object({
   ...manualRequestShape,
   body: external_exports.string().trim().min(1).max(8e3),
   channelKey: external_exports.string().trim().min(1).max(120).optional().nullable(),
   threadId: external_exports.string().uuid().optional().nullable(),
+  idempotencyKey: providedIdempotencyKeySchema.optional(),
   ...workScopeShape
 }).strict();
-var MCP_TOOL_CAPABILITY_SCOPES = {
-  askthew_start_workspace_bind: "agent:bind:start",
-  askthew_check_workspace_bind: "agent:bind:status",
-  capture_session_signal: "agent:signals:write",
-  list_signals: "agent:signals:read",
-  create_decision: "agent:decisions:write",
-  list_decisions: "agent:decisions:read",
-  list_outcomes: "agent:outcomes:read",
-  list_project_docs: "agent:docs:read",
-  read_project_doc: "agent:docs:read",
-  recap: "agent:recap",
-  coach: "agent:coach",
-  next_moves: "agent:next_moves",
-  list_ready_work: "agent:work:read",
-  claim_work: "agent:work:claim",
-  heartbeat_work: "agent:work:write",
-  complete_work: "agent:work:write",
-  release_work: "agent:work:write",
-  file_request: "agent:requests:write",
-  draft_wire_message: "agent:wire:draft"
+var PROJECT_CONTEXT_RESOURCES = {
+  pack: "askthew://project-context",
+  wCard: "askthew://project-context/w-card",
+  northStar: "askthew://project-context/north-star",
+  outcomes: "askthew://project-context/outcomes",
+  decisions: "askthew://project-context/decisions"
 };
+var READ_TOOL_OUTPUT_SCHEMA = external_exports.object({
+  ok: external_exports.boolean().optional()
+}).passthrough();
+var DEVICE_ONLY_TOOLS = /* @__PURE__ */ new Set([
+  "write_project_doc",
+  "request_world_analysis",
+  "request_whiteboard_map",
+  "list_ready_work",
+  "claim_work",
+  "heartbeat_work",
+  "complete_work",
+  "release_work",
+  "file_request",
+  "draft_wire_message",
+  "askthew_start_workspace_bind",
+  "askthew_check_workspace_bind"
+]);
+var PROJECT_WRITE_TOOLS = /* @__PURE__ */ new Set([
+  "capture_session_signal",
+  "create_decision",
+  "write_project_doc",
+  "request_world_analysis",
+  "request_whiteboard_map",
+  "claim_work",
+  "heartbeat_work",
+  "complete_work",
+  "release_work",
+  "file_request",
+  "draft_wire_message"
+]);
+var BIND_TOOLS = /* @__PURE__ */ new Set([
+  "askthew_start_workspace_bind",
+  "askthew_check_workspace_bind"
+]);
+var PROJECT_ARTIFACT_RESOURCE_TEMPLATE = "artifact://{+ref}";
+function parseArtifactResourceUri(uri) {
+  const trimmed = uri.trim();
+  if (!trimmed.startsWith("artifact://")) return null;
+  const parts = trimmed.slice("artifact://".length).split("/");
+  if (parts.length < 3) return null;
+  const last = parts[parts.length - 1] ?? "";
+  const at = last.indexOf("@");
+  const artifactId = at === -1 ? last : last.slice(0, at);
+  const versionRaw = at === -1 ? "" : last.slice(at + 1);
+  if (!artifactId) return null;
+  const version2 = /^[1-9][0-9]*$/.test(versionRaw) ? Number(versionRaw) : void 0;
+  return version2 ? { artifactId, version: version2 } : { artifactId };
+}
 var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W project installs, send compact session signals to the connected Ask The W project for meaningful verification, final summaries, and explicit product-relevant direction changes. Routine setup, checkpoints, and implementation chatter should stay local/internal. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
-var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W project binding for the local identity. Returns a confirmation URL and display code; does not send project content.";
+var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W project binding for this coding agent. Returns a confirmation URL and display code. Open the URL while signed in to Ask The W, confirm the code, and choose a paid project. Do not ask the user for an email or a six-digit code. Does not send project content.";
 var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W project binding status for a display code. When completed, stores the project binding and consent receipt locally.";
 var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected project or scope. Does not modify project state.";
 var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record only when the user explicitly asks Ask The W to capture or record a decision. Routine coding work must use capture_session_signal instead.";
 var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history only when the user explicitly asks for it. Does not modify project state.";
 var LIST_OUTCOMES_DESCRIPTION = "Read active Ask The W outcomes only when the user explicitly asks for them. Does not modify project state.";
-var LIST_PROJECT_DOCS_DESCRIPTION = "List current kept files in the bound Ask The W Project library, including agent entry-point docs. Read-only.";
-var READ_PROJECT_DOC_DESCRIPTION = "Read one bound Project library file at an exact version. Returns grounded text and a versioned artifact ref; never writes or pushes files.";
-var RECAP_DESCRIPTION = "Read a server-generated recap only when the user explicitly asks for a recap. Does not modify project state.";
+var LIST_PROJECT_DOCS_DESCRIPTION = "List current kept files in the bound Ask The W Project library. AGENTS.md and CLAUDE.md are how to work in the repo; PRD.md is the product brief when present. Read-only. Safe for a session-start check.";
+var READ_PROJECT_DOC_DESCRIPTION = "Read one bound Project library file at an exact version. Returns grounded text and a versioned artifact ref, plus human_maintained, which says whether a person owns the file. Safe for a session-start check. Does not modify project state.";
+var WRITE_PROJECT_DOC_DESCRIPTION = "Write one bound Project library file as markdown, only when the user explicitly asks. The write appends a new version authored by this agent and replaces nothing; naming a path that does not exist yet creates the file. A file whose human_maintained flag is true is refused: read, quote and cite it instead.";
+var GET_PROJECT_CONTEXT_DESCRIPTION = "Read the bound project's compact context pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. Safe for a session-start check. This is the project view. Recap is the install session trail and also returns this pack plus an install-trail appendix for older hosts. Does not modify project state.";
+var REQUEST_WORLD_ANALYSIS_DESCRIPTION = "Request World by Ask The W competitive analysis for the bound project, only when the user explicitly asks. Uses the same refresh path as the World UI, so the result appears there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
+var REQUEST_WHITEBOARD_MAP_DESCRIPTION = "Request Whiteboard by Ask The W to map or cluster the bound project, only when the user explicitly asks. Uses the same refresh path as the Whiteboard UI, so the board updates there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
+var RECAP_DESCRIPTION = "Install-trail summary for this coding-agent install. Prefer get_project_context / askthew://project-context for the project view. This tool still returns the project pack first, then a clearly named install_trail appendix, so hosts that call recap get the project. Only when the user explicitly asks for a recap. Does not modify project state.";
 var COACH_DESCRIPTION = "Read on-demand server-backed coaching and next-step guidance only when the user explicitly asks for guidance. Not part of routine setup, checkpoint, or final-summary cadence. Does not modify project state.";
 var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W project Next Moves only when the user explicitly asks for next moves. This is separate from coach tips and does not modify project state.";
-var LIST_READY_WORK_DESCRIPTION = "Read approved terminal work waiting for this bound project. Safe for a session-start check; does not claim or start work.";
+var LIST_READY_WORK_DESCRIPTION = "Read the OKed coding-agent queue for this bound project, not W-product runs. Safe for a session-start check; does not claim or start work.";
 var CLAIM_WORK_DESCRIPTION = "Explicitly claim one approved terminal work item after the human chooses it. Claiming starts the run and returns the full fenced brief.";
 var HEARTBEAT_WORK_DESCRIPTION = "Renew the lease for a claimed terminal work item and optionally attach a short progress note.";
 var COMPLETE_WORK_DESCRIPTION = "Complete a claimed terminal work item with a receipt: summary, files touched, checks run, and optional commit ref.";
@@ -27801,6 +22871,7 @@ function verifyTokenWithTimeout(input) {
   ]);
 }
 function toolJson(value, options = {}) {
+  const structuredContent = value && typeof value === "object" && !Array.isArray(value) ? value : { value };
   return {
     content: [
       {
@@ -27808,59 +22879,59 @@ function toolJson(value, options = {}) {
         text: JSON.stringify(value, null, 2)
       }
     ],
+    structuredContent,
     ...options.isError ? { isError: true } : {}
   };
 }
 function isFailureBody(body) {
   return typeof body === "object" && body !== null && body.ok === false;
 }
-function toolBody(body) {
-  return toolJson(body, { isError: isFailureBody(body) });
-}
 function toolResult(result) {
   return toolJson(result.body, { isError: !result.ok || isFailureBody(result.body) });
+}
+function resourceJson(uri, value) {
+  return {
+    contents: [
+      {
+        uri: uri.href,
+        mimeType: "application/json",
+        text: JSON.stringify(value, null, 2)
+      }
+    ]
+  };
+}
+function packRecord(body) {
+  if (!body || typeof body !== "object") return null;
+  const pack = body.pack;
+  return pack && typeof pack === "object" && !Array.isArray(pack) ? pack : null;
 }
 function requiresPaidWorkspace(env = process.env) {
   const value = String(env.ASKTHEW_REQUIRE_PAID ?? env.ASKTHEW_PLUGIN_TIER ?? "").trim().toLowerCase();
   return value === "1" || value === "true" || value === "yes" || value === "paid";
-}
-function needsSignup(env = process.env) {
-  const paidRequired = requiresPaidWorkspace(env);
-  return toolJson(
-    {
-      ok: false,
-      code: "needs_signup",
-      message: paidRequired ? "Ask The W needs a project connection. First call askthew_start_signup({email}) and askthew_complete_signup({email, code}), then call askthew_start_workspace_bind and complete the browser confirmation." : "Ask The W needs signup before this tool can run. Call askthew_start_signup({email}), then askthew_complete_signup({email, code})."
-    },
-    { isError: true }
-  );
-}
-function installHostArg(env) {
-  return defaultClientId(env) ?? "<host>";
-}
-function defaultClientId(env) {
-  const host = env.ASKTHEW_HOST_TYPE;
-  return host === "claude_code" || host === "codex" || host === "cursor" ? host : void 0;
-}
-function needsReauth(reason, env) {
-  return toolJson(
-    {
-      ok: false,
-      code: "needs_reauth",
-      message: `Ask The W token is no longer valid (reason: ${reason}). Run: npx -y --package @askthew/mcp-plugin askthew-mcp install --host ${installHostArg(env)} --force`
-    },
-    { isError: true }
-  );
 }
 function needsPaidWorkspace() {
   return toolJson(
     {
       ok: false,
       code: "needs_paid_workspace",
-      message: "Ask The W needs a project connection. Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed."
+      message: "Ask The W needs a project connection. Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed. Do not ask the user for an email or a six-digit code."
     },
     { isError: true }
   );
+}
+function needsReauth(reason) {
+  return toolJson(
+    {
+      ok: false,
+      code: "needs_reauth",
+      message: `Ask The W token is no longer valid (reason: ${reason}). Call askthew_start_workspace_bind, open the returned URL, confirm the code in Ask The W, then call askthew_check_workspace_bind until it reports completed.`
+    },
+    { isError: true }
+  );
+}
+function defaultClientId(env) {
+  const host = env.ASKTHEW_HOST_TYPE;
+  return host === "claude_code" || host === "codex" || host === "cursor" ? host : void 0;
 }
 function defaultScopeKey(env = process.env) {
   return currentScopeKey(process.cwd(), env);
@@ -27870,6 +22941,9 @@ function validIdempotencyKey(value) {
 }
 function fallbackIdempotencyKey() {
   return import_node_crypto.default.randomUUID();
+}
+function resolveWriteIdempotencyKey(value) {
+  return validIdempotencyKey(value) ? String(value) : fallbackIdempotencyKey();
 }
 function captureCadenceFeedback(sessions, signal, nowMs = Date.now()) {
   const previous = sessions.get(signal.sessionId);
@@ -27914,7 +22988,7 @@ async function releaseHeldWork(input) {
 function createAskTheWMcpServer(options = {}) {
   const server = new McpServer({
     name: "Ask The W MCP",
-    version: packageVersion2()
+    version: packageVersion()
   });
   const outbox = options.outbox ?? new Outbox();
   const signalCadenceBySession = /* @__PURE__ */ new Map();
@@ -27932,8 +23006,8 @@ function createAskTheWMcpServer(options = {}) {
     env: runtimeEnv
   });
   const cloudGuard = (currentClient, input = {}) => {
-    if (!currentClient.hasToken()) return needsSignup(runtimeEnv);
-    if (tokenInvalidReason) return needsReauth(tokenInvalidReason, runtimeEnv);
+    if (!currentClient.hasToken()) return needsPaidWorkspace();
+    if (tokenInvalidReason) return needsReauth(tokenInvalidReason);
     if (input.requirePaid !== false && requiresPaidWorkspace(runtimeEnv)) {
       const tokenFile = loadCloudToken(runtimeEnv);
       if (tokenFile?.tier !== "paid") return needsPaidWorkspace();
@@ -27956,52 +23030,21 @@ function createAskTheWMcpServer(options = {}) {
       { isError: true }
     );
   };
-  server.tool(
-    "askthew_start_signup",
-    "Start Ask The W signup by sending a 6-digit OTP email to the provided address.",
-    {
-      email: external_exports.string().email(),
-      clientHint: external_exports.enum(["claude_code", "codex", "cursor", "web_agent"]).optional()
-    },
-    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const body = await startSignup({
-        email: payload.email,
-        apiUrl: options.apiUrl,
-        clientHint: payload.clientHint,
-        fetcher: options.fetcher,
-        env: runtimeEnv
-      });
-      return toolBody(body);
+  const advertisedTools = () => server._registeredTools ?? {};
+  const syncAdvertisedTools = () => {
+    const tokenFile = loadCloudToken(runtimeEnv);
+    const purpose = tokenFile?.token_purpose === "conversation" ? "conversation" : "device";
+    const hasToken = Boolean(tokenFile?.token);
+    const paidOk = !requiresPaidWorkspace(runtimeEnv) || tokenFile?.tier === "paid";
+    const bind = bindingStatus();
+    const projectReady = bind.allowed && bind.reason !== "unbound";
+    const cloudOk = hasToken && !tokenInvalidReason && paidOk;
+    for (const [name, tool] of Object.entries(advertisedTools())) {
+      const advertise = (purpose === "device" || !DEVICE_ONLY_TOOLS.has(name)) && (projectReady || !PROJECT_WRITE_TOOLS.has(name)) && (cloudOk || BIND_TOOLS.has(name));
+      if (advertise) tool.enable();
+      else tool.disable();
     }
-  );
-  server.tool(
-    "askthew_complete_signup",
-    "Complete Ask The W signup with the 6-digit OTP code from the email.",
-    {
-      email: external_exports.string().email(),
-      code: external_exports.string().regex(/^\d{6}$/),
-      clientHint: external_exports.enum(["claude_code", "codex", "cursor", "web_agent"]).optional()
-    },
-    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const body = await completeSignup({
-        email: payload.email,
-        code: payload.code,
-        apiUrl: options.apiUrl,
-        clientHint: payload.clientHint,
-        tokenPurpose: "device",
-        fetcher: options.fetcher,
-        env: runtimeEnv
-      });
-      if (body?.ok) tokenInvalidReason = null;
-      return toolBody(body);
-    }
-  );
+  };
   server.tool(
     "askthew_start_workspace_bind",
     START_WORKSPACE_BIND_DESCRIPTION,
@@ -28012,11 +23055,25 @@ function createAskTheWMcpServer(options = {}) {
     async () => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
+      if (tokenInvalidReason) {
+        archiveCloudToken(tokenInvalidReason, runtimeEnv);
+        tokenInvalidReason = null;
+      }
       const currentClient = client();
-      const unavailable = cloudGuard(currentClient, { requirePaid: false });
-      if (unavailable) return unavailable;
-      const result = await currentClient.startPaidBind();
-      return toolResult(result);
+      if (currentClient.hasToken()) {
+        const unavailable = cloudGuard(currentClient, { requirePaid: false });
+        if (unavailable) return unavailable;
+      }
+      const result = await currentClient.startPaidBind({
+        clientHint: defaultClientId(runtimeEnv)
+      });
+      const body = result.body && typeof result.body === "object" ? { ...result.body } : result.body;
+      if (body && typeof body === "object" && "token" in body) {
+        delete body.token;
+      }
+      if (result.ok) tokenInvalidReason = null;
+      syncAdvertisedTools();
+      return toolJson(body, { isError: !result.ok || isFailureBody(body) });
     }
   );
   server.tool(
@@ -28054,6 +23111,7 @@ function createAskTheWMcpServer(options = {}) {
             });
           }
         }
+        syncAdvertisedTools();
       }
       return toolResult(result);
     }
@@ -28122,17 +23180,21 @@ function createAskTheWMcpServer(options = {}) {
       });
     }
   );
-  server.tool(
+  server.registerTool(
     "list_signals",
-    LIST_SIGNALS_DESCRIPTION,
     {
-      sessionId: external_exports.string().optional(),
-      since: external_exports.string().optional(),
-      limit: external_exports.number().int().min(1).max(100).default(50),
-      scopeKey: external_exports.string().min(1).optional(),
-      allScopes: external_exports.boolean().optional()
+      description: LIST_SIGNALS_DESCRIPTION,
+      inputSchema: {
+        sessionId: external_exports.string().optional(),
+        since: external_exports.string().optional(),
+        limit: external_exports.number().int().min(1).max(100).default(50),
+        cursor: external_exports.string().min(1).optional(),
+        scopeKey: external_exports.string().min(1).optional(),
+        allScopes: external_exports.boolean().optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
     },
-    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -28159,22 +23221,26 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.createDecision({
         ...payload,
-        idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey(),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey),
         scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
       return toolResult(result);
     }
   );
-  server.tool(
+  server.registerTool(
     "list_decisions",
-    LIST_DECISIONS_DESCRIPTION,
     {
-      ...manualRequestShape,
-      limit: external_exports.number().int().min(1).max(200).default(50),
-      scopeKey: external_exports.string().min(1).optional(),
-      allScopes: external_exports.boolean().optional()
+      description: LIST_DECISIONS_DESCRIPTION,
+      inputSchema: {
+        ...manualRequestShape,
+        limit: external_exports.number().int().min(1).max(200).default(50),
+        cursor: external_exports.string().min(1).optional(),
+        scopeKey: external_exports.string().min(1).optional(),
+        allScopes: external_exports.boolean().optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
     },
-    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -28210,14 +23276,17 @@ function createAskTheWMcpServer(options = {}) {
       return toolResult(result);
     }
   );
-  server.tool(
+  server.registerTool(
     "list_project_docs",
-    LIST_PROJECT_DOCS_DESCRIPTION,
     {
-      limit: external_exports.number().int().min(1).max(100).default(50),
-      scopeKey: external_exports.string().min(1).optional()
+      description: LIST_PROJECT_DOCS_DESCRIPTION,
+      inputSchema: {
+        limit: external_exports.number().int().min(1).max(100).default(50),
+        scopeKey: external_exports.string().min(1).optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
     },
-    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -28263,27 +23332,140 @@ function createAskTheWMcpServer(options = {}) {
     }
   );
   server.tool(
-    "recap",
-    RECAP_DESCRIPTION,
+    "write_project_doc",
+    WRITE_PROJECT_DOC_DESCRIPTION,
+    writeProjectDocSchema.shape,
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      if (!payload.artifactId && !payload.path) {
+        return toolJson(
+          { ok: false, code: "doc_required", message: "Provide artifactId or path." },
+          { isError: true }
+        );
+      }
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.writeProjectDoc({
+        artifactId: payload.artifactId,
+        path: payload.path,
+        markdown: payload.markdown,
+        requestIntent: payload.requestIntent,
+        originatingPrompt: payload.originatingPrompt,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
+      });
+      return toolResult(result);
+    }
+  );
+  server.registerTool(
+    "get_project_context",
     {
-      ...manualRequestShape,
-      since: external_exports.string().optional(),
-      maxSignals: external_exports.number().int().min(1).max(200).optional(),
-      scopeKey: external_exports.string().min(1).optional(),
-      allScopes: external_exports.boolean().optional()
+      description: GET_PROJECT_CONTEXT_DESCRIPTION,
+      inputSchema: {
+        scopeKey: external_exports.string().min(1).optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
     },
-    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      const result = await currentClient.recap({
-        ...payload,
-        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
+      const result = await currentClient.getProjectContext({
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
       });
       return toolResult(result);
+    }
+  );
+  server.tool(
+    "request_world_analysis",
+    REQUEST_WORLD_ANALYSIS_DESCRIPTION,
+    {
+      ...manualRequestShape,
+      idempotencyKey: providedIdempotencyKeySchema.optional(),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.requestWorldAnalysis({
+        requestIntent: payload.requestIntent,
+        originatingPrompt: payload.originatingPrompt,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
+      });
+      return toolResult(result);
+    }
+  );
+  server.tool(
+    "request_whiteboard_map",
+    REQUEST_WHITEBOARD_MAP_DESCRIPTION,
+    {
+      ...manualRequestShape,
+      idempotencyKey: providedIdempotencyKeySchema.optional(),
+      scopeKey: external_exports.string().min(1).optional()
+    },
+    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const result = await currentClient.requestWhiteboardMap({
+        requestIntent: payload.requestIntent,
+        originatingPrompt: payload.originatingPrompt,
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
+      });
+      return toolResult(result);
+    }
+  );
+  server.registerTool(
+    "recap",
+    {
+      description: RECAP_DESCRIPTION,
+      inputSchema: {
+        ...manualRequestShape,
+        since: external_exports.string().optional(),
+        maxSignals: external_exports.number().int().min(1).max(200).optional(),
+        scopeKey: external_exports.string().min(1).optional(),
+        allScopes: external_exports.boolean().optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
+    },
+    async (payload) => {
+      const blocked = blockedOutsideProject();
+      if (blocked) return blocked;
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return unavailable;
+      const scopeKey = payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv);
+      const [packResult, trailResult] = await Promise.all([
+        currentClient.getProjectContext({ scopeKey }),
+        currentClient.recap({ ...payload, scopeKey })
+      ]);
+      const packBody = packResult.body;
+      const trailBody = trailResult.body;
+      if (!trailResult.ok || isFailureBody(trailBody)) {
+        return toolResult(trailResult);
+      }
+      return toolJson({
+        ...trailBody,
+        pack: packResult.ok && !isFailureBody(packBody) ? packBody.pack ?? packBody : null,
+        pack_error: packResult.ok && !isFailureBody(packBody) ? void 0 : packBody,
+        install_trail: trailBody.recap ?? trailBody
+      });
     }
   );
   server.tool(
@@ -28311,15 +23493,18 @@ function createAskTheWMcpServer(options = {}) {
       return toolResult(result);
     }
   );
-  server.tool(
+  server.registerTool(
     "next_moves",
-    NEXT_MOVES_DESCRIPTION,
     {
-      ...manualRequestShape,
-      limit: external_exports.number().int().min(1).max(50).optional(),
-      scopeKey: external_exports.string().min(1).optional()
+      description: NEXT_MOVES_DESCRIPTION,
+      inputSchema: {
+        ...manualRequestShape,
+        limit: external_exports.number().int().min(1).max(50).optional(),
+        scopeKey: external_exports.string().min(1).optional()
+      },
+      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+      annotations: READ_WORKSPACE_ANNOTATIONS
     },
-    READ_WORKSPACE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
@@ -28407,7 +23592,8 @@ function createAskTheWMcpServer(options = {}) {
         filesTouched: payload.filesTouched,
         checks: payload.checks,
         commitRef: payload.commitRef,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       forgetHeldWork(payload.runId);
       return toolResult(result);
@@ -28449,7 +23635,8 @@ function createAskTheWMcpServer(options = {}) {
         title: payload.title,
         body: payload.body,
         metadata: payload.metadata,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
     }
@@ -28471,11 +23658,116 @@ function createAskTheWMcpServer(options = {}) {
         body: payload.body,
         channelKey: payload.channelKey,
         threadId: payload.threadId,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
     }
   );
+  const readProjectContextBody = async () => {
+    const blocked = blockedOutsideProject();
+    if (blocked) return { ok: false, body: JSON.parse(blocked.content[0].text) };
+    const currentClient = client();
+    const unavailable = cloudGuard(currentClient);
+    if (unavailable) return { ok: false, body: JSON.parse(unavailable.content[0].text) };
+    return currentClient.getProjectContext({
+      scopeKey: defaultScopeKey(runtimeEnv)
+    });
+  };
+  server.registerResource(
+    "project-context",
+    PROJECT_CONTEXT_RESOURCES.pack,
+    {
+      description: "Compact bound-project pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. Attach at session start. Recap is the install trail, not this pack.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const result = await readProjectContextBody();
+      return resourceJson(uri, result.body);
+    }
+  );
+  server.registerResource(
+    "project-w-card",
+    PROJECT_CONTEXT_RESOURCES.wCard,
+    {
+      description: "Current W Card from the bound project pack. First-class pack field; no wcard:// citation kind.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const result = await readProjectContextBody();
+      if (!result.ok || isFailureBody(result.body)) return resourceJson(uri, result.body);
+      return resourceJson(uri, { ok: true, wCard: packRecord(result.body)?.wCard ?? null });
+    }
+  );
+  server.registerResource(
+    "project-north-star",
+    PROJECT_CONTEXT_RESOURCES.northStar,
+    {
+      description: "Canonical North Star from the bound project pack. First-class pack field; no northstar:// citation kind.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const result = await readProjectContextBody();
+      if (!result.ok || isFailureBody(result.body)) return resourceJson(uri, result.body);
+      return resourceJson(uri, { ok: true, northStar: packRecord(result.body)?.northStar ?? null });
+    }
+  );
+  server.registerResource(
+    "project-outcomes",
+    PROJECT_CONTEXT_RESOURCES.outcomes,
+    {
+      description: "Active Way outcomes from the bound project pack, cited with outcome:// ids.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const result = await readProjectContextBody();
+      if (!result.ok || isFailureBody(result.body)) return resourceJson(uri, result.body);
+      return resourceJson(uri, { ok: true, outcomes: packRecord(result.body)?.outcomes ?? [] });
+    }
+  );
+  server.registerResource(
+    "project-decisions",
+    PROJECT_CONTEXT_RESOURCES.decisions,
+    {
+      description: "Open Way decisions from the bound project pack, cited with decision:// ids. This is the project record, not the install-scoped list_decisions trail.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const result = await readProjectContextBody();
+      if (!result.ok || isFailureBody(result.body)) return resourceJson(uri, result.body);
+      return resourceJson(uri, { ok: true, decisions: packRecord(result.body)?.decisions ?? [] });
+    }
+  );
+  server.registerResource(
+    "project-artifact",
+    new ResourceTemplate(PROJECT_ARTIFACT_RESOURCE_TEMPLATE, { list: void 0 }),
+    {
+      description: "Re-fetch one pack artifact:// ref through the existing project-doc read. Same grammar as read_project_doc; no second fetch path.",
+      mimeType: "application/json"
+    },
+    async (uri) => {
+      const parsed = parseArtifactResourceUri(uri.href);
+      if (!parsed) {
+        return resourceJson(uri, {
+          ok: false,
+          code: "invalid_artifact_ref",
+          message: "Use an artifact:// ref from the project pack. Do not invent another URI grammar."
+        });
+      }
+      const blocked = blockedOutsideProject();
+      if (blocked) return resourceJson(uri, JSON.parse(blocked.content[0].text));
+      const currentClient = client();
+      const unavailable = cloudGuard(currentClient);
+      if (unavailable) return resourceJson(uri, JSON.parse(unavailable.content[0].text));
+      const result = await currentClient.readProjectDoc({
+        artifactId: parsed.artifactId,
+        version: parsed.version,
+        scopeKey: defaultScopeKey(runtimeEnv)
+      });
+      return resourceJson(uri, result.body);
+    }
+  );
+  syncAdvertisedTools();
   return server;
 }
 async function runStdioServer(options = {}) {
@@ -28508,13 +23800,24 @@ async function runStdioServer(options = {}) {
 }
 
 // src/cli.ts
-var SUPPORTED_HOST_TYPES2 = ["claude_code", "codex", "cursor"];
+var import_meta3 = {};
+var requirePackageJson2 = (0, import_node_module3.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta3.url);
+var REMOVED_COMMANDS = /* @__PURE__ */ new Set([
+  "install",
+  "uninstall",
+  "bind",
+  "initialize-handshake",
+  "identity",
+  "doctor",
+  "refresh",
+  "token",
+  "export",
+  "print-instructions",
+  "delete-me"
+]);
 var EXIT_CODE = {
   ok: 0,
   internal: 1,
-  auth: 2,
-  network: 3,
-  binding: 4,
   usage: 5
 };
 var CliError = class extends Error {
@@ -28529,17 +23832,13 @@ var CliError = class extends Error {
 function usageError(message, code = "usage_error") {
   return new CliError(message, { code, exitCode: EXIT_CODE.usage });
 }
-function authError(message, code = "auth_error") {
-  return new CliError(message, { code, exitCode: EXIT_CODE.auth });
-}
-function bindingError(message, code = "binding_error") {
-  return new CliError(message, { code, exitCode: EXIT_CODE.binding });
-}
-function isNonInteractive(args) {
-  return boolArg(args, "--non-interactive") || process.stdin.isTTY !== true;
-}
-function printSuccessJson(command, data) {
-  console.log(JSON.stringify({ ok: true, command, data }, null, 2));
+function packageVersion2() {
+  try {
+    const manifest = requirePackageJson2("../package.json");
+    return typeof manifest.version === "string" ? manifest.version : "unknown";
+  } catch {
+    return "unknown";
+  }
 }
 function usage() {
   return [
@@ -28547,21 +23846,10 @@ function usage() {
     "",
     "Usage:",
     "  askthew-mcp",
-    "  askthew-mcp install --host <claude_code|codex|cursor> [--email <email>] [--code <otp>] [--skip-auth] [--force|--reauth] [--server-entrypoint <path>] [--api-url <url>] [--dry-run] [--json] [--non-interactive]",
-    "  askthew-mcp uninstall --host <claude_code|codex|cursor> [--dry-run] [--keep-local-data] [--keep-auth] [--json]",
-    "  askthew-mcp initialize-handshake [--host <claude_code|codex|cursor>] [--json]",
     "  askthew-mcp session-start [--scope-key <scope>] [--limit <n>] [--json]",
-    "  askthew-mcp bind [--allow-pending] [--json] [--non-interactive]",
-    "  askthew-mcp identity status [--json]",
-    "  askthew-mcp doctor [--host <claude_code|codex|cursor>] [--json] [--strict]",
-    "  askthew-mcp refresh [--json]",
-    "  askthew-mcp token rotate|revoke [--json]",
-    "  askthew-mcp export [--scope-key <scope>] [--all-scopes] [--json]",
-    "  askthew-mcp print-instructions",
-    "  askthew-mcp delete-me --confirm [--json]",
     "  askthew-mcp --version",
     "",
-    "Global: --non-interactive fails fast instead of prompting (also inferred when stdin is not a TTY)."
+    "Install from the Claude Code or Codex marketplace. Project connection uses MCP tools, not this CLI."
   ].join("\n");
 }
 function parseArgs(argv) {
@@ -28593,369 +23881,8 @@ function positiveIntArg(args, name, fallback, max) {
   const parsed = Number(stringArg(args, name));
   return Number.isFinite(parsed) ? Math.max(1, Math.min(max, Math.round(parsed))) : fallback;
 }
-function requireHost(value) {
-  if (value === "claude_code" || value === "codex" || value === "cursor") return value;
-  throw usageError("Missing or invalid --host. Expected claude_code, codex, or cursor.", "invalid_host");
-}
-function optionalHost(value) {
-  if (value === "claude_code" || value === "codex" || value === "cursor") return value;
-  return null;
-}
-function apiUrl(args, tokenFile) {
-  return resolveApiUrl({
-    apiUrl: stringArg(args, "--api-url"),
-    tokenFile: tokenFile ?? null
-  });
-}
-async function readEmail(nonInteractive) {
-  if (nonInteractive) {
-    throw usageError("Missing --email. Pass --email <address> in non-interactive mode.", "missing_email");
-  }
-  const response = await (0, import_prompts.default)({
-    type: "text",
-    name: "email",
-    message: "Email for your Ask The W code",
-    validate: (value) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value) ? true : "Enter a valid email."
-  });
-  if (!response.email) throw new Error("Signup cancelled.");
-  return String(response.email);
-}
-async function readCode(nonInteractive) {
-  if (nonInteractive) {
-    throw usageError("Missing --code. Pass --code <otp> in non-interactive mode.", "missing_code");
-  }
-  const response = await (0, import_prompts.default)({
-    type: "text",
-    name: "code",
-    message: "Six-digit Ask The W code",
-    validate: (value) => /^\d{6}$/.test(value) ? true : "Enter the 6-digit code."
-  });
-  if (!response.code) throw new Error("Signup cancelled.");
-  return String(response.code);
-}
-async function authenticateInstall(input) {
-  const email2 = input.email || await readEmail(input.nonInteractive);
-  if (input.code) {
-    const completed2 = await completeSignup({
-      email: email2,
-      code: input.code,
-      apiUrl: input.apiUrl,
-      clientHint: input.hostType,
-      tokenPurpose: "device"
-    });
-    if (!completed2?.ok) {
-      throw new Error(String(completed2?.message ?? completed2?.code ?? "Could not verify signup code."));
-    }
-    return completed2;
-  }
-  const started = await startSignup({
-    email: email2,
-    apiUrl: input.apiUrl,
-    clientHint: input.hostType
-  });
-  if (!started?.ok) {
-    throw authError(String(started?.message ?? started?.code ?? "Could not send signup code."), "signup_start_failed");
-  }
-  const code = await readCode(input.nonInteractive);
-  const completed = await completeSignup({
-    email: email2,
-    code,
-    apiUrl: input.apiUrl,
-    clientHint: input.hostType,
-    tokenPurpose: "device"
-  });
-  if (!completed?.ok) {
-    throw authError(String(completed?.message ?? completed?.code ?? "Could not verify signup code."), "signup_verify_failed");
-  }
-  return completed;
-}
-async function installCommand(argv) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  const nonInteractive = isNonInteractive(args);
-  const hostType = requireHost(stringArg(args, "--host"));
-  const baseUrl = apiUrl(args);
-  const skipAuth = boolArg(args, "--skip-auth");
-  const dryRun = boolArg(args, "--dry-run");
-  const forceAuth = boolArg(args, "--force") || boolArg(args, "--reauth");
-  const email2 = stringArg(args, "--email") || void 0;
-  const code = stringArg(args, "--code") || void 0;
-  const serverEntrypoint = stringArg(args, "--server-entrypoint") || void 0;
-  if (stringArg(args, "--bind") || boolArg(args, "--bind")) {
-    throw usageError(
-      "--bind is no longer supported. Run install with email verification, then use `askthew-mcp bind` to connect a project.",
-      "unsupported_flag"
-    );
-  }
-  if (boolArg(args, "--free")) {
-    throw usageError("This flag is no longer needed. Run install with email verification.", "unsupported_flag");
-  }
-  if (hostType === "claude_code" && !asJson) {
-    console.log("Tip: Claude Code users can install Ask The W with `/plugin marketplace add AskTheWAI/claude-plugins`.");
-  }
-  let projectId;
-  const existingToken = loadCloudToken();
-  let installTier = existingToken?.tier ?? "free";
-  if (!skipAuth && !dryRun && existingToken?.token && !email2 && !code) {
-    const verification = await verifyToken({ apiUrl: baseUrl });
-    if (verification.stale) {
-      const archivePath = archiveCloudToken(verification.reason);
-      if (!asJson) {
-        console.log(`Existing token was invalid (${verification.reason}). Starting fresh email signup.`);
-        if (archivePath) console.log(`Archived invalid token: ${archivePath}`);
-      }
-      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, nonInteractive });
-      projectId = auth.project_id ?? null;
-      installTier = "free";
-    } else if (forceAuth) {
-      const archivePath = archiveCloudToken("replaced");
-      if (!asJson && archivePath) console.log(`Archived existing token: ${archivePath}`);
-      const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, nonInteractive });
-      projectId = auth.project_id ?? null;
-      installTier = "free";
-    } else {
-      projectId = verification.project_id ?? existingToken.project_id ?? null;
-      if (verification.project_id) {
-        installTier = "paid";
-        saveCloudToken({
-          ...existingToken,
-          tier: "paid",
-          project_id: verification.project_id,
-          api_url: baseUrl
-        });
-      }
-      if (!asJson) {
-        if ("email" in verification) {
-          console.log(`Existing Ask The W install detected and valid for ${verification.email ?? "this device"}.`);
-        } else {
-          console.log("Existing Ask The W install detected. Token verification is temporarily unavailable.");
-        }
-        console.log("Re-run with --force to re-authenticate.");
-      }
-    }
-  } else if (!skipAuth && !dryRun) {
-    if (forceAuth && existingToken?.token) {
-      const archivePath = archiveCloudToken("replaced");
-      if (!asJson && archivePath) console.log(`Archived existing token: ${archivePath}`);
-    }
-    const auth = await authenticateInstall({ hostType, apiUrl: baseUrl, email: email2, code, nonInteractive });
-    projectId = auth.project_id ?? null;
-    installTier = "free";
-  } else if (!dryRun && !existingToken) {
-    throw authError("--skip-auth requires an existing ~/.askthew/cloud-token.json.", "no_existing_token");
-  }
-  try {
-    const config2 = installHostConfig({
-      hostType,
-      apiUrl: baseUrl,
-      serverName: DEFAULT_SERVER_NAME,
-      serverEntrypoint,
-      dryRun
-    });
-    const instructions = writeBehaviorInstructions({ hostType, dryRun });
-    if (!dryRun) {
-      writeInstallMetadata({
-        hostType,
-        apiUrl: baseUrl,
-        tier: installTier,
-        projectId,
-        signalAuthorizationSource: projectId ? "workspace_bind" : "plugin_install",
-        cwd: process.cwd()
-      });
-    }
-    if (asJson) {
-      printSuccessJson("install", {
-        host: hostType,
-        settings_path: config2.settingsPath,
-        instructions_path: instructions.filePath,
-        project_id: projectId ?? null,
-        tier: installTier,
-        dry_run: dryRun
-      });
-    } else {
-      console.log(`Ask The W installed for ${hostType}.`);
-      console.log(`MCP config: ${config2.settingsPath}`);
-      console.log(`Agent instructions: ${instructions.filePath}`);
-      console.log("Open a new coding-agent session or restart this one so it loads the new MCP server and instructions.");
-    }
-  } catch (error2) {
-    const message = error2 instanceof Error ? error2.message : "Unknown install failure.";
-    if (asJson) {
-      console.log(
-        JSON.stringify(
-          {
-            ok: false,
-            command: "install",
-            error: {
-              code: "install_config_write_failed",
-              message: `Install reached auth, but writing local config failed: ${message}. Token is still saved under ${dataDirSummary()}. Retry local writes with: askthew-mcp install --host ${hostType} --skip-auth`
-            }
-          },
-          null,
-          2
-        )
-      );
-    } else {
-      console.error(`Install reached auth, but writing local config failed: ${message}`);
-      console.error(`Your token is still saved under ${dataDirSummary()}.`);
-      console.error(`Retry local writes with: askthew-mcp install --host ${hostType} --skip-auth`);
-    }
-    process.exitCode = EXIT_CODE.internal;
-  }
-}
-async function uninstallCommand(argv) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  const hostType = requireHost(stringArg(args, "--host"));
-  const dryRun = boolArg(args, "--dry-run");
-  const config2 = uninstallHostConfig({
-    hostType,
-    serverName: DEFAULT_SERVER_NAME,
-    dryRun
-  });
-  const instructions = removeBehaviorInstructions({ hostType, dryRun });
-  if (asJson) {
-    printSuccessJson("uninstall", {
-      host: hostType,
-      dry_run: dryRun,
-      config_removed: config2.removed,
-      settings_path: config2.settingsPath,
-      instructions_removed: instructions.removed,
-      instructions_path: instructions.filePath,
-      data_dir: dataDirSummary()
-    });
-    return;
-  }
-  console.log(`${dryRun ? "Would uninstall" : "Uninstalled"} Ask The W for ${hostType}.`);
-  console.log(`${config2.removed ? "Removed" : "No matching"} MCP config: ${config2.settingsPath}`);
-  console.log(`${instructions.removed ? "Removed" : "No matching"} agent instructions: ${instructions.filePath}`);
-  console.log(`Local identity and outbox were left in ${dataDirSummary()}.`);
-  console.log("Run `askthew-mcp delete-me --confirm` before uninstall if you also want to delete install-scoped cloud data.");
-}
-function openBrowser(url) {
-  const command = process.platform === "darwin" ? "open" : process.platform === "win32" ? "cmd" : "xdg-open";
-  const args = process.platform === "win32" ? ["/c", "start", "", url] : [url];
-  try {
-    const child = (0, import_node_child_process.spawn)(command, args, { detached: true, stdio: "ignore" });
-    child.unref();
-  } catch {
-  }
-}
-var BIND_POLL_INTERVAL_MS = 5e3;
-var BIND_CODE_LIFETIME_MS = 10 * 60 * 1e3;
-var BIND_POLL_GRACE_MS = 60 * 1e3;
-var BIND_POLL_ATTEMPTS = Math.ceil((BIND_CODE_LIFETIME_MS + BIND_POLL_GRACE_MS) / BIND_POLL_INTERVAL_MS);
-async function bindCommand(argv) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  const nonInteractive = isNonInteractive(args);
-  const allowPending = boolArg(args, "--allow-pending");
-  const baseUrl = apiUrl(args);
-  const client = new AskTheWCloudClient({ apiUrl: baseUrl });
-  if (!client.hasToken()) throw authError("Run askthew-mcp install first.", "not_signed_in");
-  const outbox = new Outbox();
-  const pendingBeforeBind = outbox.pendingCount();
-  if (pendingBeforeBind > 0 && !allowPending) {
-    if (nonInteractive) {
-      throw usageError(
-        `${pendingBeforeBind} pending capture(s) are waiting locally. Pass --allow-pending to connect in non-interactive mode.`,
-        "pending_outbox_requires_allow_pending"
-      );
-    }
-    const response = await (0, import_prompts.default)({
-      type: "confirm",
-      name: "ok",
-      message: `${pendingBeforeBind} captures are waiting locally. Connect now and sync them into the project after confirmation?`,
-      initial: true
-    });
-    if (!response.ok) throw usageError("Workspace connection cancelled while captures are pending.", "bind_cancelled");
-  }
-  const started = await client.request("/paid/bind/start", { method: "POST", body: "{}" });
-  const body = started.body;
-  if (!started.ok || body.ok === false) {
-    throw bindingError(String(body.message ?? body.code ?? "Could not start project connection."), "bind_start_failed");
-  }
-  const codeDisplay = String(body.code_display ?? "");
-  const url = String(body.url ?? "");
-  if (!asJson) {
-    console.log(`Open this URL: ${url}`);
-    console.log(`Confirm this terminal code in the browser: ${codeDisplay}`);
-  }
-  if (url) openBrowser(url);
-  for (let attempt = 0; attempt < BIND_POLL_ATTEMPTS; attempt += 1) {
-    await new Promise((resolve2) => setTimeout(resolve2, BIND_POLL_INTERVAL_MS));
-    const status = await client.request(
-      `/paid/bind/status?code_display=${encodeURIComponent(codeDisplay)}`,
-      { method: "GET" }
-    );
-    const statusBody = status.body;
-    if (status.ok && statusBody.status === "completed") {
-      const projectId = typeof statusBody.project_id === "string" ? statusBody.project_id : null;
-      const tokenFile = loadCloudToken();
-      if (tokenFile) {
-        saveCloudToken({ ...tokenFile, tier: "paid", project_id: projectId, api_url: baseUrl });
-      }
-      if (projectId) {
-        for (const hostType of SUPPORTED_HOST_TYPES2) {
-          const metadata = loadInstallMetadata(hostType);
-          if (!metadata) continue;
-          writeInstallMetadata({
-            hostType,
-            apiUrl: metadata.api_url || baseUrl,
-            tier: "paid",
-            projectId,
-            signalAuthorizationSource: "workspace_bind",
-            cwd: process.cwd()
-          });
-        }
-      }
-      let synced = 0;
-      if (outbox.pendingCount() > 0) {
-        const flushed = await outbox.flush(client);
-        synced = flushed.sent;
-        if (!asJson) console.log(`Synced ${flushed.sent} pending capture(s) after project connection.`);
-      }
-      if (asJson) {
-        printSuccessJson("bind", { project_id: projectId, synced });
-      } else {
-        console.log("Ask The W install is now connected to the project.");
-      }
-      return;
-    }
-  }
-  throw bindingError("Timed out waiting for project connection.", "bind_timeout");
-}
-async function initializeHandshakeCommand(argv = []) {
-  const args = parseArgs(argv);
-  const host = stringArg(args, "--host");
-  const hostType = host ? requireHost(host) : optionalHost(process.env.ASKTHEW_HOST_TYPE?.trim());
-  const installMetadata = hostType ? loadInstallMetadata(hostType) : null;
-  const tokenFile = loadCloudToken();
-  const payload = {
-    ok: true,
-    configured: Boolean(tokenFile?.token),
-    host: hostType ?? process.env.ASKTHEW_HOST_TYPE ?? null,
-    api_url: stringArg(args, "--api-url") || installMetadata?.api_url || tokenFile?.api_url || apiUrl(args),
-    data_dir: dataDirSummary(),
-    current_scope_key: currentScopeKey(process.cwd())
-  };
-  if (installMetadata) {
-    payload.install_metadata = installMetadata;
-    payload.signal_authorization = loadSignalAuthorizationReceipt(hostType);
-  }
-  if (tokenFile?.token) {
-    payload.install_id = tokenFile.install_id;
-    payload.tier = tokenFile.tier ?? "free";
-    payload.token_purpose = tokenFile.token_purpose ?? "device";
-  } else {
-    payload.code = "needs_signup";
-    payload.message = "No local Ask The W identity is configured. Run install or use askthew_start_signup and askthew_complete_signup.";
-  }
-  if (boolArg(args, "--json")) {
-    console.log(JSON.stringify(payload, null, 2));
-    return;
-  }
-  printObject(payload, false);
+function apiUrl(args) {
+  return stringArg(args, "--api-url") || process.env.ASKTHEW_API_URL?.trim() || "https://my.askthew.com";
 }
 var EMPTY_WORK_LINES = {
   no_approved_requests: "no work has been approved for this project yet.",
@@ -28968,24 +23895,43 @@ async function sessionStartCommand(argv = []) {
   const limit = positiveIntArg(args, "--limit", 10, 25);
   const asJson = boolArg(args, "--json");
   const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  const result = client.hasToken() ? await client.listReadyWork({ scopeKey, limit }) : {
+  if (client.hasToken()) {
+    try {
+      const outbox = new Outbox();
+      await outbox.flush(client);
+    } catch {
+    }
+  }
+  const unauthenticated = {
     ok: false,
     status: 401,
     body: {
       ok: false,
-      code: "needs_signup",
-      message: "No local Ask The W identity is configured."
+      code: "needs_paid_workspace",
+      message: "No local Ask The W identity is configured. Call askthew_start_workspace_bind and complete the browser confirmation."
     }
   };
-  const body = result.body;
+  const [workResult, docsResult, packResult] = client.hasToken() ? await Promise.all([
+    client.listReadyWork({ scopeKey, limit }),
+    client.listProjectDocs({ scopeKey, limit }),
+    client.getProjectContext({ scopeKey })
+  ]) : [unauthenticated, unauthenticated, unauthenticated];
+  const body = workResult.body;
+  const docsBody = docsResult.body;
+  const packBody = packResult.body;
   const work = Array.isArray(body.work) ? body.work : [];
+  const docs = Array.isArray(docsBody.docs) ? docsBody.docs : [];
+  const pack = packResult.ok && packBody.ok !== false ? packBody.pack ?? packBody : null;
   const emptyReason = typeof body.emptyReason === "string" ? body.emptyReason : null;
   const payload = {
-    ok: Boolean(result.ok && body.ok !== false),
-    status: result.status,
+    ok: Boolean(workResult.ok && body.ok !== false),
+    status: workResult.status,
     scope_key: scopeKey,
     count: work.length,
     work,
+    docs,
+    pack,
+    pack_ok: Boolean(packResult.ok && packBody.ok !== false),
     empty_reason: emptyReason,
     code: typeof body.code === "string" ? body.code : null,
     message: typeof body.message === "string" ? body.message : null
@@ -28996,6 +23942,20 @@ async function sessionStartCommand(argv = []) {
   }
   if (!payload.ok) {
     return;
+  }
+  if (pack) {
+    console.log("Ask The W: project pack attached. Use get_project_context or askthew://project-context for the project view.");
+  }
+  if (docs.length > 0) {
+    const noun2 = docs.length === 1 ? "doc is" : "docs are";
+    console.log(`Ask The W: ${docs.length} kept project ${noun2} available.`);
+    console.log("Read current ones with read_project_doc before answering from memory.");
+    for (const [index, entry] of docs.entries()) {
+      const item = entry && typeof entry === "object" ? entry : {};
+      const path5 = String(item.path ?? item.title ?? "Untitled doc");
+      const reasons = Array.isArray(item.staleReasons) ? item.staleReasons.map(String) : [];
+      console.log(`${index + 1}. ${path5}${reasons.length ? ` - stale: ${reasons.join("; ")}` : ""}`);
+    }
   }
   if (work.length === 0) {
     const line = EMPTY_WORK_LINES[emptyReason ?? ""];
@@ -29013,523 +23973,10 @@ async function sessionStartCommand(argv = []) {
     console.log(`${index + 1}. ${title}${runId ? ` (${runId})` : ""} - ${priority}`);
   }
 }
-function pendingOutboxCount() {
-  if (!outboxExists()) return 0;
-  try {
-    return new Outbox().pendingCount();
-  } catch {
-    return null;
-  }
-}
-function outboxExists() {
-  const paths = outboxStoragePaths(localStorePath());
-  return import_node_fs5.default.existsSync(paths.sqlite) || import_node_fs5.default.existsSync(paths.file);
-}
-function printObject(value, asJson) {
-  if (asJson) {
-    console.log(JSON.stringify(value, null, 2));
-    return;
-  }
-  for (const [key, entry] of Object.entries(value)) {
-    if (entry === void 0) continue;
-    if (typeof entry === "object" && entry !== null) {
-      console.log(`${key}: ${JSON.stringify(entry)}`);
-    } else {
-      console.log(`${key}: ${entry}`);
-    }
-  }
-}
-function settingsTextHasServer(settingsText, hostType, serverName = DEFAULT_SERVER_NAME) {
-  if (hostType === "codex") {
-    return settingsText.includes(`[mcp_servers.${serverName}]`) || settingsText.includes(`[mcp_servers."${serverName}"]`);
-  }
-  return settingsText.includes(`"${serverName}"`);
-}
-function inspectHostToolCallability(hostType) {
-  const settingsPath = resolveSettingsPath({ hostType });
-  const settingsExists = import_node_fs5.default.existsSync(settingsPath);
-  const settingsText = settingsExists ? import_node_fs5.default.readFileSync(settingsPath, "utf8") : "";
-  const serverConfigured = settingsExists && settingsTextHasServer(settingsText, hostType);
-  const registeredTools = Object.keys(MCP_TOOL_CAPABILITY_SCOPES);
-  const tool = "capture_session_signal";
-  const toolRegistered = registeredTools.includes(tool);
-  return {
-    ok: serverConfigured && toolRegistered,
-    host: hostType,
-    settings_path: settingsPath,
-    server_configured: serverConfigured,
-    tool,
-    tool_registered: toolRegistered,
-    capability_scope: MCP_TOOL_CAPABILITY_SCOPES.capture_session_signal,
-    callable_from_host: serverConfigured && toolRegistered,
-    registered_tools: registeredTools,
-    message: serverConfigured && toolRegistered ? `${tool} is registered by the local MCP server and exposed in ${hostType} settings.` : `${tool} is registered locally, but ${hostType} settings do not expose the Ask The W MCP server.`
-  };
-}
-async function identityStatusCommand(argv) {
-  const args = parseArgs(argv);
-  const tokenFile = loadCloudToken();
-  const baseUrl = apiUrl(args, tokenFile);
-  const client = new AskTheWCloudClient({ apiUrl: baseUrl });
-  const status = {
-    ok: true,
-    configured: Boolean(tokenFile?.token),
-    data_dir: dataDirSummary(),
-    token_path: cloudTokenPath(),
-    install_metadata_path: installMetadataPath(),
-    signal_authorization_path: signalAuthorizationPath(),
-    outbox_pending: pendingOutboxCount(),
-    current_scope_key: currentScopeKey(process.cwd()),
-    api_url: baseUrl
-  };
-  if (!tokenFile?.token) {
-    status.message = "No local Ask The W identity is configured. Run `askthew-mcp install --host <host>`.";
-    printObject(status, boolArg(args, "--json"));
-    return;
-  }
-  status.install_id = tokenFile.install_id;
-  status.tier = tokenFile.tier ?? "free";
-  status.token_purpose = tokenFile.token_purpose ?? "device";
-  const cloud = await client.request("/me", { method: "GET" });
-  status.cloud_ok = cloud.ok;
-  status.cloud_status = cloud.status;
-  status.cloud = cloud.body;
-  printObject(status, boolArg(args, "--json"));
-}
-async function probeHealth(baseUrl) {
-  try {
-    const response = await fetch(`${baseUrl.replace(/\/+$/, "")}/api/v1/agent/health`, {
-      method: "GET",
-      headers: { Accept: "application/json" }
-    });
-    const body = await response.json().catch(() => ({
-      ok: false,
-      code: "invalid_health_response",
-      message: "Health endpoint did not return JSON."
-    }));
-    return { ok: response.ok && body?.ok !== false, status: response.status, body };
-  } catch (error2) {
-    return {
-      ok: false,
-      status: 0,
-      body: {
-        ok: false,
-        code: "network_error",
-        message: error2 instanceof Error ? error2.message : "Could not reach Ask The W."
-      }
-    };
-  }
-}
-async function buildDoctorSequence(input) {
-  const rows = [];
-  const hasToken = Boolean(input.tokenFile?.token);
-  rows.push({
-    id: "token_file",
-    label: "Local identity token",
-    status: hasToken ? "pass" : "fail",
-    detail: hasToken ? `Token file present at ${cloudTokenPath()}. api_url=${input.baseUrl}` : `No token file at ${cloudTokenPath()}.`,
-    remedy: hasToken ? null : "Run `askthew-mcp install --host <host>`."
-  });
-  if (!hasToken) {
-    rows.push({
-      id: "token_verified",
-      label: "Token verification",
-      status: "skipped",
-      detail: "No local token to verify.",
-      remedy: "Run `askthew-mcp install --host <host>`."
-    });
-    rows.push({
-      id: "project_binding",
-      label: "Project binding",
-      status: "skipped",
-      detail: "No local token to resolve a project with.",
-      remedy: "Run `askthew-mcp install --host <host>`, then `askthew-mcp bind`."
-    });
-    rows.push({
-      id: "capability_scopes",
-      label: "Capability scopes",
-      status: "skipped",
-      detail: "No local token to read capability scopes from.",
-      remedy: null
-    });
-    rows.push({
-      id: "ready_work_dry_run",
-      label: "Ready work read",
-      status: "skipped",
-      detail: "No local token to read work with.",
-      remedy: null
-    });
-  } else {
-    const verification = input.tokenVerification;
-    if (verification?.stale) {
-      rows.push({
-        id: "token_verified",
-        label: "Token verification",
-        status: "fail",
-        detail: `Token is no longer accepted (${verification.reason}).`,
-        remedy: "Run `askthew-mcp install --host <host> --force`."
-      });
-    } else if (verification && "email" in verification) {
-      rows.push({
-        id: "token_verified",
-        label: "Token verification",
-        status: "pass",
-        detail: `Token valid for ${verification.email ?? "this install"}.`,
-        remedy: null
-      });
-    } else {
-      rows.push({
-        id: "token_verified",
-        label: "Token verification",
-        status: "skipped",
-        detail: "Token verification was temporarily unavailable.",
-        remedy: "Retry `askthew-mcp doctor` shortly."
-      });
-    }
-    const me = await input.client.request("/me", { method: "GET" });
-    const meBody = me.body;
-    if (!me.ok) {
-      rows.push({
-        id: "project_binding",
-        label: "Project binding",
-        status: "fail",
-        detail: `Could not read account state (status ${me.status}).`,
-        remedy: "Check network connectivity and --api-url, then retry."
-      });
-      rows.push({
-        id: "capability_scopes",
-        label: "Capability scopes",
-        status: "skipped",
-        detail: "Account state was unreachable, so capability scopes could not be read.",
-        remedy: null
-      });
-    } else {
-      const scopeBindings = Array.isArray(meBody.scope_bindings) ? meBody.scope_bindings : null;
-      const matched = scopeBindings?.find(
-        (entry) => entry && typeof entry === "object" && entry.scope_key === input.scopeKey
-      );
-      if (!scopeBindings) {
-        rows.push({
-          id: "project_binding",
-          label: "Project binding",
-          status: "skipped",
-          detail: "Server did not return scope bindings for this account.",
-          remedy: null
-        });
-      } else if (matched) {
-        rows.push({
-          id: "project_binding",
-          label: "Project binding",
-          status: "pass",
-          detail: `Scope ${input.scopeKey} is bound to project ${matched.project_id}.`,
-          remedy: null
-        });
-      } else {
-        rows.push({
-          id: "project_binding",
-          label: "Project binding",
-          status: "fail",
-          detail: `No project bound for scope ${input.scopeKey} in this directory.`,
-          remedy: "Run `askthew-mcp bind` from this directory."
-        });
-      }
-      const capabilities = Array.isArray(meBody.token_capabilities) ? meBody.token_capabilities : null;
-      if (!capabilities) {
-        rows.push({
-          id: "capability_scopes",
-          label: "Capability scopes",
-          status: "skipped",
-          detail: "Server did not return capability scopes for this token.",
-          remedy: null
-        });
-      } else if (capabilities.length > 0) {
-        rows.push({
-          id: "capability_scopes",
-          label: "Capability scopes",
-          status: "pass",
-          detail: `${capabilities.length} capability scope(s) granted.`,
-          remedy: null
-        });
-      } else {
-        rows.push({
-          id: "capability_scopes",
-          label: "Capability scopes",
-          status: "fail",
-          detail: "No capability scopes are granted to this token.",
-          remedy: "Run `askthew-mcp install --host <host> --force` to re-authenticate."
-        });
-      }
-    }
-    const readyWork = await input.client.listReadyWork({ scopeKey: input.scopeKey, limit: 1 });
-    const readyWorkBody = readyWork.body;
-    if (readyWork.status === 0) {
-      rows.push({
-        id: "ready_work_dry_run",
-        label: "Ready work read",
-        status: "fail",
-        detail: "Could not reach Ask The W to read ready work.",
-        remedy: "Check network connectivity and --api-url."
-      });
-    } else if (readyWork.ok && readyWorkBody.ok !== false) {
-      const count = Array.isArray(readyWorkBody.work) ? readyWorkBody.work.length : 0;
-      rows.push({
-        id: "ready_work_dry_run",
-        label: "Ready work read",
-        status: "pass",
-        detail: `Ready work read succeeded (${count} item(s)).`,
-        remedy: null
-      });
-    } else {
-      const code = typeof readyWorkBody.code === "string" ? readyWorkBody.code : "refused";
-      rows.push({
-        id: "ready_work_dry_run",
-        label: "Ready work read",
-        status: "fail",
-        detail: `Ready work read refused: ${readyWorkBody.message ?? code}`,
-        remedy: code === "workspace_not_connected" ? "Run `askthew-mcp bind` from this directory." : null
-      });
-    }
-  }
-  rows.push({
-    id: "host_config",
-    label: input.hostLabel,
-    status: input.hostCallableOk ? "pass" : "fail",
-    detail: input.hostMessage,
-    remedy: input.hostCallableOk ? null : "Run `askthew-mcp install --host <host>`."
-  });
-  return rows;
-}
-function doctorStrictExitCode(input) {
-  if (input.tokenVerification?.stale) return EXIT_CODE.auth;
-  if (!input.health.ok) return EXIT_CODE.network;
-  if (input.sequence.some((row) => row.status === "fail" && (row.id === "project_binding" || row.id === "ready_work_dry_run"))) {
-    return EXIT_CODE.binding;
-  }
-  return EXIT_CODE.internal;
-}
-async function doctorCommand(argv) {
-  const args = parseArgs(argv);
-  const host = stringArg(args, "--host");
-  const hostType = host ? requireHost(host) : null;
-  const baseUrl = apiUrl(args);
-  const tokenFile = loadCloudToken();
-  const installMetadata = hostType ? loadInstallMetadata(hostType) : null;
-  const health = await probeHealth(baseUrl);
-  const pendingCount = pendingOutboxCount();
-  const client = new AskTheWCloudClient({ apiUrl: baseUrl });
-  const scopeKey = currentScopeKey(process.cwd());
-  let tokenVerification = null;
-  let tokenMessage = null;
-  const checks = {
-    cli_version: packageVersion(),
-    api_url: baseUrl,
-    api_health: health,
-    data_dir: dataDirSummary(),
-    token_file_exists: import_node_fs5.default.existsSync(cloudTokenPath()),
-    install_metadata_exists: import_node_fs5.default.existsSync(installMetadataPath()),
-    outbox_exists: outboxExists(),
-    outbox_paths: outboxStoragePaths(localStorePath()),
-    outbox_pending: pendingCount,
-    identity_configured: Boolean(tokenFile?.token),
-    current_scope_key: scopeKey
-  };
-  if (hostType) {
-    checks.host = hostType;
-    checks.settings_path = resolveSettingsPath({ hostType });
-    checks.install_metadata = installMetadata;
-    checks.signal_authorization = loadSignalAuthorizationReceipt(hostType);
-    checks.capture_session_signal_callable = inspectHostToolCallability(hostType);
-  } else {
-    checks.capture_session_signal_callable = Object.fromEntries(
-      SUPPORTED_HOST_TYPES2.map((candidate) => [
-        candidate,
-        inspectHostToolCallability(candidate)
-      ])
-    );
-  }
-  if (tokenFile?.token) {
-    tokenVerification = await verifyToken({ apiUrl: baseUrl });
-    checks.token_verification = tokenVerification;
-    if (tokenVerification.stale) {
-      tokenMessage = `Token is no longer accepted (${tokenVerification.reason}). Re-install with: askthew-mcp install --host ${hostType ?? "<host>"} --force`;
-      checks.identity_cloud = {
-        ok: false,
-        code: tokenVerification.reason,
-        message: tokenMessage
-      };
-    } else if ("email" in tokenVerification) {
-      tokenMessage = `Token valid for ${tokenVerification.email ?? "this install"}.`;
-      checks.identity_cloud = {
-        ok: true,
-        email: tokenVerification.email ?? null
-      };
-    } else {
-      checks.identity_cloud = {
-        ok: false,
-        code: "verification_unavailable",
-        message: "Token verification is temporarily unavailable."
-      };
-    }
-  }
-  const hostCallableOk = hostType ? Boolean(checks.capture_session_signal_callable?.ok) : true;
-  const hostLabel = hostType ? `${hostType} MCP config` : "Host MCP config";
-  const hostMessage = hostType ? String(checks.capture_session_signal_callable?.message ?? "") : "Run with --host <host> to check a specific host's settings file.";
-  const sequence = await buildDoctorSequence({
-    tokenFile,
-    tokenVerification,
-    client,
-    scopeKey,
-    baseUrl,
-    hostCallableOk,
-    hostLabel,
-    hostMessage
-  });
-  checks.sequence = sequence;
-  const sequenceOk = !sequence.some((row) => row.status === "fail");
-  const ok = Boolean(health.ok) && !tokenVerification?.stale && hostCallableOk && sequenceOk;
-  const asJson = boolArg(args, "--json");
-  printObject({ ok, checks }, asJson);
-  if (!asJson) {
-    if (tokenMessage) console.log(tokenMessage);
-    for (const row of sequence) {
-      const marker = row.status === "pass" ? "PASS" : row.status === "skipped" ? "SKIP" : "FAIL";
-      console.log(`[${marker}] ${row.label}: ${row.detail}${row.remedy ? ` (fix: ${row.remedy})` : ""}`);
-    }
-  }
-  if (!ok && boolArg(args, "--strict")) {
-    process.exitCode = doctorStrictExitCode({ health, tokenVerification, sequence });
-  }
-}
-async function tokenCommand(argv) {
-  const [action] = argv;
-  const args = parseArgs(argv.slice(1));
-  const asJson = boolArg(args, "--json");
-  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  if (action === "rotate") {
-    const result = await client.request("/token/rotate", { method: "POST", body: "{}" });
-    const body = result.body;
-    if (!result.ok || body.ok === false) {
-      throw authError(String(body.message ?? body.code ?? "Token rotate failed."), "token_rotate_failed");
-    }
-    const tokenFile = loadCloudToken();
-    if (tokenFile && typeof body.token === "string") {
-      saveCloudToken({ ...tokenFile, token: body.token });
-    }
-    if (asJson) {
-      printSuccessJson("token", { action: "rotate" });
-    } else {
-      console.log("Ask The W token rotated. Restart your coding agent.");
-    }
-    return;
-  }
-  if (action === "revoke") {
-    const result = await client.request("/token/revoke", { method: "POST", body: "{}" });
-    const body = result.body;
-    if (!result.ok || body.ok === false) {
-      throw authError(String(body.message ?? body.code ?? "Token revoke failed."), "token_revoke_failed");
-    }
-    if (asJson) {
-      printSuccessJson("token", { action: "revoke" });
-    } else {
-      console.log("Current Ask The W token revoked.");
-    }
-    return;
-  }
-  throw usageError("Usage: askthew-mcp token rotate|revoke", "invalid_token_action");
-}
-async function refreshCommand(argv = []) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  if (!client.hasToken()) throw authError("Run askthew-mcp install first.", "not_signed_in");
-  const outbox = new Outbox();
-  const result = await outbox.flush(client);
-  const data = { ...result, pending: outbox.pendingCount() };
-  if (asJson) {
-    printSuccessJson("refresh", data);
-    return;
-  }
-  console.log(JSON.stringify({ ok: true, ...data }, null, 2));
-}
-async function exportCommand(argv = []) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  const allScopes = boolArg(args, "--all-scopes");
-  const scopeKey = stringArg(args, "--scope-key") || currentScopeKey(process.cwd());
-  if (allScopes && stringArg(args, "--scope-key")) {
-    throw usageError("Use either --scope-key or --all-scopes, not both.", "conflicting_scope_flags");
-  }
-  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  const result = await client.exportData({
-    requestIntent: "explicit_user_request",
-    originatingPrompt: "User ran the Ask The W export command.",
-    scopeKey: allScopes ? void 0 : scopeKey
-  });
-  if (!result.ok) {
-    const body = result.body;
-    throw new CliError(String(body.message ?? body.code ?? "Export failed."), { code: "export_failed" });
-  }
-  if (asJson) {
-    printSuccessJson("export", result.body);
-    return;
-  }
-  console.log(JSON.stringify(result.body, null, 2));
-}
-function printInstructionsCommand() {
-  console.log(
-    [
-      "## Ask The W",
-      "",
-      "Ask The W is available as an authorized connector in this project.",
-      "",
-      "Send compact, policy-sanitized signals with `capture_session_signal` (often exposed as `mcp__askthew__capture_session_signal`). Omit `scopeKey` unless deliberately overriding the workspace default; the MCP server resolves it from the active project directory.",
-      "",
-      "The plugin install or project-bind confirmation authorizes compact session signals for this project. Do not ask the user for a separate approval sentence during normal coding work. If a newer user instruction explicitly forbids external capture, respect it and continue locally.",
-      "",
-      "Recommended quiet cadence:",
-      "1. Routine setup and checkpoints stay local/internal. Do not send `setup_complete` or `session_checkpoint` for normal tool availability or progress bookkeeping.",
-      '2. Send `kind: "verification_result"` after meaningful tests, builds, migrations, or production-impacting verification.',
-      '3. Send `kind: "direction_change"` only when the user/product direction materially changed. Send `kind: "implementation_update"` only when it is explicitly durable project context and include `metadata.project_to_workspace=true`.',
-      '4. Before a substantive final reply, send one `kind: "final_summary"` with what changed, what was verified, and remaining risk.',
-      "",
-      "Aim for 1-3 signals per substantive session. Keep payloads short: summary, relative files touched, verification status, and useful non-sensitive metadata. Omit commands unless they materially explain verification or failure. Do not send transcripts, secrets, credentials, private tokens, or large copied content. The MCP package redacts known credential patterns, sensitive metadata keys, local workspace/home paths, and sensitive file references before queueing or sending.",
-      "",
-      "First-run signup: if a protected Ask The W tool returns `needs_signup`, ask the user for their email, call `askthew_start_signup({ email })`, ask for the six-digit email code, call `askthew_complete_signup({ email, code })`, then retry the original `setup_complete` capture.",
-      "",
-      "Startup work check: after the project binding is active, `list_ready_work` may be called at session start/resume. If work is returned, present the list and ask the human which item to claim. Never call `claim_work` silently.",
-      "",
-      "Related tools: `list_outcomes`, `list_decisions`, `recap`, `coach`, `next_moves`, `create_decision`, and `draft_wire_message` are manual-only: use them only when the user explicitly asks for that Ask The W action. `draft_wire_message` files an internal draft request and never sends externally.",
-      "",
-      "Manual-only tools: only `capture_session_signal` and startup `list_ready_work` may be called automatically. Do not call other Ask The W tools during routine setup, checkpoint, planning, verification, or final-summary cadence unless the user explicitly asks for that Ask The W action."
-    ].join("\n")
-  );
-}
-async function deleteMeCommand(argv) {
-  const args = parseArgs(argv);
-  const asJson = boolArg(args, "--json");
-  if (!boolArg(args, "--confirm")) {
-    throw usageError("Refusing to delete without --confirm.", "confirm_required");
-  }
-  const tokenFile = loadCloudToken();
-  if (tokenFile?.tier === "paid" && !asJson) {
-    console.error("This install is connected to a project. Install-scoped data will be deleted; project data is retained.");
-  }
-  const client = new AskTheWCloudClient({ apiUrl: apiUrl(args) });
-  const result = await client.request("/me?confirm=true", { method: "DELETE" });
-  const body = result.body;
-  if (!result.ok || body.ok === false) {
-    throw new CliError(String(body.message ?? body.code ?? "Delete failed."), { code: "delete_failed" });
-  }
-  if (asJson) {
-    printSuccessJson("delete-me", body);
-    return;
-  }
-  console.log(JSON.stringify(body, null, 2));
-}
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
   if (!command) {
-    await runStdioServer({ env: process.env });
+    await runStdioServer();
     return;
   }
   if (command === "--help" || command === "-h" || command === "help") {
@@ -29537,60 +23984,20 @@ async function main() {
     return;
   }
   if (command === "--version" || command === "-v" || command === "version") {
-    console.log(packageVersion());
+    console.log(packageVersion2());
     return;
   }
   const asJson = boolArg(parseArgs(argv), "--json");
   try {
-    if (command === "install") {
-      await installCommand(argv);
-      return;
-    }
-    if (command === "uninstall") {
-      await uninstallCommand(argv);
-      return;
-    }
-    if (command === "bind") {
-      await bindCommand(argv);
-      return;
-    }
-    if (command === "initialize-handshake") {
-      await initializeHandshakeCommand(argv);
-      return;
-    }
     if (command === "session-start") {
       await sessionStartCommand(argv);
       return;
     }
-    if (command === "identity") {
-      const [action, ...rest] = argv;
-      if (action !== "status") throw usageError("Usage: askthew-mcp identity status [--json]", "invalid_identity_action");
-      await identityStatusCommand(rest);
-      return;
-    }
-    if (command === "doctor") {
-      await doctorCommand(argv);
-      return;
-    }
-    if (command === "refresh") {
-      await refreshCommand(argv);
-      return;
-    }
-    if (command === "token") {
-      await tokenCommand(argv);
-      return;
-    }
-    if (command === "export") {
-      await exportCommand(argv);
-      return;
-    }
-    if (command === "print-instructions") {
-      printInstructionsCommand();
-      return;
-    }
-    if (command === "delete-me") {
-      await deleteMeCommand(argv);
-      return;
+    if (REMOVED_COMMANDS.has(command)) {
+      throw usageError(
+        `${command} was removed. Install Ask The W from the Claude Code or Codex marketplace, then use the MCP tools for signup and project connection.`,
+        "removed_command"
+      );
     }
     throw usageError(`Unknown command: ${command}
 
