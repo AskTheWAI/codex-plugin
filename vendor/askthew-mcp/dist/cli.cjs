@@ -411,11 +411,11 @@ var require_codegen = __commonJS({
         const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
         return `${varKind} ${this.name}${rhs};` + _n;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         if (!names[this.name.str])
           return;
         if (this.rhs)
-          this.rhs = optimizeExpr(this.rhs, names, constants);
+          this.rhs = optimizeExpr(this.rhs, names, constants2);
         return this;
       }
       get names() {
@@ -432,10 +432,10 @@ var require_codegen = __commonJS({
       render({ _n }) {
         return `${this.lhs} = ${this.rhs};` + _n;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         if (this.lhs instanceof code_1.Name && !names[this.lhs.str] && !this.sideEffects)
           return;
-        this.rhs = optimizeExpr(this.rhs, names, constants);
+        this.rhs = optimizeExpr(this.rhs, names, constants2);
         return this;
       }
       get names() {
@@ -496,8 +496,8 @@ var require_codegen = __commonJS({
       optimizeNodes() {
         return `${this.code}` ? this : void 0;
       }
-      optimizeNames(names, constants) {
-        this.code = optimizeExpr(this.code, names, constants);
+      optimizeNames(names, constants2) {
+        this.code = optimizeExpr(this.code, names, constants2);
         return this;
       }
       get names() {
@@ -526,12 +526,12 @@ var require_codegen = __commonJS({
         }
         return nodes.length > 0 ? this : void 0;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         const { nodes } = this;
         let i = nodes.length;
         while (i--) {
           const n = nodes[i];
-          if (n.optimizeNames(names, constants))
+          if (n.optimizeNames(names, constants2))
             continue;
           subtractNames(names, n.names);
           nodes.splice(i, 1);
@@ -584,12 +584,12 @@ var require_codegen = __commonJS({
           return void 0;
         return this;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         var _a;
-        this.else = (_a = this.else) === null || _a === void 0 ? void 0 : _a.optimizeNames(names, constants);
-        if (!(super.optimizeNames(names, constants) || this.else))
+        this.else = (_a = this.else) === null || _a === void 0 ? void 0 : _a.optimizeNames(names, constants2);
+        if (!(super.optimizeNames(names, constants2) || this.else))
           return;
-        this.condition = optimizeExpr(this.condition, names, constants);
+        this.condition = optimizeExpr(this.condition, names, constants2);
         return this;
       }
       get names() {
@@ -612,10 +612,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.iteration})` + super.render(opts);
       }
-      optimizeNames(names, constants) {
-        if (!super.optimizeNames(names, constants))
+      optimizeNames(names, constants2) {
+        if (!super.optimizeNames(names, constants2))
           return;
-        this.iteration = optimizeExpr(this.iteration, names, constants);
+        this.iteration = optimizeExpr(this.iteration, names, constants2);
         return this;
       }
       get names() {
@@ -651,10 +651,10 @@ var require_codegen = __commonJS({
       render(opts) {
         return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
       }
-      optimizeNames(names, constants) {
-        if (!super.optimizeNames(names, constants))
+      optimizeNames(names, constants2) {
+        if (!super.optimizeNames(names, constants2))
           return;
-        this.iterable = optimizeExpr(this.iterable, names, constants);
+        this.iterable = optimizeExpr(this.iterable, names, constants2);
         return this;
       }
       get names() {
@@ -696,11 +696,11 @@ var require_codegen = __commonJS({
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
-      optimizeNames(names, constants) {
+      optimizeNames(names, constants2) {
         var _a, _b;
-        super.optimizeNames(names, constants);
-        (_a = this.catch) === null || _a === void 0 ? void 0 : _a.optimizeNames(names, constants);
-        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants);
+        super.optimizeNames(names, constants2);
+        (_a = this.catch) === null || _a === void 0 ? void 0 : _a.optimizeNames(names, constants2);
+        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants2);
         return this;
       }
       get names() {
@@ -1001,7 +1001,7 @@ var require_codegen = __commonJS({
     function addExprNames(names, from) {
       return from instanceof code_1._CodeOrName ? addNames(names, from.names) : names;
     }
-    function optimizeExpr(expr, names, constants) {
+    function optimizeExpr(expr, names, constants2) {
       if (expr instanceof code_1.Name)
         return replaceName(expr);
       if (!canOptimize(expr))
@@ -1016,14 +1016,14 @@ var require_codegen = __commonJS({
         return items;
       }, []));
       function replaceName(n) {
-        const c = constants[n.str];
+        const c = constants2[n.str];
         if (c === void 0 || names[n.str] !== 1)
           return n;
         delete names[n.str];
         return c;
       }
       function canOptimize(e) {
-        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants[c.str] !== void 0);
+        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants2[c.str] !== void 0);
       }
     }
     function subtractNames(names, from) {
@@ -1202,8 +1202,8 @@ var require_util = __commonJS({
     })(Type || (exports2.Type = Type = {}));
     function getErrorPath(dataProp, dataPropType, jsPropertySyntax) {
       if (dataProp instanceof codegen_1.Name) {
-        const isNumber = dataPropType === Type.Num;
-        return jsPropertySyntax ? isNumber ? (0, codegen_1._)`"[" + ${dataProp} + "]"` : (0, codegen_1._)`"['" + ${dataProp} + "']"` : isNumber ? (0, codegen_1._)`"/" + ${dataProp}` : (0, codegen_1._)`"/" + ${dataProp}.replace(/~/g, "~0").replace(/\\//g, "~1")`;
+        const isNumber2 = dataPropType === Type.Num;
+        return jsPropertySyntax ? isNumber2 ? (0, codegen_1._)`"[" + ${dataProp} + "]"` : (0, codegen_1._)`"['" + ${dataProp} + "']"` : isNumber2 ? (0, codegen_1._)`"/" + ${dataProp}` : (0, codegen_1._)`"/" + ${dataProp}.replace(/~/g, "~0").replace(/\\//g, "~1")`;
       }
       return jsPropertySyntax ? (0, codegen_1.getProperty)(dataProp).toString() : "/" + escapeJsonPointer(dataProp);
     }
@@ -2236,8 +2236,8 @@ var require_resolve = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id = "", normalize) {
-      if (normalize !== false)
+    function getFullPath(resolver, id = "", normalize2) {
+      if (normalize2 !== false)
         id = normalizeId(id);
       const p = resolver.parse(id);
       return _getFullPath(resolver, p);
@@ -3110,9 +3110,28 @@ var require_utils = __commonJS({
     "use strict";
     var isUUID = RegExp.prototype.test.bind(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu);
     var isIPv4 = RegExp.prototype.test.bind(/^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)$/u);
+    var isPort = RegExp.prototype.test.bind(/^\d*$/u);
     var isHexPair = RegExp.prototype.test.bind(/^[\da-f]{2}$/iu);
     var isUnreserved = RegExp.prototype.test.bind(/^[\da-z\-._~]$/iu);
-    var isPathCharacter = RegExp.prototype.test.bind(/^[\da-z\-._~!$&'()*+,;=:@/]$/iu);
+    var isPathCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/]$/u);
+    var isQueryFragmentCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/?]$/u);
+    var isUserinfoCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:]$/u);
+    var BYTE_HEX = new Array(256);
+    {
+      const HEX_DIGITS = "0123456789ABCDEF";
+      for (let i = 0; i < 256; i++) {
+        BYTE_HEX[i] = "%" + HEX_DIGITS[i >> 4] + HEX_DIGITS[i & 15];
+      }
+    }
+    function percentEncodeNonAscii(cp) {
+      if (cp < 2048) {
+        return BYTE_HEX[192 | cp >> 6] + BYTE_HEX[128 | cp & 63];
+      }
+      if (cp < 65536) {
+        return BYTE_HEX[224 | cp >> 12] + BYTE_HEX[128 | cp >> 6 & 63] + BYTE_HEX[128 | cp & 63];
+      }
+      return BYTE_HEX[240 | cp >> 18] + BYTE_HEX[128 | cp >> 12 & 63] + BYTE_HEX[128 | cp >> 6 & 63] + BYTE_HEX[128 | cp & 63];
+    }
     function stringArrayToHexStripped(input) {
       let acc = "";
       let code = 0;
@@ -3137,91 +3156,105 @@ var require_utils = __commonJS({
       }
       return acc;
     }
+    var isHextet = RegExp.prototype.test.bind(/^[\dA-Fa-f]{1,4}$/);
+    var isIPvFuture = RegExp.prototype.test.bind(/^[vV][\dA-Fa-f]+\.[A-Za-z\d\-._~!$&'()*+,;=:]+$/);
+    var isZoneCharacter = RegExp.prototype.test.bind(/^[A-Za-z\d\-._~]$/);
     var nonSimpleDomain = RegExp.prototype.test.bind(/[^!"$&'()*+,\-.;=_`a-z{}~]/u);
-    function consumeIsZone(buffer) {
-      buffer.length = 0;
-      return true;
-    }
-    function consumeHextets(buffer, address, output) {
-      if (buffer.length) {
-        const hex = stringArrayToHexStripped(buffer);
-        if (hex !== "") {
-          address.push(hex);
-        } else {
-          output.error = true;
-          return false;
+    function isZoneIdentifier(zone) {
+      if (zone.length === 0) return false;
+      for (let i = 0; i < zone.length; i++) {
+        if (isZoneCharacter(zone[i])) continue;
+        if (zone[i] === "%" && i + 2 < zone.length && isHexPair(zone.slice(i + 1, i + 3))) {
+          i += 2;
+          continue;
         }
-        buffer.length = 0;
+        return false;
       }
       return true;
     }
-    function getIPV6(input) {
-      let tokenCount = 0;
-      const output = { error: false, address: "", zone: "" };
-      const address = [];
-      const buffer = [];
-      let endipv6Encountered = false;
-      let endIpv6 = false;
-      let consume = consumeHextets;
-      for (let i = 0; i < input.length; i++) {
-        const cursor = input[i];
-        if (cursor === "[" || cursor === "]") {
-          continue;
-        }
-        if (cursor === ":") {
-          if (endipv6Encountered === true) {
-            endIpv6 = true;
+    function compressIPv6ZeroRun(hextets) {
+      let bestStart = -1;
+      let bestLength = 0;
+      let runStart = -1;
+      let runLength = 0;
+      for (let i = 0; i < hextets.length; i++) {
+        if (hextets[i] === "0") {
+          if (runStart === -1) runStart = i;
+          runLength++;
+          if (runLength > bestLength) {
+            bestLength = runLength;
+            bestStart = runStart;
           }
-          if (!consume(buffer, address, output)) {
-            break;
-          }
-          if (++tokenCount > 7) {
-            output.error = true;
-            break;
-          }
-          if (i > 0 && input[i - 1] === ":") {
-            endipv6Encountered = true;
-          }
-          address.push(":");
-          continue;
-        } else if (cursor === "%") {
-          if (!consume(buffer, address, output)) {
-            break;
-          }
-          consume = consumeIsZone;
         } else {
-          buffer.push(cursor);
-          continue;
+          runStart = -1;
+          runLength = 0;
         }
       }
-      if (buffer.length) {
-        if (consume === consumeIsZone) {
-          output.zone = buffer.join("");
-        } else if (endIpv6) {
-          address.push(buffer.join(""));
-        } else {
-          address.push(stringArrayToHexStripped(buffer));
-        }
+      if (bestLength < 2) return hextets.join(":");
+      const head = hextets.slice(0, bestStart).join(":");
+      const tail = hextets.slice(bestStart + bestLength).join(":");
+      return head + "::" + tail;
+    }
+    function normalizeIPv6Address(input) {
+      const compression = input.indexOf("::");
+      if (compression !== -1 && input.indexOf("::", compression + 1) !== -1) return void 0;
+      const left = compression === -1 ? input.split(":") : input.slice(0, compression).split(":");
+      const right = compression === -1 ? [] : input.slice(compression + 2).split(":");
+      if (compression !== -1) {
+        if (left.length === 1 && left[0] === "") left.length = 0;
+        if (right.length === 1 && right[0] === "") right.length = 0;
       }
-      output.address = address.join("");
-      return output;
+      const parts = left.concat(right);
+      let hextetCount = 0;
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        if (part === "") return void 0;
+        if (part.indexOf(".") !== -1) {
+          if (i !== parts.length - 1 || compression !== -1 && right.length === 0 || !isIPv4(part)) return void 0;
+          hextetCount += 2;
+          continue;
+        }
+        if (!isHextet(part)) return void 0;
+        parts[i] = parseInt(part, 16).toString(16);
+        hextetCount++;
+      }
+      if (compression === -1) {
+        if (hextetCount !== 8) return void 0;
+        return compressIPv6ZeroRun(parts);
+      }
+      if (hextetCount >= 8) return void 0;
+      const expanded = parts.slice(0, left.length);
+      for (let i = hextetCount; i < 8; i++) expanded.push("0");
+      for (let i = left.length; i < parts.length; i++) expanded.push(parts[i]);
+      return compressIPv6ZeroRun(expanded);
     }
     function normalizeIPv6(host) {
-      if (findToken(host, ":") < 2) {
-        return { host, isIPV6: false };
+      const bracketed = host[0] === "[" && host[host.length - 1] === "]";
+      const hasBracket = host[0] === "[" || host[host.length - 1] === "]";
+      if (hasBracket && !bracketed) return { host, isIPV6: false, error: true };
+      let input = bracketed ? host.slice(1, -1) : host;
+      if (bracketed && isIPvFuture(input)) {
+        input = input.toLowerCase();
+        return { host: `[${input}]`, escapedHost: input, isIPV6: false, isIPVFuture: true };
       }
-      const ipv62 = getIPV6(host);
-      if (!ipv62.error) {
-        let newHost = ipv62.address;
-        let escapedHost = ipv62.address;
-        if (ipv62.zone) {
-          newHost += "%" + ipv62.zone;
-          escapedHost += "%25" + ipv62.zone;
-        }
-        return { host: newHost, isIPV6: true, escapedHost };
-      } else {
-        return { host, isIPV6: false };
+      if (findToken(input, ":") < 2) {
+        return { host, isIPV6: false, error: bracketed };
       }
+      let zoneIdentifier = "";
+      const zoneSeparator = input.indexOf("%");
+      if (zoneSeparator !== -1) {
+        const separatorLength = input.slice(zoneSeparator, zoneSeparator + 3).toLowerCase() === "%25" ? 3 : 1;
+        zoneIdentifier = input.slice(zoneSeparator + separatorLength);
+        if (!isZoneIdentifier(zoneIdentifier)) return { host, isIPV6: false, error: true };
+        input = input.slice(0, zoneSeparator);
+      }
+      const address = normalizeIPv6Address(input);
+      if (address === void 0) return { host, isIPV6: false, error: true };
+      return {
+        host: address + (zoneIdentifier ? "%" + zoneIdentifier : ""),
+        escapedHost: address + (zoneIdentifier ? "%25" + zoneIdentifier : ""),
+        isIPV6: true
+      };
     }
     function findToken(str, token) {
       let ind = 0;
@@ -3230,8 +3263,8 @@ var require_utils = __commonJS({
       }
       return ind;
     }
-    function removeDotSegments(path5) {
-      let input = path5;
+    function removeDotSegments(path6) {
+      let input = path6;
       const output = [];
       let nextSlash = -1;
       let len = 0;
@@ -3340,7 +3373,8 @@ var require_utils = __commonJS({
     function normalizePathEncoding(input) {
       let output = "";
       for (let i = 0; i < input.length; i++) {
-        if (input[i] === "%" && i + 2 < input.length) {
+        const ch = input[i];
+        if (ch === "%" && i + 2 < input.length) {
           const hex = input.slice(i + 1, i + 3);
           if (isHexPair(hex)) {
             const normalizedHex = hex.toUpperCase();
@@ -3354,10 +3388,152 @@ var require_utils = __commonJS({
             continue;
           }
         }
-        if (isPathCharacter(input[i])) {
-          output += input[i];
+        if (isPathCharacter(ch)) {
+          output += ch;
         } else {
-          output += escape(input[i]);
+          const code = input.charCodeAt(i);
+          if (code < 128) {
+            output += isEscapeSafe(code) ? ch : BYTE_HEX[code];
+          } else if (code < 55296 || code > 57343) {
+            output += percentEncodeNonAscii(code);
+          } else if (code <= 56319 && i + 1 < input.length) {
+            const low = input.charCodeAt(i + 1);
+            if (low >= 56320 && low <= 57343) {
+              output += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+              i++;
+            } else {
+              output += percentEncodeNonAscii(65533);
+            }
+          } else {
+            output += percentEncodeNonAscii(65533);
+          }
+        }
+      }
+      return output;
+    }
+    function serializePathEncoding(input, pathNoScheme = false) {
+      let output = "";
+      let firstSegment = pathNoScheme && input[0] !== "/";
+      for (let i = 0; i < input.length; i++) {
+        const ch = input[i];
+        if (ch === "%" && i + 2 < input.length) {
+          const hex = input.slice(i + 1, i + 3);
+          if (isHexPair(hex)) {
+            output += "%" + hex.toUpperCase();
+            i += 2;
+            continue;
+          }
+        }
+        if (ch === "/") {
+          firstSegment = false;
+        }
+        if (isPathCharacter(ch) && (ch !== ":" || !firstSegment)) {
+          output += ch;
+        } else {
+          const code = input.charCodeAt(i);
+          if (code < 128) {
+            output += BYTE_HEX[code];
+          } else if (code < 55296 || code > 57343) {
+            output += percentEncodeNonAscii(code);
+          } else if (code <= 56319 && i + 1 < input.length) {
+            const low = input.charCodeAt(i + 1);
+            if (low >= 56320 && low <= 57343) {
+              output += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+              i++;
+            } else {
+              output += percentEncodeNonAscii(65533);
+            }
+          } else {
+            output += percentEncodeNonAscii(65533);
+          }
+        }
+      }
+      return output;
+    }
+    function encodeComponent(input, isAllowed) {
+      let output = "";
+      for (let i = 0; i < input.length; i++) {
+        const ch = input[i];
+        if (ch === "%" && i + 2 < input.length) {
+          const hex = input.slice(i + 1, i + 3);
+          if (isHexPair(hex)) {
+            output += "%" + hex.toUpperCase();
+            i += 2;
+            continue;
+          }
+        }
+        if (isAllowed(ch)) {
+          output += ch;
+        } else {
+          const code = input.charCodeAt(i);
+          if (code < 128) {
+            output += BYTE_HEX[code];
+          } else if (code < 55296 || code > 57343) {
+            output += percentEncodeNonAscii(code);
+          } else if (code <= 56319 && i + 1 < input.length) {
+            const low = input.charCodeAt(i + 1);
+            if (low >= 56320 && low <= 57343) {
+              output += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+              i++;
+            } else {
+              output += percentEncodeNonAscii(65533);
+            }
+          } else {
+            output += percentEncodeNonAscii(65533);
+          }
+        }
+      }
+      return output;
+    }
+    function encodeUserinfo(input) {
+      return encodeComponent(input, isUserinfoCharacter);
+    }
+    function encodeQuery(input) {
+      return encodeComponent(input, isQueryFragmentCharacter);
+    }
+    function encodeFragment(input) {
+      return encodeComponent(input, isQueryFragmentCharacter);
+    }
+    function isEscapeSafe(cp) {
+      return cp >= 48 && cp <= 57 || cp >= 65 && cp <= 90 || cp >= 97 && cp <= 122 || cp === 42 || cp === 43 || cp === 45 || cp === 46 || cp === 47 || cp === 64 || cp === 95;
+    }
+    function normalizeQueryFragmentEncoding(input) {
+      let output = "";
+      for (let i = 0; i < input.length; i++) {
+        const ch = input[i];
+        if (ch === "%" && i + 2 < input.length) {
+          const hex = input.slice(i + 1, i + 3);
+          if (isHexPair(hex)) {
+            const normalizedHex = hex.toUpperCase();
+            const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
+            if (isUnreserved(decoded)) {
+              output += decoded;
+            } else {
+              output += "%" + normalizedHex;
+            }
+            i += 2;
+            continue;
+          }
+        }
+        if (isQueryFragmentCharacter(ch)) {
+          output += ch;
+        } else {
+          const code = input.charCodeAt(i);
+          if (code < 128) {
+            output += isEscapeSafe(code) ? ch : BYTE_HEX[code];
+          } else if (code < 55296 || code > 57343) {
+            output += percentEncodeNonAscii(code);
+          } else if (code <= 56319 && i + 1 < input.length) {
+            const low = input.charCodeAt(i + 1);
+            if (low >= 56320 && low <= 57343) {
+              output += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+              i++;
+            } else {
+              output += percentEncodeNonAscii(65533);
+            }
+          } else {
+            output += percentEncodeNonAscii(65533);
+          }
         }
       }
       return output;
@@ -3380,14 +3556,18 @@ var require_utils = __commonJS({
     function recomposeAuthority(component) {
       const uriTokens = [];
       if (component.userinfo !== void 0) {
-        uriTokens.push(component.userinfo);
+        uriTokens.push(encodeUserinfo(component.userinfo));
         uriTokens.push("@");
       }
       if (component.host !== void 0) {
-        let host = unescape(component.host);
+        let host = component.host;
         if (!isIPv4(host)) {
-          const ipV6res = normalizeIPv6(host);
-          if (ipV6res.isIPV6 === true) {
+          let ipV6res = normalizeIPv6(host);
+          if (ipV6res.isIPV6 !== true && ipV6res.isIPVFuture !== true) {
+            host = normalizePercentEncoding(host, true);
+            ipV6res = normalizeIPv6(host);
+          }
+          if (ipV6res.isIPV6 === true || ipV6res.isIPVFuture === true) {
             host = `[${ipV6res.escapedHost}]`;
           } else {
             host = reescapeHostDelimiters(host, false);
@@ -3396,8 +3576,12 @@ var require_utils = __commonJS({
         uriTokens.push(host);
       }
       if (typeof component.port === "number" || typeof component.port === "string") {
+        const port = String(component.port);
+        if (!isPort(port)) {
+          throw new TypeError("URI port is malformed.");
+        }
         uriTokens.push(":");
-        uriTokens.push(String(component.port));
+        uriTokens.push(port);
       }
       return uriTokens.length ? uriTokens.join("") : void 0;
     }
@@ -3407,6 +3591,11 @@ var require_utils = __commonJS({
       reescapeHostDelimiters,
       normalizePercentEncoding,
       normalizePathEncoding,
+      serializePathEncoding,
+      normalizeQueryFragmentEncoding,
+      encodeUserinfo,
+      encodeQuery,
+      encodeFragment,
       escapePreservingEscapes,
       removeDotSegments,
       isIPv4,
@@ -3422,7 +3611,7 @@ var require_schemes = __commonJS({
   "../../node_modules/fast-uri/lib/schemes.js"(exports2, module2) {
     "use strict";
     var { isUUID } = require_utils();
-    var URN_REG = /([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-.:;=@]|%[\da-f]{2})+)/iu;
+    var URN_REG = /^([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-./:;=@]|%[\da-f]{2})+)$/iu;
     var supportedSchemeNames = (
       /** @type {const} */
       [
@@ -3483,9 +3672,10 @@ var require_schemes = __commonJS({
         wsComponent.secure = void 0;
       }
       if (wsComponent.resourceName) {
-        const [path5, query] = wsComponent.resourceName.split("?");
-        wsComponent.path = path5 && path5 !== "/" ? path5 : void 0;
-        wsComponent.query = query;
+        const queryIndex = wsComponent.resourceName.indexOf("?");
+        const path6 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
+        wsComponent.path = path6 && path6 !== "/" ? path6 : void 0;
+        wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
         wsComponent.resourceName = void 0;
       }
       wsComponent.fragment = void 0;
@@ -3497,7 +3687,7 @@ var require_schemes = __commonJS({
         return urnComponent;
       }
       const matches = urnComponent.path.match(URN_REG);
-      if (matches) {
+      if (matches && matches[0] === urnComponent.path) {
         const scheme = options.scheme || urnComponent.scheme || "urn";
         urnComponent.nid = matches[1].toLowerCase();
         urnComponent.nss = matches[2];
@@ -3631,9 +3821,18 @@ var require_schemes = __commonJS({
 var require_fast_uri = __commonJS({
   "../../node_modules/fast-uri/index.js"(exports2, module2) {
     "use strict";
-    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, escapePreservingEscapes, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
+    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
     var { SCHEMES, getSchemeHandler } = require_schemes();
-    function normalize(uri, options) {
+    var VALID_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*$/u;
+    var MALFORMED_SCHEME_ERROR = "URI scheme is malformed.";
+    function decodeValidScheme(scheme) {
+      const decodedScheme = unescape(String(scheme));
+      if (!VALID_SCHEME.test(decodedScheme)) {
+        throw new TypeError(MALFORMED_SCHEME_ERROR);
+      }
+      return decodedScheme;
+    }
+    function normalize2(uri, options) {
       if (typeof uri === "string") {
         uri = /** @type {T} */
         normalizeString(uri, options);
@@ -3645,58 +3844,80 @@ var require_fast_uri = __commonJS({
     }
     function resolve2(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
-      const { parsed: baseParsed, malformedAuthorityOrPort: baseMalformed } = parseWithStatus(baseURI, schemelessOptions);
-      const { parsed: relativeParsed, malformedAuthorityOrPort: relativeMalformed } = parseWithStatus(relativeURI, schemelessOptions);
-      if (baseMalformed || relativeMalformed) {
+      const {
+        parsed: baseParsed,
+        malformedAuthorityOrPort: baseMalformed,
+        malformedPercentEncoding: baseMalformedPercentEncoding,
+        malformedSchemeSpecific: baseMalformedSchemeSpecific,
+        malformedHost: baseMalformedHost,
+        malformedScheme: baseMalformedScheme
+      } = parseWithStatus(baseURI, schemelessOptions);
+      const {
+        parsed: relativeParsed,
+        malformedAuthorityOrPort: relativeMalformed,
+        malformedPercentEncoding: relativeMalformedPercentEncoding,
+        malformedSchemeSpecific: relativeMalformedSchemeSpecific,
+        malformedHost: relativeMalformedHost,
+        malformedScheme: relativeMalformedScheme
+      } = parseWithStatus(relativeURI, schemelessOptions);
+      if (baseMalformed || relativeMalformed || baseMalformedPercentEncoding || relativeMalformedPercentEncoding || baseMalformedSchemeSpecific || relativeMalformedSchemeSpecific || baseMalformedHost || relativeMalformedHost || baseMalformedScheme || relativeMalformedScheme) {
         throw new Error(baseParsed.error || relativeParsed.error || "URI is malformed.");
       }
       const resolved = resolveComponent(baseParsed, relativeParsed, schemelessOptions, true);
+      const resolvedSchemeHandler = getSchemeHandler(options && options.scheme || resolved.scheme);
+      const resolvedHost = resolved.host;
+      const resolvedHostIsIP = resolvedHost !== void 0 && resolvedHost !== "" && (isIPv4(resolvedHost) || normalizeIPv6(resolvedHost).isIPV6);
+      canonicalizeHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP);
+      const encodedASCIIHost = resolvedHost && resolvedHost.indexOf("%") !== -1 && !new RegExp("\\P{ASCII}", "u").test(resolvedHost);
+      if (resolved.error && !encodedASCIIHost) {
+        throw new Error(resolved.error);
+      }
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative2, options, skipNormalization) {
+    function resolveComponent(base, relative3, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
         base = parse3(serialize(base, options), options);
-        relative2 = parse3(serialize(relative2, options), options);
+        relative3 = parse3(serialize(relative3, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative2.scheme) {
-        target.scheme = relative2.scheme;
-        target.userinfo = relative2.userinfo;
-        target.host = relative2.host;
-        target.port = relative2.port;
-        target.path = removeDotSegments(relative2.path || "");
-        target.query = relative2.query;
+      if (!options.tolerant && relative3.scheme) {
+        target.scheme = relative3.scheme;
+        target.userinfo = relative3.userinfo;
+        target.host = relative3.host;
+        target.port = relative3.port;
+        target.path = removeDotSegments(relative3.path || "");
+        target.query = relative3.query;
       } else {
-        if (relative2.userinfo !== void 0 || relative2.host !== void 0 || relative2.port !== void 0) {
-          target.userinfo = relative2.userinfo;
-          target.host = relative2.host;
-          target.port = relative2.port;
-          target.path = removeDotSegments(relative2.path || "");
-          target.query = relative2.query;
+        if (relative3.userinfo !== void 0 || relative3.host !== void 0 || relative3.port !== void 0) {
+          target.userinfo = relative3.userinfo;
+          target.host = relative3.host;
+          target.port = relative3.port;
+          target.path = removeDotSegments(relative3.path || "");
+          target.query = relative3.query;
         } else {
-          if (!relative2.path) {
+          if (!relative3.path) {
             target.path = base.path;
-            if (relative2.query !== void 0) {
-              target.query = relative2.query;
+            if (relative3.query !== void 0) {
+              target.query = relative3.query;
             } else {
               target.query = base.query;
             }
           } else {
-            if (relative2.path[0] === "/") {
-              target.path = removeDotSegments(relative2.path);
+            if (relative3.path[0] === "/") {
+              target.path = removeDotSegments(relative3.path);
             } else {
               if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
-                target.path = "/" + relative2.path;
+                target.path = "/" + relative3.path;
               } else if (!base.path) {
-                target.path = relative2.path;
+                target.path = relative3.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative2.path;
+                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative3.path;
               }
               target.path = removeDotSegments(target.path);
             }
-            target.query = relative2.query;
+            target.query = relative3.query;
           }
           target.userinfo = base.userinfo;
           target.host = base.host;
@@ -3704,13 +3925,13 @@ var require_fast_uri = __commonJS({
         }
         target.scheme = base.scheme;
       }
-      target.fragment = relative2.fragment;
+      target.fragment = relative3.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
       const normalizedA = normalizeComparableURI(uriA, options);
       const normalizedB = normalizeComparableURI(uriB, options);
-      return normalizedA !== void 0 && normalizedB !== void 0 && normalizedA.toLowerCase() === normalizedB.toLowerCase();
+      return normalizedA !== void 0 && normalizedB !== void 0 && normalizedA === normalizedB;
     }
     function serialize(cmpts, opts) {
       const component = {
@@ -3731,19 +3952,22 @@ var require_fast_uri = __commonJS({
       };
       const options = Object.assign({}, opts);
       const uriTokens = [];
+      if (component.scheme) {
+        component.scheme = decodeValidScheme(component.scheme);
+      }
       const schemeHandler = getSchemeHandler(options.scheme || component.scheme);
       if (schemeHandler && schemeHandler.serialize) schemeHandler.serialize(component, options);
+      const hasAuthority = component.userinfo !== void 0 || component.host !== void 0 || component.port !== void 0;
+      const pathNoScheme = !options.skipEscape && component.scheme === void 0 && !hasAuthority;
       if (component.path !== void 0) {
         if (!options.skipEscape) {
-          component.path = escapePreservingEscapes(component.path);
-          if (component.scheme !== void 0) {
-            component.path = component.path.split("%3A").join(":");
-          }
+          component.path = serializePathEncoding(component.path, pathNoScheme);
         } else {
           component.path = normalizePercentEncoding(component.path);
         }
       }
       if (options.reference !== "suffix" && component.scheme) {
+        component.scheme = decodeValidScheme(component.scheme);
         uriTokens.push(component.scheme, ":");
       }
       const authority = recomposeAuthority(component);
@@ -3761,16 +3985,19 @@ var require_fast_uri = __commonJS({
         if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
           s = removeDotSegments(s);
         }
+        if (pathNoScheme) {
+          s = serializePathEncoding(s, true);
+        }
         if (authority === void 0 && s[0] === "/" && s[1] === "/") {
           s = "/%2F" + s.slice(2);
         }
         uriTokens.push(s);
       }
       if (component.query !== void 0) {
-        uriTokens.push("?", component.query);
+        uriTokens.push("?", encodeQuery(component.query));
       }
       if (component.fragment !== void 0) {
-        uriTokens.push("#", component.fragment);
+        uriTokens.push("#", encodeFragment(component.fragment));
       }
       return uriTokens.join("");
     }
@@ -3786,6 +4013,35 @@ var require_fast_uri = __commonJS({
       }
       return void 0;
     }
+    function hasMalformedPercentEncoding(component) {
+      if (component === void 0) return false;
+      let percent = component.indexOf("%");
+      while (percent !== -1) {
+        if (percent + 2 >= component.length || !/^[\da-f]{2}$/iu.test(component.slice(percent + 1, percent + 3))) {
+          return true;
+        }
+        percent = component.indexOf("%", percent + 3);
+      }
+      return false;
+    }
+    function isIPLiteral(host) {
+      return host[0] === "[" && host[host.length - 1] === "]";
+    }
+    function hasMalformedComponentPercentEncoding(matches) {
+      const host = matches[4];
+      return hasMalformedPercentEncoding(matches[3]) || host !== void 0 && !isIPLiteral(host) && hasMalformedPercentEncoding(host) || hasMalformedPercentEncoding(matches[6]) || hasMalformedPercentEncoding(matches[7]) || hasMalformedPercentEncoding(matches[8]);
+    }
+    function canonicalizeHost(parsed, options, schemeHandler, isIP) {
+      if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport) && parsed.host && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) {
+        try {
+          parsed.host = new URL("http://" + parsed.host).hostname;
+        } catch (e) {
+          parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
+          return true;
+        }
+      }
+      return false;
+    }
     function parseWithStatus(uri, opts) {
       const options = Object.assign({}, opts);
       const parsed = {
@@ -3798,6 +4054,11 @@ var require_fast_uri = __commonJS({
         fragment: void 0
       };
       let malformedAuthorityOrPort = false;
+      let malformedPercentEncoding = false;
+      let malformedSchemeSpecific = false;
+      let malformedHost = false;
+      let malformedIPLiteral = false;
+      let malformedScheme = false;
       let isIP = false;
       if (options.reference === "suffix") {
         if (options.scheme) {
@@ -3834,6 +4095,19 @@ var require_fast_uri = __commonJS({
         parsed.path = matches[6] || "";
         parsed.query = matches[7];
         parsed.fragment = matches[8];
+        if (parsed.scheme !== void 0) {
+          const decodedScheme = unescape(parsed.scheme);
+          if (VALID_SCHEME.test(decodedScheme)) {
+            parsed.scheme = decodedScheme.toLowerCase();
+          } else {
+            parsed.error = parsed.error || MALFORMED_SCHEME_ERROR;
+            malformedScheme = true;
+          }
+        }
+        malformedPercentEncoding = hasMalformedComponentPercentEncoding(matches);
+        if (malformedPercentEncoding) {
+          parsed.error = parsed.error || "URI contains malformed percent-encoding.";
+        }
         if (isNaN(parsed.port)) {
           parsed.port = matches[5];
         }
@@ -3845,9 +4119,16 @@ var require_fast_uri = __commonJS({
         if (parsed.host) {
           const ipv4result = isIPv4(parsed.host);
           if (ipv4result === false) {
+            const bracketedIPLiteral = isIPLiteral(parsed.host);
+            const hasIPLiteralBracket = parsed.host.indexOf("[") !== -1 || parsed.host.indexOf("]") !== -1;
             const ipv6result = normalizeIPv6(parsed.host);
-            parsed.host = ipv6result.host.toLowerCase();
-            isIP = ipv6result.isIPV6;
+            isIP = ipv6result.isIPV6 || ipv6result.isIPVFuture === true;
+            malformedIPLiteral = hasIPLiteralBracket && (!bracketedIPLiteral || ipv6result.error === true);
+            parsed.host = isIP ? ipv6result.host : ipv6result.host.toLowerCase();
+            if (malformedIPLiteral) {
+              parsed.error = parsed.error || "URI host is malformed.";
+              malformedAuthorityOrPort = true;
+            }
           } else {
             isIP = true;
           }
@@ -3865,42 +4146,37 @@ var require_fast_uri = __commonJS({
           parsed.error = parsed.error || "URI is not a " + options.reference + " reference.";
         }
         const schemeHandler = getSchemeHandler(options.scheme || parsed.scheme);
-        if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
-          if (parsed.host && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) {
-            try {
-              parsed.host = new URL("http://" + parsed.host).hostname;
-            } catch (e) {
-              parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
-            }
+        if (!malformedIPLiteral) {
+          malformedHost = canonicalizeHost(parsed, options, schemeHandler, isIP);
+        }
+        if (uri.indexOf("%") !== -1 && parsed.host !== void 0 && !malformedIPLiteral) {
+          let host = isIP ? parsed.host : normalizePercentEncoding(parsed.host, true);
+          if (!isIP) {
+            host = normalizePercentEncoding(host.toLowerCase());
           }
+          parsed.host = reescapeHostDelimiters(host, isIP);
         }
         if (!schemeHandler || schemeHandler && !schemeHandler.skipNormalize) {
-          if (uri.indexOf("%") !== -1) {
-            if (parsed.scheme !== void 0) {
-              parsed.scheme = unescape(parsed.scheme);
-            }
-            if (parsed.host !== void 0) {
-              parsed.host = reescapeHostDelimiters(unescape(parsed.host), isIP);
-            }
-          }
           if (parsed.path) {
             parsed.path = normalizePathEncoding(parsed.path);
           }
+          if (parsed.query) {
+            parsed.query = normalizeQueryFragmentEncoding(parsed.query);
+          }
           if (parsed.fragment) {
-            try {
-              parsed.fragment = encodeURI(decodeURIComponent(parsed.fragment));
-            } catch {
-              parsed.error = parsed.error || "URI malformed";
-            }
+            parsed.fragment = normalizeQueryFragmentEncoding(parsed.fragment);
           }
         }
         if (schemeHandler && schemeHandler.parse) {
           schemeHandler.parse(parsed, options);
+          if (schemeHandler === SCHEMES.urn && parsed.nid === void 0) {
+            malformedSchemeSpecific = true;
+          }
         }
       } else {
         parsed.error = parsed.error || "URI can not be parsed.";
       }
-      return { parsed, malformedAuthorityOrPort };
+      return { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme };
     }
     function parse3(uri, opts) {
       return parseWithStatus(uri, opts).parsed;
@@ -3909,24 +4185,32 @@ var require_fast_uri = __commonJS({
       return normalizeStringWithStatus(uri, opts).normalized;
     }
     function normalizeStringWithStatus(uri, opts) {
-      const { parsed, malformedAuthorityOrPort } = parseWithStatus(uri, opts);
+      const { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = parseWithStatus(uri, opts);
       return {
-        normalized: malformedAuthorityOrPort ? uri : serialize(parsed, opts),
-        malformedAuthorityOrPort
+        normalized: malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? uri : serialize(parsed, opts),
+        malformedAuthorityOrPort,
+        malformedPercentEncoding,
+        malformedSchemeSpecific,
+        malformedHost,
+        malformedScheme
       };
     }
     function normalizeComparableURI(uri, opts) {
-      if (typeof uri === "string") {
-        const { normalized, malformedAuthorityOrPort } = normalizeStringWithStatus(uri, opts);
-        return malformedAuthorityOrPort ? void 0 : normalized;
+      if (typeof uri !== "string" && typeof uri !== "object") {
+        return void 0;
       }
-      if (typeof uri === "object") {
-        return serialize(uri, opts);
+      let value;
+      try {
+        value = typeof uri === "string" ? uri : serialize(uri, opts);
+      } catch {
+        return void 0;
       }
+      const { normalized, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = normalizeStringWithStatus(value, opts);
+      return malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? void 0 : normalized;
     }
     var fastUri = {
       SCHEMES,
-      normalize,
+      normalize: normalize2,
       resolve: resolve2,
       resolveComponent,
       equal,
@@ -4431,11 +4715,11 @@ var require_core = __commonJS({
     Ajv2.ValidationError = validation_error_1.default;
     Ajv2.MissingRefError = ref_error_1.default;
     exports2.default = Ajv2;
-    function checkOptions(checkOpts, options, msg, log = "error") {
+    function checkOptions(checkOpts, options, msg, log2 = "error") {
       for (const key in checkOpts) {
         const opt = key;
         if (opt in options)
-          this.logger[log](`${msg}: option ${key}. ${checkOpts[opt]}`);
+          this.logger[log2](`${msg}: option ${key}. ${checkOpts[opt]}`);
       }
     }
     function getSchEnv(keyRef) {
@@ -6903,12 +7187,12 @@ var require_dist = __commonJS({
         throw new Error(`Unknown format "${name}"`);
       return f;
     };
-    function addFormats(ajv, list, fs5, exportName) {
+    function addFormats(ajv, list, fs7, exportName) {
       var _a;
       var _b;
       (_a = (_b = ajv.opts.code).formats) !== null && _a !== void 0 ? _a : _b.formats = (0, codegen_1._)`require("ajv-formats/dist/formats").${exportName}`;
       for (const f of list)
-        ajv.addFormat(f, fs5[f]);
+        ajv.addFormat(f, fs7[f]);
     }
     module2.exports = exports2 = formatsPlugin;
     Object.defineProperty(exports2, "__esModule", { value: true });
@@ -6942,6 +7226,9 @@ function localStorePath(env = process.env) {
 }
 function cloudTokenPath(env = process.env) {
   return import_node_path.default.join(askTheWDataDir(env), "cloud-token.json");
+}
+function lastPullPath(env = process.env) {
+  return import_node_path.default.join(askTheWDataDir(env), "last-pull.json");
 }
 function signalAuthorizationPath(env = process.env) {
   return import_node_path.default.join(askTheWDataDir(env), "consent.json");
@@ -7092,8 +7379,8 @@ function isPluginRuntimePath(candidate, env) {
 function isPathWithinRoot(candidatePath, rootPath) {
   const candidate = canonicalPath(candidatePath);
   const root = canonicalPath(rootPath);
-  const relative2 = path2.relative(root, candidate);
-  return relative2 === "" || !relative2.startsWith("..") && !path2.isAbsolute(relative2);
+  const relative3 = path2.relative(root, candidate);
+  return relative3 === "" || !relative3.startsWith("..") && !path2.isAbsolute(relative3);
 }
 function projectBindingStatus(startDirectory = process.cwd(), env = process.env) {
   const boundRoot = cleanEnv(env.ASKTHEW_REPO_ROOT || env.ASKTHEW_PROJECT_ROOT);
@@ -7275,16 +7562,16 @@ function sensitiveFileReference(value) {
   return /\.(?:pem|p12|pfx|key)$/i.test(basename2);
 }
 function pathTextWithinRoot(candidatePath, rootPath) {
-  const relative2 = import_node_path2.default.relative(import_node_path2.default.resolve(rootPath), import_node_path2.default.resolve(candidatePath));
-  return relative2 === "" || !relative2.startsWith("..") && !import_node_path2.default.isAbsolute(relative2);
+  const relative3 = import_node_path2.default.relative(import_node_path2.default.resolve(rootPath), import_node_path2.default.resolve(candidatePath));
+  return relative3 === "" || !relative3.startsWith("..") && !import_node_path2.default.isAbsolute(relative3);
 }
 function fileReference(value, options) {
   if (sensitiveFileReference(value)) return "[REDACTED_PATH]";
   const scope = safeResolveScope(options);
   const trimmed = redactText(value).trim();
   if (scope?.repoRoot && import_node_path2.default.isAbsolute(trimmed) && pathTextWithinRoot(trimmed, scope.repoRoot)) {
-    const relative2 = import_node_path2.default.relative(scope.repoRoot, trimmed).split(import_node_path2.default.sep).join("/");
-    return relative2 || ".";
+    const relative3 = import_node_path2.default.relative(scope.repoRoot, trimmed).split(import_node_path2.default.sep).join("/");
+    return relative3 || ".";
   }
   return scrubLocalPaths(trimmed, options);
 }
@@ -7444,12 +7731,6 @@ function appendScopeParam(params, scopeKey) {
   const trimmed = scopeKey?.trim();
   if (trimmed) params.set("scope_key", trimmed);
 }
-function appendManualRequestParams(params, input) {
-  const requestIntent = String(input.requestIntent ?? "").trim();
-  const originatingPrompt = String(input.originatingPrompt ?? "").trim();
-  if (requestIntent) params.set("request_intent", requestIntent);
-  if (originatingPrompt) params.set("originating_prompt", originatingPrompt);
-}
 function writeIdempotencyHeaders(key) {
   const trimmed = key?.trim();
   return trimmed ? { "Idempotency-Key": trimmed } : {};
@@ -7490,7 +7771,7 @@ var AskTheWCloudClient = class {
   hasToken() {
     return Boolean(this.token);
   }
-  async request(path5, init = {}) {
+  async request(path6, init = {}) {
     if (!this.token) {
       return {
         ok: false,
@@ -7503,7 +7784,7 @@ var AskTheWCloudClient = class {
       };
     }
     try {
-      const response = await this.fetcher(`${this.apiUrl}/api/v1/agent${path5}`, {
+      const response = await this.fetcher(`${this.apiUrl}/api/v1/agent${path6}`, {
         ...init,
         headers: {
           "Content-Type": "application/json",
@@ -7524,16 +7805,6 @@ var AskTheWCloudClient = class {
       body: JSON.stringify(snakeSignal(sanitized))
     });
   }
-  async listSignals(input = {}) {
-    const params = new URLSearchParams();
-    if (input.sessionId) params.set("session_id", input.sessionId);
-    if (input.since) params.set("since", input.since);
-    if (input.limit) params.set("limit", String(input.limit));
-    if (input.cursor) params.set("cursor", input.cursor);
-    appendScopeParam(params, input.scopeKey);
-    const result = await this.request(`/signals${params.size ? `?${params.toString()}` : ""}`);
-    return { ...result, body: camelize(result.body) };
-  }
   async createDecision(payload) {
     const body = {
       content: typeof payload.content === "string" ? redactFreeText(payload.content, this.redactionOptions) : payload.content,
@@ -7546,23 +7817,6 @@ var AskTheWCloudClient = class {
       scope_key: payload.scopeKey
     };
     return this.request("/decisions", { method: "POST", body: JSON.stringify(body) });
-  }
-  async listDecisions(input = {}) {
-    const params = new URLSearchParams();
-    if (input.limit) params.set("limit", String(input.limit));
-    if (input.cursor) params.set("cursor", input.cursor);
-    appendScopeParam(params, input.scopeKey);
-    appendManualRequestParams(params, input);
-    const result = await this.request(`/decisions${params.size ? `?${params.toString()}` : ""}`);
-    return { ...result, body: camelize(result.body) };
-  }
-  async listOutcomes(input = {}) {
-    const params = new URLSearchParams();
-    if (input.limit) params.set("limit", String(input.limit));
-    appendScopeParam(params, input.scopeKey);
-    appendManualRequestParams(params, input);
-    const result = await this.request(`/outcomes${params.size ? `?${params.toString()}` : ""}`);
-    return { ...result, body: camelize(result.body) };
   }
   async listProjectDocs(input = {}) {
     const params = new URLSearchParams();
@@ -7600,17 +7854,6 @@ var AskTheWCloudClient = class {
       })
     });
     return { ...result, body: camelize(result.body) };
-  }
-  async recap(input) {
-    return this.request("/recap", {
-      method: "POST",
-      body: JSON.stringify({
-        ...manualRequestBody(input),
-        since: input.since,
-        max_signals: input.maxSignals,
-        scope_key: input.scopeKey
-      })
-    });
   }
   async getProjectContext(input = {}) {
     return this.request("/project-context", {
@@ -7652,17 +7895,22 @@ var AskTheWCloudClient = class {
     const result = await this.request(`/product-refresh?${params.toString()}`, { method: "GET" });
     return { ...result, body: camelize(result.body) };
   }
-  async coach(input) {
-    return this.request("/coach", {
+  async runAskWAction(input) {
+    const result = await this.request(`/actions/${encodeURIComponent(input.actionId)}`, {
       method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
       body: JSON.stringify({
         ...manualRequestBody(input),
-        focus: input.focus,
-        cursor: input.cursor,
-        limit: input.limit,
-        scope_key: input.scopeKey
+        verb: input.verb,
+        confirm: input.confirm,
+        subject_kind: input.subjectKind,
+        subject_id: input.subjectId,
+        w_key: input.wKey,
+        scope_key: input.scopeKey,
+        idempotency_key: input.idempotencyKey
       })
     });
+    return { ...result, body: camelize(result.body) };
   }
   async nextMoves(input) {
     const result = await this.request("/next-moves", {
@@ -7699,6 +7947,7 @@ var AskTheWCloudClient = class {
       method: "POST",
       body: JSON.stringify({
         progress_note: input.progressNote,
+        lease_token: input.leaseToken ?? void 0,
         scope_key: input.scopeKey
       })
     });
@@ -7713,6 +7962,14 @@ var AskTheWCloudClient = class {
         files_touched: redactFilesTouched(input.filesTouched ?? [], this.redactionOptions),
         checks: redactMetadataRecord(input.checks, this.redactionOptions),
         commit_ref: input.commitRef ?? null,
+        pr_urls: input.prUrls ?? [],
+        done_when: Array.isArray(input.doneWhen) ? input.doneWhen.map((item) => ({
+          ...item,
+          note: item.note ? redactFreeText(item.note, this.redactionOptions) : item.note,
+          text: item.text ? redactFreeText(item.text, this.redactionOptions) : item.text
+        })) : void 0,
+        stack: input.stack ?? void 0,
+        lease_token: input.leaseToken ?? void 0,
         scope_key: input.scopeKey,
         idempotency_key: input.idempotencyKey
       })
@@ -7725,6 +7982,7 @@ var AskTheWCloudClient = class {
       body: JSON.stringify({
         outcome: input.outcome ?? "requeue",
         reason: input.reason ?? null,
+        lease_token: input.leaseToken ?? void 0,
         scope_key: input.scopeKey
       })
     });
@@ -7770,6 +8028,58 @@ var AskTheWCloudClient = class {
     });
     return { ...result, body: camelize(result.body) };
   }
+  async listProjects(input = {}) {
+    const params = new URLSearchParams();
+    appendScopeParam(params, input.scopeKey);
+    const result = await this.request(`/projects${params.size ? `?${params.toString()}` : ""}`, {
+      method: "GET"
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async chooseProject(input = {}) {
+    const heldWork = (input.heldWork ?? []).filter((item) => item.runId);
+    const result = await this.request("/projects/choose", {
+      method: "POST",
+      body: JSON.stringify({
+        ...input.projectId ? { project_id: input.projectId } : {},
+        ...input.title ? { title: input.title } : {},
+        scope_key: input.scopeKey,
+        ...heldWork.length ? {
+          held_work: heldWork.map((item) => ({
+            run_id: item.runId,
+            lease_token: item.leaseToken ?? null
+          }))
+        } : {}
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
+  async createProject(input) {
+    const card = input.wCard;
+    const result = await this.request("/projects", {
+      method: "POST",
+      headers: writeIdempotencyHeaders(input.idempotencyKey),
+      body: JSON.stringify({
+        title: input.title,
+        w_card: {
+          title: card.title,
+          siteUrl: card.siteUrl,
+          fields: card.fields,
+          theme: card.theme,
+          isPublished: card.isPublished,
+          stage: card.stage,
+          bet: card.bet
+        },
+        autopilot: input.autopilot,
+        ...input.organizationId ? { organization_id: input.organizationId } : {},
+        request_intent: "explicit_user_request",
+        originating_prompt: redactFreeText(input.originatingPrompt, this.redactionOptions),
+        scope_key: input.scopeKey,
+        idempotency_key: input.idempotencyKey
+      })
+    });
+    return { ...result, body: camelize(result.body) };
+  }
   async startPaidBind(input = {}) {
     const body = JSON.stringify(input.clientHint ? { client_hint: input.clientHint } : {});
     if (this.token) {
@@ -7800,13 +8110,6 @@ var AskTheWCloudClient = class {
     const params = new URLSearchParams();
     params.set("code_display", input.codeDisplay);
     return this.request(`/paid/bind/status?${params.toString()}`, { method: "GET" });
-  }
-  async exportData(input = {}) {
-    const params = new URLSearchParams();
-    appendScopeParam(params, input.scopeKey);
-    appendManualRequestParams(params, input);
-    const result = await this.request(`/export${params.size ? `?${params.toString()}` : ""}`, { method: "GET" });
-    return { ...result, body: camelize(result.body) };
   }
 };
 
@@ -8083,6 +8386,13 @@ async function sendOutboxPayload(client, payload, attempts = 0) {
     return { kind: "queued", retryAfterSeconds: BACKOFF_SECONDS[Math.min(attempts, BACKOFF_SECONDS.length - 1)] };
   }
 }
+
+// src/instructions.ts
+var mcpToolBehaviorInstructions = [
+  "When a tool can do what the person asked, call that tool. Do not answer it from your own knowledge.",
+  "When no Ask The W tool covers the question, say in the first sentence that the answer is general knowledge, not from the project.",
+  "When an answer uses a tool result and also uses general knowledge, say which sentences come from the project and which are general knowledge."
+].join("\n");
 
 // ../../node_modules/zod/v3/external.js
 var external_exports = {};
@@ -8562,8 +8872,8 @@ function getErrorMap() {
 
 // ../../node_modules/zod/v3/helpers/parseUtil.js
 var makeIssue = (params) => {
-  const { data, path: path5, errorMaps, issueData } = params;
-  const fullPath = [...path5, ...issueData.path || []];
+  const { data, path: path6, errorMaps, issueData } = params;
+  const fullPath = [...path6, ...issueData.path || []];
   const fullIssue = {
     ...issueData,
     path: fullPath
@@ -8679,11 +8989,11 @@ var errorUtil;
 
 // ../../node_modules/zod/v3/types.js
 var ParseInputLazyPath = class {
-  constructor(parent, value, path5, key) {
+  constructor(parent, value, path6, key) {
     this._cachedPath = [];
     this.parent = parent;
     this.data = value;
-    this._path = path5;
+    this._path = path6;
     this._key = key;
   }
   get path() {
@@ -9062,11 +9372,11 @@ function datetimeRegex(args) {
   regex = `${regex}(${opts.join("|")})`;
   return new RegExp(`^${regex}$`);
 }
-function isValidIP(ip, version2) {
-  if ((version2 === "v4" || !version2) && ipv4Regex.test(ip)) {
+function isValidIP(ip, version4) {
+  if ((version4 === "v4" || !version4) && ipv4Regex.test(ip)) {
     return true;
   }
-  if ((version2 === "v6" || !version2) && ipv6Regex.test(ip)) {
+  if ((version4 === "v6" || !version4) && ipv6Regex.test(ip)) {
     return true;
   }
   return false;
@@ -9093,11 +9403,11 @@ function isValidJWT(jwt, alg) {
     return false;
   }
 }
-function isValidCidr(ip, version2) {
-  if ((version2 === "v4" || !version2) && ipv4CidrRegex.test(ip)) {
+function isValidCidr(ip, version4) {
+  if ((version4 === "v4" || !version4) && ipv4CidrRegex.test(ip)) {
     return true;
   }
-  if ((version2 === "v6" || !version2) && ipv6CidrRegex.test(ip)) {
+  if ((version4 === "v6" || !version4) && ipv6CidrRegex.test(ip)) {
     return true;
   }
   return false;
@@ -12320,10 +12630,10 @@ function assignProp(target, prop, value) {
     configurable: true
   });
 }
-function getElementAtPath(obj, path5) {
-  if (!path5)
+function getElementAtPath(obj, path6) {
+  if (!path6)
     return obj;
-  return path5.reduce((acc, key) => acc?.[key], obj);
+  return path6.reduce((acc, key) => acc?.[key], obj);
 }
 function promiseAllObject(promisesObj) {
   const keys = Object.keys(promisesObj);
@@ -12643,11 +12953,11 @@ function aborted(x, startIndex = 0) {
   }
   return false;
 }
-function prefixIssues(path5, issues) {
+function prefixIssues(path6, issues) {
   return issues.map((iss) => {
     var _a;
     (_a = iss).path ?? (_a.path = []);
-    iss.path.unshift(path5);
+    iss.path.unshift(path6);
     return iss;
   });
 }
@@ -12841,10 +13151,10 @@ var ksuid = /^[A-Za-z0-9]{27}$/;
 var nanoid = /^[a-zA-Z0-9_-]{21}$/;
 var duration = /^P(?:(\d+W)|(?!.*W)(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+([.,]\d+)?S)?)?)$/;
 var guid = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
-var uuid = (version2) => {
-  if (!version2)
+var uuid = (version4) => {
+  if (!version4)
     return /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000)$/;
-  return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version2}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
+  return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version4}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
 };
 var email = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
 var _emoji = `^(\\p{Extended_Pictographic}|\\p{Emoji_Component})+$`;
@@ -13934,7 +14244,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     return (payload, ctx) => fn(shape, payload, ctx);
   };
   let fastpass;
-  const isObject2 = isObject;
+  const isObject3 = isObject;
   const jit = !globalConfig.jitless;
   const allowsEval2 = allowsEval;
   const fastEnabled = jit && allowsEval2.value;
@@ -13943,7 +14253,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   inst._zod.parse = (payload, ctx) => {
     value ?? (value = _normalized.value);
     const input = payload.value;
-    if (!isObject2(input)) {
+    if (!isObject3(input)) {
       payload.issues.push({
         expected: "object",
         code: "invalid_type",
@@ -15088,12 +15398,12 @@ function _uppercase(params) {
     ...normalizeParams(params)
   });
 }
-function _includes(includes, params) {
+function _includes(includes2, params) {
   return new $ZodCheckIncludes({
     check: "string_format",
     format: "includes",
     ...normalizeParams(params),
-    includes
+    includes: includes2
   });
 }
 function _startsWith(prefix, params) {
@@ -16058,11 +16368,11 @@ function normalizeObjectSchema(schema) {
   }
   return void 0;
 }
-function getDotPath(path5) {
-  if (path5.length === 0) {
+function getDotPath(path6) {
+  if (path6.length === 0) {
     return "object root";
   }
-  return path5.reduce((acc, seg, index) => {
+  return path6.reduce((acc, seg, index) => {
     if (index === 0) {
       return String(seg);
     }
@@ -19732,6 +20042,9 @@ var Protocol = class {
       this.setRequestHandler(GetTaskPayloadRequestSchema, async (request, extra) => {
         const handleTaskResult = async () => {
           const taskId = request.params.taskId;
+          if (!await this._taskStore.getTask(taskId, extra.sessionId)) {
+            throw new McpError(ErrorCode.InvalidParams, `Task not found: ${taskId}`);
+          }
           if (this._taskMessageQueue) {
             let queuedMessage;
             while (queuedMessage = await this._taskMessageQueue.dequeue(taskId, extra.sessionId)) {
@@ -19762,12 +20075,12 @@ var Protocol = class {
             throw new McpError(ErrorCode.InvalidParams, `Task not found: ${taskId}`);
           }
           if (!isTerminal(task.status)) {
-            await this._waitForTaskUpdate(taskId, extra.signal);
+            await this._waitForTaskUpdate(taskId, extra.signal, extra.sessionId);
             return await handleTaskResult();
           }
           if (isTerminal(task.status)) {
             const result = await this._taskStore.getTaskResult(taskId, extra.sessionId);
-            this._clearTaskQueue(taskId);
+            this._clearTaskQueue(taskId, extra.sessionId);
             return {
               ...result,
               _meta: {
@@ -19804,7 +20117,7 @@ var Protocol = class {
             throw new McpError(ErrorCode.InvalidParams, `Cannot cancel task in terminal status: ${task.status}`);
           }
           await this._taskStore.updateTaskStatus(request.params.taskId, "cancelled", "Client cancelled task execution.", extra.sessionId);
-          this._clearTaskQueue(request.params.taskId);
+          this._clearTaskQueue(request.params.taskId, extra.sessionId);
           const cancelledTask = await this._taskStore.getTask(request.params.taskId, extra.sessionId);
           if (!cancelledTask) {
             throw new McpError(ErrorCode.InvalidParams, `Task not found after cancellation: ${request.params.taskId}`);
@@ -19932,6 +20245,19 @@ var Protocol = class {
     const handler = this._requestHandlers.get(request.method) ?? this.fallbackRequestHandler;
     const capturedTransport = this._transport;
     const relatedTaskId = request.params?._meta?.[RELATED_TASK_META_KEY]?.taskId;
+    const sessionId = capturedTransport?.sessionId;
+    const store = this._taskStore;
+    let relatedTaskFound = true;
+    let relatedTaskLookup;
+    if (relatedTaskId && store && this._taskMessageQueue && sessionId !== void 0) {
+      relatedTaskFound = false;
+      relatedTaskLookup = (async () => {
+        if (!await store.getTask(relatedTaskId, sessionId)) {
+          throw new McpError(ErrorCode.InvalidParams, `Task not found: ${relatedTaskId}`);
+        }
+        relatedTaskFound = true;
+      })();
+    }
     if (handler === void 0) {
       const errorResponse = {
         jsonrpc: "2.0",
@@ -19941,7 +20267,10 @@ var Protocol = class {
           message: "Method not found"
         }
       };
-      if (relatedTaskId && this._taskMessageQueue) {
+      if (relatedTaskId && relatedTaskLookup) {
+        const queuedError = { type: "error", message: errorResponse, timestamp: Date.now() };
+        relatedTaskLookup.then(() => this._enqueueTaskMessage(relatedTaskId, queuedError, sessionId), () => capturedTransport?.send(errorResponse)).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
+      } else if (relatedTaskId && this._taskMessageQueue) {
         this._enqueueTaskMessage(relatedTaskId, {
           type: "error",
           message: errorResponse,
@@ -19992,7 +20321,10 @@ var Protocol = class {
       closeSSEStream: extra?.closeSSEStream,
       closeStandaloneSSEStream: extra?.closeStandaloneSSEStream
     };
-    Promise.resolve().then(() => {
+    (relatedTaskLookup ?? Promise.resolve()).then(() => {
+      if (relatedTaskLookup && abortController.signal.aborted) {
+        throw new McpError(ErrorCode.ConnectionClosed, "Request was cancelled");
+      }
       if (taskCreationParams) {
         this.assertTaskHandlerCapability(request.method);
       }
@@ -20027,7 +20359,7 @@ var Protocol = class {
           ...error2["data"] !== void 0 && { data: error2["data"] }
         }
       };
-      if (relatedTaskId && this._taskMessageQueue) {
+      if (relatedTaskId && this._taskMessageQueue && relatedTaskFound) {
         await this._enqueueTaskMessage(relatedTaskId, {
           type: "error",
           message: errorResponse,
@@ -20507,7 +20839,7 @@ var Protocol = class {
       throw new Error("Cannot enqueue task message: taskStore and taskMessageQueue are not configured");
     }
     const maxQueueSize = this._options?.maxTaskQueueSize;
-    await this._taskMessageQueue.enqueue(taskId, message, sessionId, maxQueueSize);
+    await this._taskMessageQueue.enqueue(taskId, message, sessionId ?? this._transport?.sessionId, maxQueueSize);
   }
   /**
    * Clears the message queue for a task and rejects any pending request resolvers.
@@ -20536,12 +20868,13 @@ var Protocol = class {
    * Uses polling to check for updates at the task's configured poll interval.
    * @param taskId The task ID to wait for
    * @param signal Abort signal to cancel the wait
+   * @param sessionId Session of the request that waits, passed to the task store
    * @returns Promise that resolves when an update occurs or rejects if aborted
    */
-  async _waitForTaskUpdate(taskId, signal) {
+  async _waitForTaskUpdate(taskId, signal, sessionId) {
     let interval = this._options?.defaultTaskPollInterval ?? 1e3;
     try {
-      const task = await this._taskStore?.getTask(taskId);
+      const task = await this._taskStore?.getTask(taskId, sessionId);
       if (task?.pollInterval) {
         interval = task.pollInterval;
       }
@@ -21642,6 +21975,42 @@ var ExperimentalMcpServerTasks = class {
 };
 
 // ../../node_modules/@modelcontextprotocol/sdk/dist/esm/server/mcp.js
+function toolInputElementCount(value, max) {
+  let count = 0;
+  const stack = [value];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === null || typeof node !== "object")
+      continue;
+    if (Array.isArray(node)) {
+      for (const child of node) {
+        if (++count > max)
+          return count;
+        if (child !== null && typeof child === "object")
+          stack.push(child);
+      }
+    } else {
+      for (const key in node) {
+        if (!Object.prototype.hasOwnProperty.call(node, key))
+          continue;
+        if (++count > max)
+          return count;
+        const child = node[key];
+        if (child !== null && typeof child === "object")
+          stack.push(child);
+      }
+    }
+  }
+  return count;
+}
+function resolveMaxToolInputElements(value) {
+  if (value === void 0 || value === Infinity)
+    return void 0;
+  if (typeof value !== "number" || Number.isNaN(value) || value < 1) {
+    throw new RangeError(`maxToolInputElements must be a number of at least 1, or Infinity, got ${String(value)}`);
+  }
+  return value;
+}
 var McpServer = class {
   constructor(serverInfo, options) {
     this._registeredResources = {};
@@ -21653,6 +22022,7 @@ var McpServer = class {
     this._resourceHandlersInitialized = false;
     this._promptHandlersInitialized = false;
     this.server = new Server(serverInfo, options);
+    this._maxToolInputElements = resolveMaxToolInputElements(options?.maxToolInputElements);
   }
   /**
    * Access experimental features.
@@ -21783,12 +22153,15 @@ var McpServer = class {
    * Validates tool input arguments against the tool's input schema.
    */
   async validateToolInput(tool, args, toolName) {
+    if (this._maxToolInputElements !== void 0 && toolInputElementCount(args, this._maxToolInputElements) > this._maxToolInputElements) {
+      throw new McpError(ErrorCode.InvalidParams, `Invalid arguments for tool ${toolName}: arguments contain more than the maximum of ${this._maxToolInputElements} elements`);
+    }
     if (!tool.inputSchema) {
       return void 0;
     }
     const inputObj = normalizeObjectSchema(tool.inputSchema);
     const schemaToParse = inputObj ?? tool.inputSchema;
-    const parseResult = await safeParseAsync2(schemaToParse, args);
+    const parseResult = await safeParseAsync2(schemaToParse, args ?? {});
     if (!parseResult.success) {
       const error2 = "error" in parseResult ? parseResult.error : "Unknown error";
       const errorMessage2 = getParseErrorMessage(error2);
@@ -22026,7 +22399,7 @@ var McpServer = class {
       }
       if (prompt.argsSchema) {
         const argsObj = normalizeObjectSchema(prompt.argsSchema);
-        const parseResult = await safeParseAsync2(argsObj, request.params.arguments);
+        const parseResult = await safeParseAsync2(argsObj, request.params.arguments ?? {});
         if (!parseResult.success) {
           const error2 = "error" in parseResult ? parseResult.error : "Unknown error";
           const errorMessage2 = getParseErrorMessage(error2);
@@ -22565,8 +22938,50 @@ var StdioServerTransport = class {
 };
 
 // src/index.ts
+var import_node_child_process = require("node:child_process");
 var import_node_crypto = __toESM(require("node:crypto"), 1);
+var import_node_fs5 = __toESM(require("node:fs"), 1);
 var import_node_module2 = require("node:module");
+
+// src/stack.ts
+var fs5 = __toESM(require("node:fs"), 1);
+var path5 = __toESM(require("node:path"), 1);
+function readText(filePath) {
+  try {
+    return fs5.readFileSync(filePath, "utf8");
+  } catch {
+    return "";
+  }
+}
+function record2(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+function hasDep(pkg, name) {
+  for (const key of ["dependencies", "devDependencies", "peerDependencies"]) {
+    const deps = record2(pkg[key]);
+    if (name in deps) return true;
+  }
+  return false;
+}
+function reportRepoStack(repoRoot) {
+  const root = repoRoot.trim();
+  if (!root) return null;
+  if (fs5.existsSync(path5.join(root, "Cargo.toml"))) return "Rust";
+  if (fs5.existsSync(path5.join(root, "go.mod"))) return "Go";
+  if (fs5.existsSync(path5.join(root, "pyproject.toml"))) return "Python";
+  const pkgText = readText(path5.join(root, "package.json"));
+  if (!pkgText) return null;
+  let pkg = {};
+  try {
+    pkg = record2(JSON.parse(pkgText));
+  } catch {
+    return null;
+  }
+  if (hasDep(pkg, "next")) return "Next.js";
+  if (hasDep(pkg, "react")) return "React";
+  if (hasDep(pkg, "typescript")) return "TypeScript";
+  return null;
+}
 
 // src/install.ts
 var SUPPORTED_HOST_TYPES = ["claude_code", "codex", "cursor"];
@@ -22642,6 +23057,12038 @@ function writeSignalAuthorizationReceipt(input) {
   return receipt;
 }
 
+// ../../node_modules/@posthog/mcp/dist/extensions/detect.mjs
+function asRecord(value) {
+  return value && "object" == typeof value ? value : void 0;
+}
+function hasMethod(value, key) {
+  return "function" == typeof asRecord(value)?.[key];
+}
+function hasNestedLowLevelServer(server) {
+  const record3 = asRecord(server);
+  return !!record3 && "server" in record3 && !!asRecord(record3.server);
+}
+function hasToolRegistry(server) {
+  return !!asRecord(asRecord(server)?._registeredTools);
+}
+function canRegisterTools(server) {
+  return hasMethod(server, "registerTool") || hasMethod(server, "tool");
+}
+function canSetRequestHandler(server) {
+  return hasMethod(server, "setRequestHandler");
+}
+function hasRequestHandlerMap(server) {
+  const handlers = asRecord(server)?._requestHandlers;
+  return handlers instanceof Map && "function" == typeof handlers.get;
+}
+function hasClientVersionAccessor(server) {
+  return hasMethod(server, "getClientVersion");
+}
+function hasNegotiatedProtocolVersionAccessor(server) {
+  return hasMethod(server, "getNegotiatedProtocolVersion");
+}
+function hasServerInfo(server) {
+  const info = asRecord(asRecord(server)?._serverInfo);
+  return !!info && "name" in info;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/compatibility.mjs
+function logCompatibilityWarning(logger) {
+  logger("PostHog MCP analytics SDK Compatibility: This version only supports Model Context Protocol TypeScript SDK v1.11 and above. Please upgrade if using an older version.");
+}
+function isHighLevelServer(server) {
+  return hasNestedLowLevelServer(server);
+}
+function isCompatibleServerType(server, logger) {
+  if (!server || "object" != typeof server) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server must be an object. Ensure you're using MCP SDK v1.11 or higher.");
+  }
+  if (isHighLevelServer(server)) {
+    if (!hasToolRegistry(server)) {
+      logCompatibilityWarning(logger);
+      throw new Error("PostHog MCP analytics SDK compatibility error: High-level server must have _registeredTools object. This requires MCP SDK v1.11 or higher.");
+    }
+    if (!canRegisterTools(server)) {
+      logCompatibilityWarning(logger);
+      throw new Error("PostHog MCP analytics SDK compatibility error: High-level server must have a registerTool() or tool() method. This requires MCP SDK v1.11 or higher.");
+    }
+    const targetServer = server.server;
+    validateLowLevelServer(targetServer, logger);
+    return server;
+  }
+  validateLowLevelServer(server, logger);
+  return server;
+}
+function validateLowLevelServer(server, logger) {
+  if (!server || "object" != typeof server) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server must be an object. Ensure you're using MCP SDK v1.11 or higher.");
+  }
+  if (!canSetRequestHandler(server)) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server must have a setRequestHandler method. This requires MCP SDK v1.11 or higher.");
+  }
+  if (!hasRequestHandlerMap(server)) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server._requestHandlers is not accessible. This requires MCP SDK v1.11 or higher.");
+  }
+  if (!hasClientVersionAccessor(server)) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server.getClientVersion must be a function. This requires MCP SDK v1.11 or higher.");
+  }
+  if (!hasServerInfo(server)) {
+    logCompatibilityWarning(logger);
+    throw new Error("PostHog MCP analytics SDK compatibility error: Server._serverInfo is not accessible or missing name. This requires MCP SDK v1.11 or higher.");
+  }
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/index.mjs
+var error_tracking_exports = {};
+__export(error_tracking_exports, {
+  DEFAULT_EXCEPTION_STEPS_CONFIG: () => DEFAULT_EXCEPTION_STEPS_CONFIG,
+  DOMExceptionCoercer: () => DOMExceptionCoercer,
+  EXCEPTION_STEP_INTERNAL_FIELDS: () => EXCEPTION_STEP_INTERNAL_FIELDS,
+  ErrorCoercer: () => ErrorCoercer,
+  ErrorEventCoercer: () => ErrorEventCoercer,
+  ErrorPropertiesBuilder: () => ErrorPropertiesBuilder,
+  EventCoercer: () => EventCoercer,
+  ExceptionStepsBuffer: () => ExceptionStepsBuffer,
+  ObjectCoercer: () => ObjectCoercer,
+  PrimitiveCoercer: () => PrimitiveCoercer,
+  PromiseRejectionEventCoercer: () => PromiseRejectionEventCoercer,
+  ReduceableCache: () => ReduceableCache,
+  StringCoercer: () => StringCoercer,
+  chromeStackLineParser: () => chromeStackLineParser,
+  createDefaultStackParser: () => createDefaultStackParser,
+  createStackParser: () => createStackParser,
+  geckoStackLineParser: () => geckoStackLineParser,
+  getInjectedReleaseId: () => getInjectedReleaseId,
+  getUtf8ByteLength: () => getUtf8ByteLength,
+  nodeStackLineParser: () => nodeStackLineParser,
+  opera10StackLineParser: () => opera10StackLineParser,
+  opera11StackLineParser: () => opera11StackLineParser,
+  resolveExceptionStepsConfig: () => resolveExceptionStepsConfig,
+  reverseAndStripFrames: () => reverseAndStripFrames,
+  stripReservedExceptionStepFields: () => stripReservedExceptionStepFields,
+  winjsStackLineParser: () => winjsStackLineParser
+});
+
+// ../../node_modules/@posthog/core/dist/types.mjs
+var types_PostHogPersistedProperty = /* @__PURE__ */ (function(PostHogPersistedProperty) {
+  PostHogPersistedProperty["AnonymousId"] = "anonymous_id";
+  PostHogPersistedProperty["DistinctId"] = "distinct_id";
+  PostHogPersistedProperty["Props"] = "props";
+  PostHogPersistedProperty["EnablePersonProcessing"] = "enable_person_processing";
+  PostHogPersistedProperty["PersonMode"] = "person_mode";
+  PostHogPersistedProperty["FeatureFlagDetails"] = "feature_flag_details";
+  PostHogPersistedProperty["FeatureFlags"] = "feature_flags";
+  PostHogPersistedProperty["FeatureFlagPayloads"] = "feature_flag_payloads";
+  PostHogPersistedProperty["BootstrapFeatureFlagDetails"] = "bootstrap_feature_flag_details";
+  PostHogPersistedProperty["BootstrapFeatureFlags"] = "bootstrap_feature_flags";
+  PostHogPersistedProperty["BootstrapFeatureFlagPayloads"] = "bootstrap_feature_flag_payloads";
+  PostHogPersistedProperty["OverrideFeatureFlags"] = "override_feature_flags";
+  PostHogPersistedProperty["Queue"] = "queue";
+  PostHogPersistedProperty["AiQueue"] = "ai_queue";
+  PostHogPersistedProperty["AiCaptureQueue"] = "ai_capture_queue";
+  PostHogPersistedProperty["LogsQueue"] = "logs_queue";
+  PostHogPersistedProperty["OptedOut"] = "opted_out";
+  PostHogPersistedProperty["SessionId"] = "session_id";
+  PostHogPersistedProperty["SessionStartTimestamp"] = "session_start_timestamp";
+  PostHogPersistedProperty["SessionLastTimestamp"] = "session_timestamp";
+  PostHogPersistedProperty["PersonProperties"] = "person_properties";
+  PostHogPersistedProperty["GroupProperties"] = "group_properties";
+  PostHogPersistedProperty["InstalledAppBuild"] = "installed_app_build";
+  PostHogPersistedProperty["InstalledAppVersion"] = "installed_app_version";
+  PostHogPersistedProperty["SessionReplay"] = "session_replay";
+  PostHogPersistedProperty["PushRegistered"] = "push_registered";
+  PostHogPersistedProperty["SessionReplayEventTriggerActivatedSession"] = "session_replay_event_trigger_activated_session";
+  PostHogPersistedProperty["SurveyLastSeenDate"] = "survey_last_seen_date";
+  PostHogPersistedProperty["SurveysInProgress"] = "surveys_in_progress";
+  PostHogPersistedProperty["SurveysSeen"] = "surveys_seen";
+  PostHogPersistedProperty["Surveys"] = "surveys";
+  PostHogPersistedProperty["RemoteConfig"] = "remote_config";
+  PostHogPersistedProperty["FlagsEndpointWasHit"] = "flags_endpoint_was_hit";
+  PostHogPersistedProperty["DeviceId"] = "device_id";
+  return PostHogPersistedProperty;
+})({});
+
+// ../../node_modules/@posthog/core/dist/utils/string-utils.mjs
+function safeJsonStringify(value) {
+  const ancestors = [];
+  return JSON.stringify(value, function(_key, replacementValue) {
+    if ("bigint" == typeof replacementValue) return replacementValue.toString();
+    if ("function" == typeof replacementValue || "symbol" == typeof replacementValue) return;
+    if (replacementValue instanceof Error) return {
+      name: replacementValue.name,
+      message: replacementValue.message,
+      stack: replacementValue.stack
+    };
+    if (replacementValue && "object" == typeof replacementValue) {
+      while (ancestors.length > 0 && ancestors[ancestors.length - 1] !== this) ancestors.pop();
+      if (ancestors.includes(replacementValue)) return "[Circular]";
+      ancestors.push(replacementValue);
+    }
+    return replacementValue;
+  }) ?? "null";
+}
+
+// ../../node_modules/@posthog/core/dist/utils/type-utils.mjs
+var nativeIsArray = Array.isArray;
+var ObjProto = Object.prototype;
+var type_utils_hasOwnProperty = ObjProto.hasOwnProperty;
+var type_utils_toString = ObjProto.toString;
+var isArray = nativeIsArray || function(obj) {
+  return "[object Array]" === type_utils_toString.call(obj);
+};
+var isObject2 = (x) => x === Object(x) && !isArray(x);
+var isUndefined = (x) => void 0 === x;
+var isString = (x) => "[object String]" == type_utils_toString.call(x);
+var isEmptyString = (x) => isString(x) && 0 === x.trim().length;
+var isNull = (x) => null === x;
+var isNullish = (x) => isUndefined(x) || isNull(x);
+var isNumber = (x) => "[object Number]" == type_utils_toString.call(x) && x === x;
+var isBoolean = (x) => "[object Boolean]" === type_utils_toString.call(x);
+function isPrimitive(value) {
+  return null === value || "object" != typeof value;
+}
+function isBuiltin(candidate, className) {
+  return Object.prototype.toString.call(candidate) === `[object ${className}]`;
+}
+function isError(candidate) {
+  switch (Object.prototype.toString.call(candidate)) {
+    case "[object Error]":
+    case "[object Exception]":
+    case "[object DOMException]":
+    case "[object DOMError]":
+    case "[object WebAssembly.Exception]":
+      return true;
+    default:
+      return isInstanceOf(candidate, Error);
+  }
+}
+function isErrorEvent(event) {
+  return isBuiltin(event, "ErrorEvent");
+}
+function isEvent(candidate) {
+  return "u" > typeof Event && isInstanceOf(candidate, Event);
+}
+function isPlainObject3(candidate) {
+  return isBuiltin(candidate, "Object");
+}
+function isInstanceOf(candidate, base) {
+  try {
+    return candidate instanceof base;
+  } catch {
+    return false;
+  }
+}
+
+// ../../node_modules/@posthog/core/dist/utils/bot-detection.mjs
+var DEFAULT_BLOCKED_UA_STRS = [
+  "amazonbot",
+  "amazonproductbot",
+  "app.hypefactors.com",
+  "applebot",
+  "archive.org_bot",
+  "awariobot",
+  "backlinksextendedbot",
+  "baiduspider",
+  "bingbot",
+  "bingpreview",
+  "chrome-lighthouse",
+  "dataforseobot",
+  "deepscan",
+  "duckduckbot",
+  "facebookexternal",
+  "facebookcatalog",
+  "http://yandex.com/bots",
+  "hubspot",
+  "ia_archiver",
+  "leikibot",
+  "linkedinbot",
+  "meta-externalagent",
+  "mj12bot",
+  "msnbot",
+  "nessus",
+  "petalbot",
+  "pinterestbot",
+  "prerender",
+  "rogerbot",
+  "screaming frog",
+  "sebot-wa",
+  "sitebulb",
+  "slackbot",
+  "slurp",
+  "trendictionbot",
+  "turnitin",
+  "twitterbot",
+  "vercel-screenshot",
+  "vercelbot",
+  "yahoo! slurp",
+  "yandexbot",
+  "zoombot",
+  "bot.htm",
+  "bot.php",
+  "(bot;",
+  "bot/",
+  "crawler",
+  "ahrefsbot",
+  "ahrefssiteaudit",
+  "semrushbot",
+  "siteauditbot",
+  "splitsignalbot",
+  "gptbot",
+  "oai-searchbot",
+  "chatgpt-user",
+  "perplexitybot",
+  "better uptime bot",
+  "sentryuptimebot",
+  "uptimerobot",
+  "headlesschrome",
+  "cypress",
+  "google-hoteladsverifier",
+  "adsbot-google",
+  "apis-google",
+  "duplexweb-google",
+  "feedfetcher-google",
+  "google favicon",
+  "google web preview",
+  "google-read-aloud",
+  "googlebot",
+  "googleother",
+  "google-cloudvertexbot",
+  "googleweblight",
+  "mediapartners-google",
+  "storebot-google",
+  "google-inspectiontool",
+  "bytespider"
+];
+var isBlockedUA = function(ua, customBlockedUserAgents = []) {
+  if (!ua) return false;
+  const uaLower = ua.toLowerCase();
+  return DEFAULT_BLOCKED_UA_STRS.concat(customBlockedUserAgents).some((blockedUA) => {
+    const blockedUaLower = blockedUA.toLowerCase();
+    return -1 !== uaLower.indexOf(blockedUaLower);
+  });
+};
+
+// ../../node_modules/@posthog/core/dist/utils/number-utils.mjs
+function clampToRange(value, min, max, logger, fallbackValue) {
+  if (min > max) {
+    logger.warn("min cannot be greater than max.");
+    min = max;
+  }
+  if (isNumber(value)) if (value > max) {
+    logger.warn(" cannot be  greater than max: " + max + ". Using max value instead.");
+    return max;
+  } else {
+    if (!(value < min)) return value;
+    logger.warn(" cannot be less than min: " + min + ". Using min value instead.");
+    return min;
+  }
+  logger.warn(" must be a number. using max or fallback. max: " + max + ", fallback: " + fallbackValue);
+  return clampToRange(fallbackValue ?? max, min, max, logger);
+}
+
+// ../../node_modules/@posthog/core/dist/utils/bucketed-rate-limiter.mjs
+var ONE_DAY_IN_MS = 864e5;
+var DEFAULT_EXCEPTION_RATE_LIMITER_REFILL_RATE = 1;
+var DEFAULT_EXCEPTION_RATE_LIMITER_BUCKET_SIZE = 10;
+function resolveExceptionRateLimiterConfig(config2 = {}) {
+  return {
+    refillRate: config2.exceptionRateLimiterRefillRate ?? config2.__exceptionRateLimiterRefillRate ?? DEFAULT_EXCEPTION_RATE_LIMITER_REFILL_RATE,
+    bucketSize: config2.exceptionRateLimiterBucketSize ?? config2.__exceptionRateLimiterBucketSize ?? DEFAULT_EXCEPTION_RATE_LIMITER_BUCKET_SIZE
+  };
+}
+var BucketedRateLimiter = class {
+  constructor(options) {
+    this._buckets = {};
+    this._onBucketRateLimited = options._onBucketRateLimited;
+    this._bucketSize = clampToRange(options.bucketSize, 0, 100, options._logger);
+    this._refillRate = clampToRange(options.refillRate, 0, this._bucketSize, options._logger);
+    this._refillInterval = clampToRange(options.refillInterval, 0, ONE_DAY_IN_MS, options._logger);
+  }
+  _applyRefill(bucket, now) {
+    const elapsedMs = now - bucket.lastAccess;
+    const refillIntervals = Math.floor(elapsedMs / this._refillInterval);
+    if (refillIntervals > 0) {
+      const tokensToAdd = refillIntervals * this._refillRate;
+      bucket.tokens = Math.min(bucket.tokens + tokensToAdd, this._bucketSize);
+      bucket.lastAccess = bucket.lastAccess + refillIntervals * this._refillInterval;
+    }
+  }
+  consumeRateLimit(key) {
+    const now = Date.now();
+    const keyStr = String(key);
+    let bucket = this._buckets[keyStr];
+    if (bucket) this._applyRefill(bucket, now);
+    else {
+      bucket = {
+        tokens: this._bucketSize,
+        lastAccess: now
+      };
+      this._buckets[keyStr] = bucket;
+    }
+    if (0 === bucket.tokens) return true;
+    bucket.tokens--;
+    if (0 === bucket.tokens) this._onBucketRateLimited?.(key);
+    return 0 === bucket.tokens;
+  }
+  stop() {
+    this._buckets = {};
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/vendor/uuidv7.mjs
+var DIGITS = "0123456789abcdef";
+var UUID = class _UUID {
+  constructor(bytes) {
+    this.bytes = bytes;
+  }
+  static ofInner(bytes) {
+    if (16 === bytes.length) return new _UUID(bytes);
+    throw new TypeError("not 128-bit length");
+  }
+  static fromFieldsV7(unixTsMs, randA, randBHi, randBLo) {
+    if (!Number.isInteger(unixTsMs) || !Number.isInteger(randA) || !Number.isInteger(randBHi) || !Number.isInteger(randBLo) || unixTsMs < 0 || randA < 0 || randBHi < 0 || randBLo < 0 || unixTsMs > 281474976710655 || randA > 4095 || randBHi > 1073741823 || randBLo > 4294967295) throw new RangeError("invalid field value");
+    const bytes = new Uint8Array(16);
+    bytes[0] = unixTsMs / 2 ** 40;
+    bytes[1] = unixTsMs / 2 ** 32;
+    bytes[2] = unixTsMs / 2 ** 24;
+    bytes[3] = unixTsMs / 2 ** 16;
+    bytes[4] = unixTsMs / 256;
+    bytes[5] = unixTsMs;
+    bytes[6] = 112 | randA >>> 8;
+    bytes[7] = randA;
+    bytes[8] = 128 | randBHi >>> 24;
+    bytes[9] = randBHi >>> 16;
+    bytes[10] = randBHi >>> 8;
+    bytes[11] = randBHi;
+    bytes[12] = randBLo >>> 24;
+    bytes[13] = randBLo >>> 16;
+    bytes[14] = randBLo >>> 8;
+    bytes[15] = randBLo;
+    return new _UUID(bytes);
+  }
+  static parse(uuid2) {
+    let hex;
+    switch (uuid2.length) {
+      case 32:
+        hex = /^[0-9a-f]{32}$/i.exec(uuid2)?.[0];
+        break;
+      case 36:
+        hex = /^([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})$/i.exec(uuid2)?.slice(1, 6).join("");
+        break;
+      case 38:
+        hex = /^\{([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})\}$/i.exec(uuid2)?.slice(1, 6).join("");
+        break;
+      case 45:
+        hex = /^urn:uuid:([0-9a-f]{8})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{4})-([0-9a-f]{12})$/i.exec(uuid2)?.slice(1, 6).join("");
+        break;
+      default:
+        break;
+    }
+    if (hex) {
+      const inner = new Uint8Array(16);
+      for (let i = 0; i < 16; i += 4) {
+        const n = parseInt(hex.substring(2 * i, 2 * i + 8), 16);
+        inner[i + 0] = n >>> 24;
+        inner[i + 1] = n >>> 16;
+        inner[i + 2] = n >>> 8;
+        inner[i + 3] = n;
+      }
+      return new _UUID(inner);
+    }
+    throw new SyntaxError("could not parse UUID string");
+  }
+  toString() {
+    let text = "";
+    for (let i = 0; i < this.bytes.length; i++) {
+      text += DIGITS.charAt(this.bytes[i] >>> 4);
+      text += DIGITS.charAt(15 & this.bytes[i]);
+      if (3 === i || 5 === i || 7 === i || 9 === i) text += "-";
+    }
+    return text;
+  }
+  toHex() {
+    let text = "";
+    for (let i = 0; i < this.bytes.length; i++) {
+      text += DIGITS.charAt(this.bytes[i] >>> 4);
+      text += DIGITS.charAt(15 & this.bytes[i]);
+    }
+    return text;
+  }
+  toJSON() {
+    return this.toString();
+  }
+  getVariant() {
+    const n = this.bytes[8] >>> 4;
+    if (n < 0) throw new Error("unreachable");
+    if (n <= 7) return this.bytes.every((e) => 0 === e) ? "NIL" : "VAR_0";
+    if (n <= 11) return "VAR_10";
+    if (n <= 13) return "VAR_110";
+    if (n <= 15) return this.bytes.every((e) => 255 === e) ? "MAX" : "VAR_RESERVED";
+    else throw new Error("unreachable");
+  }
+  getVersion() {
+    return "VAR_10" === this.getVariant() ? this.bytes[6] >>> 4 : void 0;
+  }
+  clone() {
+    return new _UUID(this.bytes.slice(0));
+  }
+  equals(other) {
+    return 0 === this.compareTo(other);
+  }
+  compareTo(other) {
+    for (let i = 0; i < 16; i++) {
+      const diff = this.bytes[i] - other.bytes[i];
+      if (0 !== diff) return Math.sign(diff);
+    }
+    return 0;
+  }
+};
+var V7Generator = class {
+  constructor(randomNumberGenerator) {
+    this.timestamp = 0;
+    this.counter = 0;
+    this.random = randomNumberGenerator ?? getDefaultRandom();
+  }
+  generate() {
+    return this.generateOrResetCore(Date.now(), 1e4);
+  }
+  generateOrAbort() {
+    return this.generateOrAbortCore(Date.now(), 1e4);
+  }
+  generateOrResetCore(unixTsMs, rollbackAllowance) {
+    let value = this.generateOrAbortCore(unixTsMs, rollbackAllowance);
+    if (void 0 === value) {
+      this.timestamp = 0;
+      value = this.generateOrAbortCore(unixTsMs, rollbackAllowance);
+    }
+    return value;
+  }
+  generateOrAbortCore(unixTsMs, rollbackAllowance) {
+    const MAX_COUNTER = 4398046511103;
+    if (!Number.isInteger(unixTsMs) || unixTsMs < 1 || unixTsMs > 281474976710655) throw new RangeError("`unixTsMs` must be a 48-bit positive integer");
+    if (rollbackAllowance < 0 || rollbackAllowance > 281474976710655) throw new RangeError("`rollbackAllowance` out of reasonable range");
+    if (unixTsMs > this.timestamp) {
+      this.timestamp = unixTsMs;
+      this.resetCounter();
+    } else {
+      if (!(unixTsMs + rollbackAllowance >= this.timestamp)) return;
+      this.counter++;
+      if (this.counter > MAX_COUNTER) {
+        this.timestamp++;
+        this.resetCounter();
+      }
+    }
+    return UUID.fromFieldsV7(this.timestamp, Math.trunc(this.counter / 2 ** 30), this.counter & 2 ** 30 - 1, this.random.nextUint32());
+  }
+  resetCounter() {
+    this.counter = 1024 * this.random.nextUint32() + (1023 & this.random.nextUint32());
+  }
+  generateV4() {
+    const bytes = new Uint8Array(Uint32Array.of(this.random.nextUint32(), this.random.nextUint32(), this.random.nextUint32(), this.random.nextUint32()).buffer);
+    bytes[6] = 64 | bytes[6] >>> 4;
+    bytes[8] = 128 | bytes[8] >>> 2;
+    return UUID.ofInner(bytes);
+  }
+};
+var getDefaultRandom = () => ({
+  nextUint32: () => 65536 * Math.trunc(65536 * Math.random()) + Math.trunc(65536 * Math.random()) >>> 0
+});
+var defaultGenerator;
+var uuidv7 = () => uuidv7obj().toString();
+var uuidv7obj = () => (defaultGenerator || (defaultGenerator = new V7Generator())).generate();
+
+// ../../node_modules/@posthog/core/dist/utils/promise-queue.mjs
+var PromiseQueue = class {
+  add(promise) {
+    const promiseUUID = uuidv7();
+    const id = ++this.nextId;
+    this.promiseByIds[promiseUUID] = {
+      id,
+      promise
+    };
+    promise.catch(() => {
+    }).finally(() => {
+      delete this.promiseByIds[promiseUUID];
+    });
+    return promise;
+  }
+  async join() {
+    let promises = Object.values(this.promiseByIds).map((item) => item.promise);
+    let length = promises.length;
+    while (length > 0) {
+      await Promise.all(promises);
+      promises = Object.values(this.promiseByIds).map((item) => item.promise);
+      length = promises.length;
+    }
+  }
+  getPromises(ignoredPromises = [], maxId = this.nextId) {
+    const ignoredPromiseSet = new Set(ignoredPromises);
+    return Object.values(this.promiseByIds).filter((item) => item.id <= maxId && !ignoredPromiseSet.has(item.promise)).map((item) => item.promise);
+  }
+  get maxId() {
+    return this.nextId;
+  }
+  get length() {
+    return Object.keys(this.promiseByIds).length;
+  }
+  constructor() {
+    this.promiseByIds = {};
+    this.nextId = 0;
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/utils/logger.mjs
+function createConsole(consoleLike = console) {
+  const lockedMethods = {
+    log: consoleLike.log.bind(consoleLike),
+    warn: consoleLike.warn.bind(consoleLike),
+    error: consoleLike.error.bind(consoleLike),
+    debug: consoleLike.debug.bind(consoleLike)
+  };
+  return lockedMethods;
+}
+var _createLogger = (prefix, maybeCall, consoleLike) => {
+  function _log(level, ...args) {
+    maybeCall(() => {
+      const consoleMethod = consoleLike[level];
+      consoleMethod(prefix, ...args);
+    });
+  }
+  const logger = {
+    debug: (...args) => {
+      _log("debug", ...args);
+    },
+    info: (...args) => {
+      _log("log", ...args);
+    },
+    warn: (...args) => {
+      _log("warn", ...args);
+    },
+    error: (...args) => {
+      _log("error", ...args);
+    },
+    critical: (...args) => {
+      consoleLike["error"](prefix, ...args);
+    },
+    createLogger: (additionalPrefix) => _createLogger(`${prefix} ${additionalPrefix}`, maybeCall, consoleLike)
+  };
+  return logger;
+};
+var passThrough = (fn) => fn();
+function createLogger(prefix, maybeCall = passThrough) {
+  return _createLogger(prefix, maybeCall, createConsole());
+}
+
+// ../../node_modules/@posthog/core/dist/utils/user-agent-utils.mjs
+var MOBILE = "Mobile";
+var IOS = "iOS";
+var ANDROID = "Android";
+var TABLET = "Tablet";
+var ANDROID_TABLET = ANDROID + " " + TABLET;
+var APPLE = "Apple";
+var APPLE_WATCH = APPLE + " Watch";
+var SAFARI = "Safari";
+var BLACKBERRY = "BlackBerry";
+var SAMSUNG = "Samsung";
+var SAMSUNG_BROWSER = SAMSUNG + "Browser";
+var SAMSUNG_INTERNET = SAMSUNG + " Internet";
+var CHROME = "Chrome";
+var CHROME_OS = CHROME + " OS";
+var CHROME_IOS = CHROME + " " + IOS;
+var INTERNET_EXPLORER = "Internet Explorer";
+var INTERNET_EXPLORER_MOBILE = INTERNET_EXPLORER + " " + MOBILE;
+var OPERA = "Opera";
+var OPERA_MINI = OPERA + " Mini";
+var EDGE = "Edge";
+var MICROSOFT_EDGE = "Microsoft " + EDGE;
+var FIREFOX = "Firefox";
+var FIREFOX_IOS = FIREFOX + " " + IOS;
+var NINTENDO = "Nintendo";
+var PLAYSTATION = "PlayStation";
+var XBOX = "Xbox";
+var ANDROID_MOBILE = ANDROID + " " + MOBILE;
+var MOBILE_SAFARI = MOBILE + " " + SAFARI;
+var WINDOWS = "Windows";
+var WINDOWS_PHONE = WINDOWS + " Phone";
+var GENERIC = "Generic";
+var GENERIC_MOBILE = GENERIC + " " + MOBILE.toLowerCase();
+var GENERIC_TABLET = GENERIC + " " + TABLET.toLowerCase();
+var KONQUEROR = "Konqueror";
+var OCULUS_BROWSER = "Oculus Browser";
+var VIVALDI = "Vivaldi";
+var YANDEX = "Yandex";
+var WHALE = "Whale";
+var DUCKDUCKGO = "DuckDuckGo";
+var PALE_MOON = "Pale Moon";
+var WATERFOX = "Waterfox";
+var BRAVE = "Brave";
+var CLAUDE = "Claude";
+var CODEX = "Codex";
+var CHATGPT = "ChatGPT";
+var GOOGLE_SEARCH_APP = "Google Search App";
+var BROWSER_VERSION_REGEX_SUFFIX = "(\\d+(\\.\\d+)?)";
+var DEFAULT_BROWSER_VERSION_REGEX = new RegExp("Version/" + BROWSER_VERSION_REGEX_SUFFIX);
+var AI_APP_VERSION_REGEX = new RegExp("(" + CLAUDE + "|" + CODEX + "|" + CHATGPT + ")\\/" + BROWSER_VERSION_REGEX_SUFFIX);
+var XBOX_REGEX = new RegExp(XBOX, "i");
+var PLAYSTATION_REGEX = new RegExp(PLAYSTATION + " \\w+", "i");
+var NINTENDO_REGEX = new RegExp(NINTENDO + " \\w+", "i");
+var BLACKBERRY_REGEX = new RegExp(BLACKBERRY + "|PlayBook|BB10", "i");
+var windowsVersionMap = {
+  "NT3.51": "NT 3.11",
+  "NT4.0": "NT 4.0",
+  "5.0": "2000",
+  "5.1": "XP",
+  "5.2": "XP",
+  "6.0": "Vista",
+  "6.1": "7",
+  "6.2": "8",
+  "6.3": "8.1",
+  "6.4": "10",
+  "10.0": "10"
+};
+var versionRegexes = {
+  [INTERNET_EXPLORER_MOBILE]: [
+    new RegExp("rv:" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [MICROSOFT_EDGE]: [
+    new RegExp(EDGE + "?\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [CHROME]: [
+    new RegExp("(" + CHROME + "|CrMo)\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [CHROME_IOS]: [
+    new RegExp("CriOS\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  "UC Browser": [
+    new RegExp("(UCBrowser|UCWEB)\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [SAFARI]: [
+    DEFAULT_BROWSER_VERSION_REGEX
+  ],
+  [MOBILE_SAFARI]: [
+    DEFAULT_BROWSER_VERSION_REGEX
+  ],
+  [OPERA]: [
+    new RegExp("(" + OPERA + "|OPR)\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [FIREFOX]: [
+    new RegExp(FIREFOX + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [FIREFOX_IOS]: [
+    new RegExp("FxiOS\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [KONQUEROR]: [
+    new RegExp("Konqueror[:/]?" + BROWSER_VERSION_REGEX_SUFFIX, "i")
+  ],
+  [BLACKBERRY]: [
+    new RegExp(BLACKBERRY + " " + BROWSER_VERSION_REGEX_SUFFIX),
+    DEFAULT_BROWSER_VERSION_REGEX
+  ],
+  [ANDROID_MOBILE]: [
+    new RegExp("android\\s" + BROWSER_VERSION_REGEX_SUFFIX, "i")
+  ],
+  [SAMSUNG_INTERNET]: [
+    new RegExp(SAMSUNG_BROWSER + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [OCULUS_BROWSER]: [
+    new RegExp("OculusBrowser\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [VIVALDI]: [
+    new RegExp(VIVALDI + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [YANDEX]: [
+    new RegExp("YaBrowser\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [WHALE]: [
+    new RegExp(WHALE + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [BRAVE]: [
+    new RegExp(BRAVE + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [CLAUDE]: [
+    AI_APP_VERSION_REGEX
+  ],
+  [CODEX]: [
+    AI_APP_VERSION_REGEX
+  ],
+  [CHATGPT]: [
+    AI_APP_VERSION_REGEX
+  ],
+  [DUCKDUCKGO]: [
+    new RegExp("(DuckDuckGo|Ddg)\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [PALE_MOON]: [
+    new RegExp("PaleMoon\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [WATERFOX]: [
+    new RegExp(WATERFOX + "\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [GOOGLE_SEARCH_APP]: [
+    new RegExp("GSA\\/" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  [INTERNET_EXPLORER]: [
+    new RegExp("(rv:|MSIE )" + BROWSER_VERSION_REGEX_SUFFIX)
+  ],
+  Mozilla: [
+    new RegExp("rv:" + BROWSER_VERSION_REGEX_SUFFIX)
+  ]
+};
+var osMatchers = [
+  [
+    new RegExp(XBOX + "; " + XBOX + " (.*?)[);]", "i"),
+    (match) => [
+      XBOX,
+      match && match[1] || ""
+    ]
+  ],
+  [
+    new RegExp(NINTENDO, "i"),
+    [
+      NINTENDO,
+      ""
+    ]
+  ],
+  [
+    new RegExp(PLAYSTATION, "i"),
+    [
+      PLAYSTATION,
+      ""
+    ]
+  ],
+  [
+    BLACKBERRY_REGEX,
+    [
+      BLACKBERRY,
+      ""
+    ]
+  ],
+  [
+    new RegExp(WINDOWS, "i"),
+    (_, user_agent) => {
+      if (/Phone/.test(user_agent) || /WPDesktop/.test(user_agent)) return [
+        WINDOWS_PHONE,
+        ""
+      ];
+      if (new RegExp(MOBILE).test(user_agent) && !/IEMobile\b/.test(user_agent)) return [
+        WINDOWS + " " + MOBILE,
+        ""
+      ];
+      const match = /Windows NT ([0-9.]+)/i.exec(user_agent);
+      if (match && match[1]) {
+        const version4 = match[1];
+        let osVersion = windowsVersionMap[version4] || "";
+        if (/arm/i.test(user_agent)) osVersion = "RT";
+        return [
+          WINDOWS,
+          osVersion
+        ];
+      }
+      return [
+        WINDOWS,
+        ""
+      ];
+    }
+  ],
+  [
+    /((iPhone|iPad|iPod).*?OS (\d+)_(\d+)_?(\d+)?|iPhone)/,
+    (match) => {
+      if (match && match[3]) {
+        const versionParts = [
+          match[3],
+          match[4],
+          match[5] || "0"
+        ];
+        return [
+          IOS,
+          versionParts.join(".")
+        ];
+      }
+      return [
+        IOS,
+        ""
+      ];
+    }
+  ],
+  [
+    /(watch.*\/(\d+\.\d+\.\d+)|watch os,(\d+\.\d+),)/i,
+    (match) => {
+      let version4 = "";
+      if (match && match.length >= 3) version4 = isUndefined(match[2]) ? match[3] : match[2];
+      return [
+        "watchOS",
+        version4
+      ];
+    }
+  ],
+  [
+    new RegExp("(" + ANDROID + " (\\d+)\\.(\\d+)\\.?(\\d+)?|" + ANDROID + ")", "i"),
+    (match) => {
+      if (match && match[2]) {
+        const versionParts = [
+          match[2],
+          match[3],
+          match[4] || "0"
+        ];
+        return [
+          ANDROID,
+          versionParts.join(".")
+        ];
+      }
+      return [
+        ANDROID,
+        ""
+      ];
+    }
+  ],
+  [
+    /Mac OS X (\d+)[_.](\d+)[_.]?(\d+)?/i,
+    (match) => {
+      const result = [
+        "Mac OS X",
+        ""
+      ];
+      if (match && match[1]) {
+        const versionParts = [
+          match[1],
+          match[2],
+          match[3] || "0"
+        ];
+        result[1] = versionParts.join(".");
+      }
+      return result;
+    }
+  ],
+  [
+    /Mac/i,
+    [
+      "Mac OS X",
+      ""
+    ]
+  ],
+  [
+    /CrOS/,
+    [
+      CHROME_OS,
+      ""
+    ]
+  ],
+  [
+    /Linux|debian/i,
+    [
+      "Linux",
+      ""
+    ]
+  ]
+];
+
+// ../../node_modules/@posthog/core/dist/utils/json-utils.mjs
+var MAX_JSON_SAFE_VALUE_DEPTH = 20;
+var MAX_JSON_SAFE_VALUE_ITEMS = 1e3;
+var MAX_JSON_SAFE_VALUE_NODES = 1e4;
+var CIRCULAR_VALUE = "[Circular]";
+var TRUNCATED_VALUE = "[Truncated]";
+var UNSERIALIZABLE_VALUE = "[Unserializable]";
+var FUNCTION_VALUE = "[Function]";
+var dateGetTime = Date.prototype.getTime;
+var dateToISOString = Date.prototype.toISOString;
+function sanitizeString(value) {
+  let output = "";
+  for (let index = 0; index < value.length; index++) {
+    const codeUnit = value.charCodeAt(index);
+    if (codeUnit >= 55296 && codeUnit <= 56319) {
+      const nextCodeUnit = value.charCodeAt(index + 1);
+      if (nextCodeUnit >= 56320 && nextCodeUnit <= 57343) {
+        output += value[index] + value[index + 1];
+        index++;
+      } else output += "\uFFFD";
+    } else output += codeUnit >= 56320 && codeUnit <= 57343 ? "\uFFFD" : value[index];
+  }
+  return output;
+}
+function assignUserAttributes(target, source) {
+  if (!source) return target;
+  let keys = [];
+  try {
+    keys = Object.keys(source);
+  } catch {
+    keys = [];
+  }
+  for (const key of keys) {
+    let value;
+    try {
+      value = source[key];
+    } catch {
+      value = UNSERIALIZABLE_VALUE;
+    }
+    Object.defineProperty(target, key, {
+      value,
+      enumerable: true,
+      writable: true,
+      configurable: true
+    });
+  }
+  return target;
+}
+
+// ../../node_modules/@posthog/core/dist/utils/retry-after.mjs
+var MAX_RETRY_AFTER_MS = 3e5;
+var CLOCK_STEP_TOLERANCE_MS = 5e3;
+function parseRetryAfterMs(value, now = Date.now()) {
+  if ("string" != typeof value || !value) return;
+  const raw = value.trim();
+  const trimmed = /^\d+\s*,/.test(raw) ? raw.slice(0, raw.indexOf(",")).trim() : raw;
+  if (/^\d+$/.test(trimmed)) {
+    const ms2 = 1e3 * Math.min(Number(trimmed), MAX_RETRY_AFTER_MS / 1e3);
+    return ms2 > 0 ? ms2 : void 0;
+  }
+  if (!/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*[ ,]/.test(trimmed)) return;
+  const date3 = /^\w{3} \w{3} /.test(trimmed) ? trimmed + " GMT" : trimmed;
+  const ms = Date.parse(date3) - now;
+  if (!Number.isFinite(ms) || ms <= 0) return;
+  return Math.min(ms, MAX_RETRY_AFTER_MS);
+}
+var RetryAfterWindow = class {
+  record(outcome) {
+    if ("too-large" === outcome.kind) return;
+    if ("retry-later" !== outcome.kind) return void this.reset();
+    if (!outcome.retryAfterMs) return;
+    const open = this.isOpen();
+    const now = Date.now();
+    const asked = Math.min(outcome.retryAfterMs, MAX_RETRY_AFTER_MS);
+    if (!open) {
+      this._installedAt = now;
+      this._until = now + asked;
+      return;
+    }
+    this._until = Math.max(this._until, Math.min(now + asked, this._installedAt + MAX_RETRY_AFTER_MS));
+  }
+  remainingMs() {
+    const now = Date.now();
+    if (now < this._installedAt - CLOCK_STEP_TOLERANCE_MS) {
+      this.reset();
+      return 0;
+    }
+    const remaining = Math.min(MAX_RETRY_AFTER_MS, Math.max(0, this._until - now));
+    if (0 === remaining) this.reset();
+    return remaining;
+  }
+  isOpen() {
+    return this.remainingMs() > 0;
+  }
+  reset() {
+    this._until = 0;
+    this._installedAt = 0;
+  }
+  constructor() {
+    this._until = 0;
+    this._installedAt = 0;
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/utils/index.mjs
+var STRING_FORMAT = "utf8";
+var UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function isValidUUID(value) {
+  return "string" == typeof value && UUID_REGEX.test(value);
+}
+function getEventUuid(uuid2, generateUuid) {
+  return isValidUUID(uuid2) ? uuid2 : generateUuid();
+}
+function createNamedError(name, message) {
+  const error2 = new Error(message);
+  try {
+    Object.defineProperty(error2, "name", {
+      value: name,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
+  } catch {
+  }
+  return error2;
+}
+function removeTrailingSlash(url) {
+  return url?.replace(/\/+$/, "");
+}
+async function retriable(fn, props) {
+  let lastError = null;
+  for (let i = 0; i < props.retryCount + 1; i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, props.retryDelay));
+    try {
+      const res = await fn();
+      return res;
+    } catch (e) {
+      lastError = e;
+      if (!props.retryCheck(e)) throw e;
+    }
+  }
+  throw lastError;
+}
+function currentISOTime() {
+  return (/* @__PURE__ */ new Date()).toISOString();
+}
+function safeSetTimeout(fn, timeout) {
+  const t = setTimeout(fn, timeout);
+  t?.unref && t?.unref();
+  return t;
+}
+async function raceWithTimeout(promise, timeoutMs, onTimeout) {
+  let timeoutHandle;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((resolve2, reject) => {
+        timeoutHandle = safeSetTimeout(() => {
+          try {
+            onTimeout?.();
+            resolve2();
+          } catch (error2) {
+            reject(error2);
+          }
+        }, timeoutMs);
+      })
+    ]);
+  } finally {
+    clearTimeout(timeoutHandle);
+  }
+}
+var isPromise = (obj) => obj && "function" == typeof obj.then;
+function allSettled(promises) {
+  return Promise.all(promises.map((p) => (p ?? Promise.resolve()).then((value) => ({
+    status: "fulfilled",
+    value
+  }), (reason) => ({
+    status: "rejected",
+    reason
+  }))));
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/chunk-ids.mjs
+var parsedStackResults;
+var lastKeysCount;
+var cachedFilenameChunkIds;
+function getFilenameToChunkIdMap(stackParser) {
+  const chunkIdMap = globalThis._posthogChunkIds;
+  if (!chunkIdMap) return;
+  const chunkIdKeys = Object.keys(chunkIdMap);
+  if (cachedFilenameChunkIds && chunkIdKeys.length === lastKeysCount) return cachedFilenameChunkIds;
+  lastKeysCount = chunkIdKeys.length;
+  cachedFilenameChunkIds = chunkIdKeys.reduce((acc, stackKey) => {
+    if (!parsedStackResults) parsedStackResults = {};
+    const result = parsedStackResults[stackKey];
+    if (result) acc[result[0]] = result[1];
+    else {
+      const parsedStack = stackParser(stackKey);
+      for (let i = parsedStack.length - 1; i >= 0; i--) {
+        const stackFrame = parsedStack[i];
+        const filename = stackFrame?.filename;
+        const chunkId = chunkIdMap[stackKey];
+        if (filename && chunkId) {
+          acc[filename] = chunkId;
+          parsedStackResults[stackKey] = [
+            filename,
+            chunkId
+          ];
+          break;
+        }
+      }
+    }
+    return acc;
+  }, {});
+  return cachedFilenameChunkIds;
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/error-properties-builder.mjs
+var MAX_EXCEPTIONS = 50;
+var MAX_AGGREGATE_MEMBER_INSPECTIONS = 1e3;
+var MAX_ERROR_PROTOTYPE_DEPTH = 100;
+var MAX_WRAPPER_RECURSION = 4;
+var ErrorPropertiesBuilder = class {
+  constructor(coercers, stackParser, modifiers = []) {
+    this.coercers = coercers;
+    this.stackParser = stackParser;
+    this.modifiers = modifiers;
+  }
+  buildFromUnknown(input, hint = {}) {
+    const providedMechanism = hint && hint.mechanism;
+    const mechanism = providedMechanism || {
+      handled: true,
+      type: "generic"
+    };
+    const coercingContext = this.buildCoercingContext(mechanism, hint, 0);
+    const exceptionWithCause = coercingContext.apply(input);
+    const parsingContext = this.buildParsingContext(hint);
+    const exceptionWithStack = this.parseStacktrace(exceptionWithCause, parsingContext);
+    const exceptionList = this.convertToExceptionList(exceptionWithStack, mechanism);
+    return {
+      $exception_list: exceptionList,
+      $exception_level: "error"
+    };
+  }
+  async modifyFrames(exceptionList) {
+    for (const exc of exceptionList) if (exc.stacktrace && exc.stacktrace.frames && isArray(exc.stacktrace.frames)) exc.stacktrace.frames = await this.applyModifiers(exc.stacktrace.frames);
+    return exceptionList;
+  }
+  coerceFallback(ctx) {
+    return {
+      type: "Error",
+      value: "Unknown error",
+      stack: ctx.syntheticException?.stack,
+      synthetic: true
+    };
+  }
+  parseStacktrace(err, ctx) {
+    let cause;
+    if (null != err.cause) cause = this.parseStacktrace(err.cause, ctx);
+    let stack;
+    if ("" != err.stack && null != err.stack) try {
+      stack = this.applyChunkIds(this.stackParser(err.stack, err.synthetic ? ctx.skipFirstLines : 0), ctx.chunkIdMap);
+    } catch {
+    }
+    return {
+      ...err,
+      cause,
+      stack,
+      errors: err.errors?.map((child) => this.parseStacktrace(child, ctx))
+    };
+  }
+  applyChunkIds(frames, chunkIdMap) {
+    return frames.map((frame) => {
+      if (frame.filename && chunkIdMap) frame.chunk_id = chunkIdMap[frame.filename];
+      return frame;
+    });
+  }
+  applyCoercers(input, ctx) {
+    for (const adapter of this.coercers) if (adapter.match(input)) return adapter.coerce(input, ctx);
+    return this.coerceFallback(ctx);
+  }
+  async applyModifiers(frames) {
+    let newFrames = frames;
+    for (const modifier of this.modifiers) newFrames = await modifier(newFrames);
+    return newFrames;
+  }
+  convertToExceptionList(exceptionWithStack, mechanism) {
+    const exceptionList = [];
+    const append = (exception, parentId, source) => {
+      const exceptionId = exceptionList.length;
+      const entryMechanism = void 0 === parentId ? {
+        type: "string" == typeof mechanism.type && mechanism.type.length > 0 ? mechanism.type : "generic",
+        ..."boolean" == typeof mechanism.handled ? {
+          handled: mechanism.handled
+        } : void 0 === mechanism.handled ? {
+          handled: true
+        } : {},
+        synthetic: "boolean" == typeof mechanism.synthetic ? mechanism.synthetic : exception.synthetic,
+        exception_id: exceptionId
+      } : {
+        type: "chained",
+        source,
+        synthetic: exception.synthetic,
+        exception_id: exceptionId,
+        parent_id: parentId
+      };
+      const currentException = {
+        type: exception.type,
+        value: exception.value,
+        mechanism: entryMechanism
+      };
+      if (exception.stack) currentException.stacktrace = {
+        type: "raw",
+        frames: exception.stack
+      };
+      exceptionList.push(currentException);
+      if (exception.cause) append(exception.cause, exceptionId, "cause");
+      for (const child of exception.errors ?? []) append(child, exceptionId, "member");
+    };
+    append(exceptionWithStack);
+    return exceptionList;
+  }
+  buildParsingContext(hint) {
+    const context = {
+      chunkIdMap: getFilenameToChunkIdMap(this.stackParser),
+      skipFirstLines: hint.skipFirstLines ?? 1
+    };
+    return context;
+  }
+  getAggregateErrors(input) {
+    try {
+      if (isError(input)) {
+        let prototype = Object.getPrototypeOf(input);
+        for (let depth = 0; prototype && depth < MAX_ERROR_PROTOTYPE_DEPTH; depth++) {
+          const constructor = Object.getOwnPropertyDescriptor(prototype, "constructor")?.value;
+          if ("function" == typeof constructor && "AggregateError" === constructor.name) {
+            const errors = input.errors;
+            return isArray(errors) ? errors : void 0;
+          }
+          prototype = Object.getPrototypeOf(prototype);
+        }
+      }
+    } catch {
+    }
+  }
+  buildCoercingContext(mechanism, hint, depth = 0) {
+    let count = 0;
+    let memberInspections = 0;
+    let hasAggregate = false;
+    const seen = /* @__PURE__ */ new Set();
+    const wrappers = [];
+    const skipped = {};
+    const coerce2 = (input, depth2, wrapperDepth = 0) => {
+      const ctx = createContext(depth2, wrapperDepth);
+      const forward = ctx.apply;
+      ctx.apply = (nextInput) => {
+        wrappers.push(input);
+        try {
+          return forward(nextInput);
+        } finally {
+          wrappers.pop();
+        }
+      };
+      if (wrapperDepth > MAX_WRAPPER_RECURSION || wrapperDepth > 0 && -1 !== wrappers.indexOf(input)) return this.coerceFallback(ctx);
+      const isReference = "object" == typeof input && null !== input || "function" == typeof input;
+      if (0 === wrapperDepth && count >= MAX_EXCEPTIONS || isReference && seen.has(input)) return;
+      if (isReference) seen.add(input);
+      if (0 === wrapperDepth) count++;
+      const errors = this.getAggregateErrors(input);
+      hasAggregate ||= !!errors;
+      let exception;
+      try {
+        exception = this.applyCoercers(input, ctx);
+        if (!exception) throw skipped;
+      } catch (error2) {
+        if (error2 === skipped) {
+          if (0 === wrapperDepth) count--;
+          return;
+        }
+        if (!hasAggregate) throw error2;
+        exception = this.coerceFallback(ctx);
+      }
+      if (!errors || count >= MAX_EXCEPTIONS) return exception;
+      let length;
+      try {
+        length = errors.length;
+      } catch {
+        return exception;
+      }
+      if (!Number.isInteger(length) || length < 0 || length > 4294967295) return exception;
+      const children = [];
+      for (let index = 0; count < MAX_EXCEPTIONS && memberInspections < MAX_AGGREGATE_MEMBER_INSPECTIONS && index < length; index++) {
+        memberInspections++;
+        let child;
+        try {
+          child = ctx.next(errors[index]);
+        } catch {
+          count++;
+          child = this.coerceFallback(createContext(depth2 + 1));
+        }
+        if (child) children.push(child);
+      }
+      return {
+        ...exception,
+        errors: children
+      };
+    };
+    const createContext = (depth2, wrapperDepth = 0) => ({
+      ...hint,
+      syntheticException: 0 == depth2 ? hint.syntheticException : void 0,
+      mechanism: 0 == depth2 ? mechanism : {},
+      apply: (input) => {
+        const exception = coerce2(input, depth2, wrapperDepth + 1);
+        if (!exception) throw skipped;
+        return exception;
+      },
+      next: (input) => coerce2(input, depth2 + 1)
+    });
+    const context = createContext(depth);
+    return {
+      ...context,
+      apply: (input) => coerce2(input, depth) ?? this.coerceFallback(context)
+    };
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/base.mjs
+var UNKNOWN_FUNCTION = "?";
+var ANONYMOUS_FILENAME = "<anonymous>";
+var URL_SCHEME = /^([a-z][a-z0-9.+-]+):/i;
+var APP_URL_SCHEMES = [
+  "http",
+  "https",
+  "file",
+  "blob",
+  "app",
+  "capacitor",
+  "ionic",
+  "webpack",
+  "webpack-internal",
+  "ng"
+];
+function isAppFilename(filename) {
+  if (!filename || filename === ANONYMOUS_FILENAME) return false;
+  const scheme = URL_SCHEME.exec(filename);
+  return !scheme || APP_URL_SCHEMES.includes(scheme[1].toLowerCase());
+}
+function createFrame(platform2, filename, func, lineno, colno) {
+  const frame = {
+    platform: platform2,
+    filename,
+    function: "<anonymous>" === func ? UNKNOWN_FUNCTION : func,
+    in_app: isAppFilename(filename)
+  };
+  if (!isUndefined(lineno)) frame.lineno = lineno;
+  if (!isUndefined(colno)) frame.colno = colno;
+  return frame;
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/safari.mjs
+var extractSafariExtensionDetails = (func, filename) => {
+  const isSafariExtension = -1 !== func.indexOf("safari-extension");
+  const isSafariWebExtension = -1 !== func.indexOf("safari-web-extension");
+  return isSafariExtension || isSafariWebExtension ? [
+    -1 !== func.indexOf("@") ? func.split("@")[0] : UNKNOWN_FUNCTION,
+    isSafariExtension ? `safari-extension:${filename}` : `safari-web-extension:${filename}`
+  ] : [
+    func,
+    filename
+  ];
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/chrome.mjs
+var chromeRegexNoFnName = /^\s*at (\S+?)(?::(\d+))(?::(\d+))\s*$/i;
+var chromeRegex = /^\s*at (?:(.+?\)(?: \[.+\])?|.*?) ?\((?:address at )?)?(?:async )?((?:<anonymous>|[-a-z]+:|.*bundle|\/)?.*?)(?::(\d+))?(?::(\d+))?\)?\s*$/i;
+var chromeEvalRegex = /\((\S*)(?::(\d+))(?::(\d+))\)/;
+var chromeStackLineParser = (line, platform2) => {
+  const noFnParts = chromeRegexNoFnName.exec(line);
+  if (noFnParts) {
+    const [, filename, line2, col] = noFnParts;
+    return createFrame(platform2, filename, UNKNOWN_FUNCTION, +line2, +col);
+  }
+  const parts = chromeRegex.exec(line);
+  if (parts) {
+    const isEval = parts[2] && 0 === parts[2].indexOf("eval");
+    if (isEval) {
+      const subMatch = chromeEvalRegex.exec(parts[2]);
+      if (subMatch) {
+        parts[2] = subMatch[1];
+        parts[3] = subMatch[2];
+        parts[4] = subMatch[3];
+      }
+    }
+    const [func, filename] = extractSafariExtensionDetails(parts[1] || UNKNOWN_FUNCTION, parts[2]);
+    return createFrame(platform2, filename, func, parts[3] ? +parts[3] : void 0, parts[4] ? +parts[4] : void 0);
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/gecko.mjs
+var geckoREgex = /^\s*(.*?)(?:\((.*?)\))?(?:^|@)?((?:[-a-z]+)?:\/.*?|\[native code\]|[^@]*(?:bundle|\d+\.js)|\/[\w\-. /=]+)(?::(\d+))?(?::(\d+))?\s*$/i;
+var geckoEvalRegex = /(\S+) line (\d+)(?: > eval line \d+)* > eval/i;
+var geckoStackLineParser = (line, platform2) => {
+  const parts = geckoREgex.exec(line);
+  if (parts) {
+    const isEval = parts[3] && parts[3].indexOf(" > eval") > -1;
+    if (isEval) {
+      const subMatch = geckoEvalRegex.exec(parts[3]);
+      if (subMatch) {
+        parts[1] = parts[1] || "eval";
+        parts[3] = subMatch[1];
+        parts[4] = subMatch[2];
+        parts[5] = "";
+      }
+    }
+    let filename = parts[3];
+    let func = parts[1] || UNKNOWN_FUNCTION;
+    [func, filename] = extractSafariExtensionDetails(func, filename);
+    return createFrame(platform2, filename, func, parts[4] ? +parts[4] : void 0, parts[5] ? +parts[5] : void 0);
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/winjs.mjs
+var winjsRegex = /^\s*at (?:((?:\[object object\])?.+) )?\(?((?:[-a-z]+):.*?):(\d+)(?::(\d+))?\)?\s*$/i;
+var winjsStackLineParser = (line, platform2) => {
+  const parts = winjsRegex.exec(line);
+  return parts ? createFrame(platform2, parts[2], parts[1] || UNKNOWN_FUNCTION, +parts[3], parts[4] ? +parts[4] : void 0) : void 0;
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/opera.mjs
+var opera10Regex = / line (\d+).*script (?:in )?(\S+)(?:: in function (\S+))?$/i;
+var opera10StackLineParser = (line, platform2) => {
+  const parts = opera10Regex.exec(line);
+  return parts ? createFrame(platform2, parts[2], parts[3] || UNKNOWN_FUNCTION, +parts[1]) : void 0;
+};
+var opera11Regex = / line (\d+), column (\d+)\s*(?:in (?:<anonymous function: ([^>]+)>|([^)]+))\(.*\))? in (.*):\s*$/i;
+var opera11StackLineParser = (line, platform2) => {
+  const parts = opera11Regex.exec(line);
+  return parts ? createFrame(platform2, parts[5], parts[3] || parts[4] || UNKNOWN_FUNCTION, +parts[1], +parts[2]) : void 0;
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/node.mjs
+var FILENAME_MATCH = /^\s*[-]{4,}$/;
+var FULL_MATCH = /at (?:async )?(?:(.+?)\s+\()?(?:(.+):(\d+):(\d+)?|([^)]+))\)?/;
+var PROMISE_COMBINATOR = /^Promise\.(?:all|any)$/;
+var PROMISE_INDEX = /^index \d+$/;
+var PROMISE_FRAME_FILENAME = "node:internal/promise";
+var nodeStackLineParser = (line, platform2) => {
+  const lineMatch = line.match(FULL_MATCH);
+  if (lineMatch) {
+    let object3;
+    let method;
+    let functionName;
+    let typeName;
+    let methodName;
+    if (lineMatch[1]) {
+      functionName = lineMatch[1];
+      let methodStart = functionName.lastIndexOf(".");
+      if ("." === functionName[methodStart - 1]) methodStart--;
+      if (methodStart > 0) {
+        object3 = functionName.slice(0, methodStart);
+        method = functionName.slice(methodStart + 1);
+        const objectEnd = object3.indexOf(".Module");
+        if (objectEnd > 0) {
+          functionName = functionName.slice(objectEnd + 1);
+          object3 = object3.slice(0, objectEnd);
+        }
+      }
+      typeName = void 0;
+    }
+    if (method) {
+      typeName = object3;
+      methodName = method;
+    }
+    if ("<anonymous>" === method) {
+      methodName = void 0;
+      functionName = void 0;
+    }
+    if (void 0 === functionName) {
+      methodName = methodName || UNKNOWN_FUNCTION;
+      functionName = typeName ? `${typeName}.${methodName}` : methodName;
+    }
+    let filename = lineMatch[2]?.startsWith("file://") ? lineMatch[2].slice(7) : lineMatch[2];
+    const isNative = "native" === lineMatch[5];
+    if (filename?.match(/\/[A-Z]:/)) filename = filename.slice(1);
+    if (!filename && lineMatch[5] && !isNative) filename = lineMatch[5];
+    if (PROMISE_COMBINATOR.test(functionName) && PROMISE_INDEX.test(filename || "")) filename = PROMISE_FRAME_FILENAME;
+    return {
+      filename: filename ? decodeURI(filename) : void 0,
+      module: void 0,
+      function: functionName,
+      lineno: _parseIntOrUndefined(lineMatch[3]),
+      colno: _parseIntOrUndefined(lineMatch[4]),
+      in_app: filenameIsInApp(filename || "", isNative),
+      platform: platform2
+    };
+  }
+  if (line.match(FILENAME_MATCH)) return {
+    filename: line,
+    platform: platform2
+  };
+};
+function filenameIsInApp(filename, isNative = false) {
+  const isInternal = isNative || filename && !filename.startsWith("/") && !filename.match(/^[A-Z]:/) && !filename.startsWith(".") && !filename.match(/^[a-zA-Z]([a-zA-Z0-9.\-+])*:\/\//);
+  return !isInternal && void 0 !== filename && !filename.includes("node_modules/");
+}
+function _parseIntOrUndefined(input) {
+  return parseInt(input || "", 10) || void 0;
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/parsers/index.mjs
+var WEBPACK_ERROR_REGEXP = /\(error: (.*)\)/;
+var STACKTRACE_FRAME_LIMIT = 50;
+var MAX_REPEATED_CYCLE_LENGTH = 10;
+var STACKTRACE_LINE_LIMIT = 1e3;
+function isSameFrame(a, b) {
+  return a.filename === b.filename && a.function === b.function && a.module === b.module && a.lineno === b.lineno && a.colno === b.colno;
+}
+function collapseRepeatedCycle(frames) {
+  for (let length = 1; length <= MAX_REPEATED_CYCLE_LENGTH; length++) {
+    const start = frames.length - 2 * length;
+    if (start < 0) break;
+    let isCycle = true;
+    for (let offset = 0; offset < length; offset++) {
+      const inner = frames[start + offset];
+      if (!isSameFrame(inner, frames[start + length + offset])) {
+        isCycle = false;
+        break;
+      }
+    }
+    if (isCycle) {
+      for (let offset = 0; offset < length; offset++) frames[start + offset] = frames[start + length + offset];
+      frames.length = start + length;
+      return {
+        start,
+        length
+      };
+    }
+  }
+}
+function trimPartialCycle(frames, cycle) {
+  const copyEnd = cycle.start + cycle.length;
+  const partialLength = partialCycleLength(frames, cycle);
+  if (partialLength) frames.splice(copyEnd + partialLength === frames.length ? copyEnd : cycle.start, partialLength);
+}
+function innermostPartialCycleLength(frames, cycle) {
+  let partialStart = cycle.start;
+  while (partialStart > 0 && isSameFrame(frames[partialStart - 1], frames[partialStart - 1 + cycle.length])) partialStart--;
+  return cycle.start - partialStart;
+}
+function partialCycleLength(frames, cycle) {
+  const copyEnd = cycle.start + cycle.length;
+  let partialEnd = copyEnd;
+  while (partialEnd < frames.length && isSameFrame(frames[partialEnd], frames[partialEnd - cycle.length])) partialEnd++;
+  return partialEnd - copyEnd;
+}
+function survivingFrameCount(frames, cycles) {
+  const innermostCycle = cycles[0];
+  let count = frames.length - (innermostCycle ? innermostPartialCycleLength(frames, innermostCycle) : 0);
+  for (const cycle of cycles) count -= partialCycleLength(frames, cycle);
+  return count;
+}
+function canonicalizeCycleRotation(frames) {
+  const keys = frames.map((frame) => `${frame.function}|${frame.filename}|${frame.lineno}|${frame.colno}|${frame.module}`);
+  let first = 0;
+  for (let i = 1; i < keys.length; i++) if (isSmallerRotation(keys, i, first)) first = i;
+  frames.push(...frames.splice(0, first));
+}
+function isSmallerRotation(keys, candidate, best) {
+  for (let offset = 0; offset < keys.length; offset++) {
+    const left = keys[(candidate + offset) % keys.length];
+    const right = keys[(best + offset) % keys.length];
+    if (left !== right) return left < right;
+  }
+  return false;
+}
+function reverseAndStripFrames(stack) {
+  if (!stack.length) return [];
+  const localStack = Array.from(stack);
+  localStack.reverse();
+  return localStack.slice(0, STACKTRACE_FRAME_LIMIT).map((frame) => ({
+    ...frame,
+    filename: frame.filename || getLastStackFrame(localStack).filename,
+    function: frame.function || UNKNOWN_FUNCTION
+  }));
+}
+function getLastStackFrame(arr) {
+  return arr[arr.length - 1] || {};
+}
+function createDefaultStackParser() {
+  return createStackParser("web:javascript", chromeStackLineParser, geckoStackLineParser);
+}
+function createStackParser(platform2, ...parsers) {
+  return (stack, skipFirstLines = 0) => {
+    const frames = [];
+    const lines = stack.split("\n");
+    const endLine = Math.min(lines.length, skipFirstLines + STACKTRACE_LINE_LIMIT);
+    const repeatedCycles = [];
+    for (let i = skipFirstLines; i < endLine; i++) {
+      const line = lines[i];
+      if (line.length > 1024) continue;
+      const cleanedLine = WEBPACK_ERROR_REGEXP.test(line) ? line.replace(WEBPACK_ERROR_REGEXP, "$1") : line;
+      if (!cleanedLine.match(/\S*Error: /)) {
+        for (const parser of parsers) {
+          const frame = parser(cleanedLine, platform2);
+          if (frame) {
+            frames.push(frame);
+            const cycle = collapseRepeatedCycle(frames);
+            if (cycle) {
+              for (let i2 = repeatedCycles.length - 1; i2 >= 0; i2--) {
+                const previous = repeatedCycles[i2];
+                if (previous.start + previous.length <= cycle.start) break;
+                repeatedCycles.pop();
+              }
+              repeatedCycles.push(cycle);
+            }
+            break;
+          }
+        }
+        if (survivingFrameCount(frames, repeatedCycles) >= STACKTRACE_FRAME_LIMIT) break;
+      }
+    }
+    const sections = [
+      ...repeatedCycles
+    ].sort((a, b) => b.start - a.start);
+    const innermostSection = sections[sections.length - 1];
+    if (innermostSection) {
+      const trimmed = innermostPartialCycleLength(frames, innermostSection);
+      frames.splice(innermostSection.start - trimmed, trimmed);
+      for (const cycle of sections) cycle.start -= trimmed;
+    }
+    for (const cycle of sections) trimPartialCycle(frames, cycle);
+    if (repeatedCycles.some((cycle) => 0 === cycle.start && frames.length === cycle.length)) canonicalizeCycleRotation(frames);
+    return reverseAndStripFrames(frames);
+  };
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/dom-exception-coercer.mjs
+var DOMExceptionCoercer = class {
+  match(err) {
+    return this.isDOMException(err) || this.isDOMError(err);
+  }
+  coerce(err, ctx) {
+    const hasStack = isString(err.stack);
+    return {
+      type: this.getType(err),
+      value: this.getValue(err),
+      stack: hasStack ? err.stack : void 0,
+      cause: err.cause ? ctx.next(err.cause) : void 0,
+      synthetic: false
+    };
+  }
+  getType(candidate) {
+    return this.isDOMError(candidate) ? "DOMError" : "DOMException";
+  }
+  getValue(err) {
+    const name = err.name || (this.isDOMError(err) ? "DOMError" : "DOMException");
+    const message = err.message ? `${name}: ${err.message}` : name;
+    return message;
+  }
+  isDOMException(err) {
+    return isBuiltin(err, "DOMException");
+  }
+  isDOMError(err) {
+    return isBuiltin(err, "DOMError");
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/error-coercer.mjs
+var ErrorCoercer = class {
+  match(err) {
+    return isError(err);
+  }
+  coerce(err, ctx) {
+    const stack = this.getStack(err);
+    const replacementStack = void 0 === stack ? ctx.syntheticException?.stack : void 0;
+    const synthetic = !!replacementStack;
+    return {
+      type: this.getType(err),
+      value: this.getMessage(err, ctx),
+      stack: stack ?? replacementStack,
+      cause: err.cause ? ctx.next(err.cause) : void 0,
+      synthetic
+    };
+  }
+  getType(err) {
+    return err.name || err.constructor.name;
+  }
+  getMessage(err, _ctx) {
+    const message = err.message;
+    if (message.error && "string" == typeof message.error.message) return String(message.error.message);
+    return String(message);
+  }
+  getStack(err) {
+    try {
+      const stacktrace = err.stacktrace;
+      if ("string" == typeof stacktrace && stacktrace.length > 0) return stacktrace;
+      const stack = err.stack;
+      return "string" == typeof stack && stack.length > 0 ? stack : void 0;
+    } catch {
+      return;
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/error-event-coercer.mjs
+var ErrorEventCoercer = class {
+  match(err) {
+    if (!isErrorEvent(err)) return false;
+    const errorEvent = err;
+    return void 0 != errorEvent.error || this._hasUsableMessage(errorEvent);
+  }
+  coerce(err, ctx) {
+    if (void 0 != err.error) return ctx.apply(err.error);
+    const exceptionLike = ctx.apply(err.message);
+    return {
+      ...exceptionLike,
+      stack: this._buildLocationStack(err) ?? exceptionLike.stack,
+      synthetic: true
+    };
+  }
+  _hasUsableMessage(err) {
+    return isString(err.message) && err.message.length > 0;
+  }
+  _buildLocationStack(err) {
+    const location = err;
+    const lineno = location.lineno ?? 0;
+    const colno = location.colno ?? 0;
+    if (!isString(location.filename) || 0 === location.filename.length) return;
+    if (0 === lineno) return;
+    return `Error
+    at ${location.filename}:${lineno}:${colno}`;
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/string-coercer.mjs
+var ERROR_TYPES_PATTERN = /^(?:[Uu]ncaught (?:exception: )?)?(?:((?:Eval|Internal|Range|Reference|Syntax|Type|URI|)Error): )?(.*)$/i;
+var StringCoercer = class {
+  match(input) {
+    return "string" == typeof input;
+  }
+  coerce(input, ctx) {
+    const [type, value] = this.getInfos(input);
+    return {
+      type: type ?? "Error",
+      value: value ?? input,
+      stack: ctx.syntheticException?.stack,
+      synthetic: true
+    };
+  }
+  getInfos(candidate) {
+    let type = "Error";
+    let value = candidate;
+    const groups = candidate.match(ERROR_TYPES_PATTERN);
+    if (groups) {
+      type = groups[1];
+      value = groups[2];
+    }
+    return [
+      type,
+      value
+    ];
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/types.mjs
+var severityLevels = [
+  "fatal",
+  "error",
+  "warning",
+  "log",
+  "info",
+  "debug"
+];
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/utils.mjs
+function extractExceptionKeysForMessage(err, maxLength = 40) {
+  const keys = Object.keys(err);
+  keys.sort();
+  if (!keys.length) return "[object has no keys]";
+  for (let i = keys.length; i > 0; i--) {
+    const serialized = keys.slice(0, i).join(", ");
+    if (!(serialized.length > maxLength)) {
+      if (i === keys.length) return serialized;
+      return serialized.length <= maxLength ? serialized : `${serialized.slice(0, maxLength)}...`;
+    }
+  }
+  return "";
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/object-coercer.mjs
+var ObjectCoercer = class {
+  match(candidate) {
+    return "object" == typeof candidate && null !== candidate;
+  }
+  coerce(candidate, ctx) {
+    const errorProperty = this.getErrorPropertyFromObject(candidate);
+    if (errorProperty) return ctx.apply(errorProperty);
+    return {
+      type: this.getType(candidate),
+      value: this.getValue(candidate),
+      stack: this.getStack(candidate) ?? ctx.syntheticException?.stack,
+      level: this.isSeverityLevel(candidate.level) ? candidate.level : "error",
+      synthetic: true
+    };
+  }
+  getType(err) {
+    if (isEvent(err)) return err.constructor.name;
+    const name = "name" in err ? err.name : void 0;
+    return isString(name) && !isEmptyString(name) ? name : "Error";
+  }
+  getValue(err) {
+    if ("name" in err && "string" == typeof err.name) {
+      let message = `'${err.name}' captured as exception`;
+      if ("message" in err && "string" == typeof err.message) message += ` with message: '${err.message}'`;
+      return message;
+    }
+    if ("message" in err && "string" == typeof err.message) return err.message;
+    const className = this.getObjectClassName(err);
+    const keys = extractExceptionKeysForMessage(err);
+    return `${className && "Object" !== className ? `'${className}'` : "Object"} captured as exception with keys: ${keys}`;
+  }
+  isSeverityLevel(x) {
+    return isString(x) && !isEmptyString(x) && severityLevels.indexOf(x) >= 0;
+  }
+  getStack(candidate) {
+    try {
+      if (isString(candidate.stacktrace) && candidate.stacktrace.length > 0) return candidate.stacktrace;
+      return isString(candidate.stack) && candidate.stack.length > 0 ? candidate.stack : void 0;
+    } catch {
+      return;
+    }
+  }
+  getErrorPropertyFromObject(obj) {
+    for (const prop in obj) if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+      const value = obj[prop];
+      if (isError(value)) return value;
+    }
+  }
+  getObjectClassName(obj) {
+    try {
+      const prototype = Object.getPrototypeOf(obj);
+      return prototype ? prototype.constructor.name : void 0;
+    } catch (e) {
+      return;
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/event-coercer.mjs
+var EventCoercer = class {
+  match(err) {
+    return isEvent(err);
+  }
+  coerce(evt, ctx) {
+    const constructorName = evt.constructor.name;
+    return {
+      type: constructorName,
+      value: `${constructorName} captured as exception with keys: ${extractExceptionKeysForMessage(evt)}`,
+      stack: ctx.syntheticException?.stack,
+      synthetic: true
+    };
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/primitive-coercer.mjs
+var PrimitiveCoercer = class {
+  match(candidate) {
+    return isPrimitive(candidate);
+  }
+  coerce(value, ctx) {
+    return {
+      type: "Error",
+      value: `Primitive value captured as exception: ${String(value)}`,
+      stack: ctx.syntheticException?.stack,
+      synthetic: true
+    };
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/coercers/promise-rejection-event.mjs
+var PromiseRejectionEventCoercer = class {
+  match(err) {
+    return isBuiltin(err, "PromiseRejectionEvent") || this.isCustomEventWrappingRejection(err);
+  }
+  isCustomEventWrappingRejection(err) {
+    if (!isEvent(err)) return false;
+    try {
+      const detail = err.detail;
+      return null != detail && "object" == typeof detail && "reason" in detail;
+    } catch {
+      return false;
+    }
+  }
+  coerce(err, ctx) {
+    const reason = this.getUnhandledRejectionReason(err);
+    if (isPrimitive(reason)) return {
+      type: "UnhandledRejection",
+      value: `Non-Error promise rejection captured with value: ${String(reason)}`,
+      stack: ctx.syntheticException?.stack,
+      synthetic: true
+    };
+    return ctx.apply(reason);
+  }
+  getUnhandledRejectionReason(error2) {
+    try {
+      if ("reason" in error2) return error2.reason;
+      if ("detail" in error2 && null != error2.detail && "object" == typeof error2.detail && "reason" in error2.detail) return error2.detail.reason;
+    } catch {
+    }
+    return error2;
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/utils.mjs
+var ReduceableCache = class {
+  constructor(_maxSize2) {
+    this._maxSize = _maxSize2;
+    this._cache = /* @__PURE__ */ new Map();
+  }
+  get(key) {
+    const value = this._cache.get(key);
+    if (void 0 === value) return;
+    this._cache.delete(key);
+    this._cache.set(key, value);
+    return value;
+  }
+  set(key, value) {
+    this._cache.set(key, value);
+  }
+  reduce() {
+    while (this._cache.size >= this._maxSize) {
+      const value = this._cache.keys().next().value;
+      if (value) this._cache.delete(value);
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/error-tracking/exception-steps.mjs
+var EXCEPTION_STEP_INTERNAL_FIELDS = {
+  MESSAGE: "$message",
+  TIMESTAMP: "$timestamp"
+};
+var RESERVED_EXCEPTION_STEP_KEYS = /* @__PURE__ */ new Set([
+  EXCEPTION_STEP_INTERNAL_FIELDS.MESSAGE,
+  EXCEPTION_STEP_INTERNAL_FIELDS.TIMESTAMP
+]);
+var DEFAULT_EXCEPTION_STEPS_CONFIG = {
+  enabled: true,
+  max_bytes: 32768
+};
+function resolveExceptionStepsConfig(config2) {
+  if (!config2) return {
+    ...DEFAULT_EXCEPTION_STEPS_CONFIG
+  };
+  return {
+    enabled: config2.enabled ?? DEFAULT_EXCEPTION_STEPS_CONFIG.enabled,
+    max_bytes: normalizePositiveInteger(config2.max_bytes, DEFAULT_EXCEPTION_STEPS_CONFIG.max_bytes)
+  };
+}
+function stripReservedExceptionStepFields(properties) {
+  if (!properties) return {
+    sanitizedProperties: {},
+    droppedKeys: []
+  };
+  const droppedKeys = [];
+  const sanitizedProperties = Object.keys(properties).reduce((acc, key) => {
+    if (RESERVED_EXCEPTION_STEP_KEYS.has(key)) {
+      droppedKeys.push(key);
+      return acc;
+    }
+    acc[key] = properties[key];
+    return acc;
+  }, {});
+  return {
+    sanitizedProperties,
+    droppedKeys
+  };
+}
+var ExceptionStepsBuffer = class {
+  constructor(config2) {
+    this._entries = [];
+    this._totalBytes = 0;
+    this._config = resolveExceptionStepsConfig(config2);
+  }
+  setConfig(config2) {
+    this._config = resolveExceptionStepsConfig(config2);
+    this._trimToMaxBytes();
+  }
+  add(step) {
+    const serialized = normalizeAndSerializeStep(step);
+    if (!serialized) return;
+    const bytes = getUtf8ByteLength(serialized.json);
+    if (bytes > this._config.max_bytes) return;
+    this._entries.push({
+      step: serialized.step,
+      bytes
+    });
+    this._totalBytes += bytes;
+    this._trimToMaxBytes();
+  }
+  getAttachable() {
+    return this._entries.map((e) => e.step);
+  }
+  clear() {
+    this._entries = [];
+    this._totalBytes = 0;
+  }
+  size() {
+    return this._entries.length;
+  }
+  _trimToMaxBytes() {
+    while (this._totalBytes > this._config.max_bytes && this._entries.length > 0) {
+      const evicted = this._entries.shift();
+      if (evicted) this._totalBytes -= evicted.bytes;
+    }
+  }
+};
+function normalizePositiveInteger(input, fallback) {
+  if (!isNumber(input) || 1 / 0 === input || -1 / 0 === input) return fallback;
+  const normalized = Math.floor(input);
+  if (normalized < 0) return fallback;
+  return normalized;
+}
+function normalizeAndSerializeStep(step) {
+  let json;
+  try {
+    json = safeJsonStringify(step);
+  } catch {
+    return;
+  }
+  try {
+    const parsed = JSON.parse(json);
+    if (!isObject2(parsed)) return;
+    const parsedStep = parsed;
+    const message = parsedStep[EXCEPTION_STEP_INTERNAL_FIELDS.MESSAGE];
+    const timestamp = parsedStep[EXCEPTION_STEP_INTERNAL_FIELDS.TIMESTAMP];
+    if (!isString(message) || 0 === message.trim().length) return;
+    if (!isString(timestamp) && !isNumber(timestamp)) return;
+    return {
+      step: parsedStep,
+      json
+    };
+  } catch {
+    return;
+  }
+}
+function getUtf8ByteLength(value) {
+  if ("u" > typeof TextEncoder) return new TextEncoder().encode(value).length;
+  const encoded = encodeURIComponent(value);
+  let byteLength = 0;
+  for (let i = 0; i < encoded.length; i++) if ("%" === encoded[i]) {
+    byteLength += 1;
+    i += 2;
+  } else byteLength += 1;
+  return byteLength;
+}
+
+// ../../node_modules/@posthog/core/dist/error-tracking/release.mjs
+function getInjectedReleaseId() {
+  const injected = globalThis._posthogReleaseId;
+  return "string" == typeof injected && injected.length > 0 ? injected : void 0;
+}
+
+// ../../node_modules/@posthog/core/dist/featureFlagUtils.mjs
+var normalizeFlagsResponse = (flagsResponse) => {
+  if ("flags" in flagsResponse) {
+    const featureFlags = getFlagValuesFromFlags(flagsResponse.flags);
+    const featureFlagPayloads = getPayloadsFromFlags(flagsResponse.flags);
+    return {
+      ...flagsResponse,
+      featureFlags,
+      featureFlagPayloads
+    };
+  }
+  {
+    const featureFlags = flagsResponse.featureFlags ?? {};
+    const featureFlagPayloads = Object.fromEntries(Object.entries(flagsResponse.featureFlagPayloads || {}).map(([k, v]) => [
+      k,
+      parsePayload(v)
+    ]));
+    const flags = Object.fromEntries(Object.entries(featureFlags).map(([key, value]) => [
+      key,
+      getFlagDetailFromFlagAndPayload(key, value, featureFlagPayloads[key])
+    ]));
+    return {
+      ...flagsResponse,
+      featureFlags,
+      featureFlagPayloads,
+      flags
+    };
+  }
+};
+function getFlagDetailFromFlagAndPayload(key, value, payload) {
+  return {
+    key,
+    enabled: "string" == typeof value ? true : value,
+    variant: "string" == typeof value ? value : void 0,
+    reason: void 0,
+    metadata: {
+      id: void 0,
+      version: void 0,
+      payload: payload ? JSON.stringify(payload) : void 0,
+      description: void 0
+    }
+  };
+}
+var getFlagValuesFromFlags = (flags) => Object.fromEntries(Object.entries(flags ?? {}).map(([key, detail]) => [
+  key,
+  getFeatureFlagValue(detail)
+]).filter(([, value]) => void 0 !== value));
+var getPayloadsFromFlags = (flags) => {
+  const safeFlags = flags ?? {};
+  return Object.fromEntries(Object.keys(safeFlags).filter((flag) => {
+    const details = safeFlags[flag];
+    return details.enabled && details.metadata && void 0 !== details.metadata.payload;
+  }).map((flag) => {
+    const payload = safeFlags[flag].metadata?.payload;
+    return [
+      flag,
+      payload ? parsePayload(payload) : void 0
+    ];
+  }));
+};
+var getFeatureFlagValue = (detail) => void 0 === detail ? void 0 : detail.variant ?? detail.enabled;
+var parsePayload = (response) => {
+  if ("string" != typeof response) return response;
+  try {
+    return JSON.parse(response);
+  } catch {
+    return response;
+  }
+};
+var MINIMAL_FLAG_CALLED_EVENT_CAMPAIGN_PROPERTIES = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "gad_source",
+  "mc_cid",
+  "gclid",
+  "gclsrc",
+  "dclid",
+  "gbraid",
+  "wbraid",
+  "fbclid",
+  "msclkid",
+  "twclid",
+  "li_fat_id",
+  "igshid",
+  "ttclid",
+  "rdt_cid",
+  "epik",
+  "qclid",
+  "sccid",
+  "oppref",
+  "irclid",
+  "_kx"
+];
+var MINIMAL_FLAG_CALLED_EVENT_PROPERTIES = [
+  "$feature_flag",
+  "$feature_flag_response",
+  "$feature_flag_has_experiment",
+  "$feature_flag_id",
+  "$feature_flag_version",
+  "$feature_flag_reason",
+  "$feature_flag_request_id",
+  "$feature_flag_evaluated_at",
+  "$feature_flag_error",
+  "locally_evaluated",
+  "$groups",
+  "$process_person_profile",
+  "$geoip_disable",
+  "$current_url",
+  "$pathname",
+  "$referring_domain",
+  ...MINIMAL_FLAG_CALLED_EVENT_CAMPAIGN_PROPERTIES,
+  "$session_id",
+  "$window_id",
+  "$lib",
+  "$lib_version",
+  "$device_id",
+  "$is_server"
+];
+var minimizeFlagCalledEventProperties = (properties, transportKeys = []) => {
+  const minimal = {};
+  const copyKey = (key) => {
+    if (void 0 !== properties[key]) minimal[key] = properties[key];
+  };
+  MINIMAL_FLAG_CALLED_EVENT_PROPERTIES.forEach(copyKey);
+  transportKeys.forEach(copyKey);
+  return minimal;
+};
+
+// ../../node_modules/@posthog/core/dist/eventemitter.mjs
+var SimpleEventEmitter = class {
+  constructor() {
+    this.events = {};
+    this.events = {};
+  }
+  on(event, listener) {
+    if (!this.events[event]) this.events[event] = [];
+    this.events[event].push(listener);
+    return () => {
+      this.events[event] = this.events[event].filter((x) => x !== listener);
+    };
+  }
+  emit(event, payload) {
+    for (const listener of this.events[event] || []) listener(payload);
+    for (const listener of this.events["*"] || []) listener(event, payload);
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/gzip.mjs
+function isGzipSupported() {
+  return "CompressionStream" in globalThis && "TextEncoder" in globalThis && "Response" in globalThis && "function" == typeof Response.prototype.blob;
+}
+var NATIVE_GZIP_VALIDATION_ERROR = "NativeGzipValidationError";
+var GZIP_MAGIC_FIRST_BYTE = 31;
+var GZIP_MAGIC_SECOND_BYTE = 139;
+var GZIP_DEFLATE_METHOD = 8;
+var hasGzipMagic = (bytes) => bytes.length >= 2 && bytes[0] === GZIP_MAGIC_FIRST_BYTE && bytes[1] === GZIP_MAGIC_SECOND_BYTE;
+var crc32Table;
+var getCrc32Table = () => {
+  if (crc32Table) return crc32Table;
+  crc32Table = [];
+  for (let i = 0; i < 256; i++) {
+    let crc = i;
+    for (let j = 0; j < 8; j++) crc = 1 & crc ? 3988292384 ^ crc >>> 1 : crc >>> 1;
+    crc32Table[i] = crc >>> 0;
+  }
+  return crc32Table;
+};
+var crc32 = (bytes) => {
+  const table = getCrc32Table();
+  let crc = 4294967295;
+  for (let i = 0; i < bytes.length; i++) crc = table[(crc ^ bytes[i]) & 255] ^ crc >>> 8;
+  return (4294967295 ^ crc) >>> 0;
+};
+var throwNativeGzipValidationError = (reason) => {
+  throw createNamedError(NATIVE_GZIP_VALIDATION_ERROR, `Native gzip produced invalid output: ${reason}`);
+};
+var validateNativeGzip = async (compressed, inputBytes) => {
+  if (compressed.size < 18) throwNativeGzipValidationError("too-short");
+  const header = new Uint8Array(await compressed.slice(0, 10).arrayBuffer());
+  if (!hasGzipMagic(header) || header[2] !== GZIP_DEFLATE_METHOD) throwNativeGzipValidationError("invalid-header");
+  const trailer = new DataView(await compressed.slice(compressed.size - 8).arrayBuffer());
+  if (trailer.getUint32(0, true) !== crc32(inputBytes)) throwNativeGzipValidationError("invalid-crc");
+  const inputSize = inputBytes.length >>> 0;
+  if (trailer.getUint32(4, true) !== inputSize) throwNativeGzipValidationError("invalid-size");
+};
+async function gzipCompress(input, isDebug = true, options) {
+  try {
+    const inputBytes = new TextEncoder().encode(input);
+    const compressedStream = new globalThis.CompressionStream("gzip");
+    const writer = compressedStream.writable.getWriter();
+    const writePromise = writer.write(inputBytes).then(() => writer.close()).catch(async (err) => {
+      try {
+        await writer.abort(err);
+      } catch {
+      }
+      throw err;
+    });
+    const responsePromise = new Response(compressedStream.readable).blob();
+    const [compressed] = await Promise.all([
+      responsePromise,
+      writePromise
+    ]);
+    await validateNativeGzip(compressed, inputBytes);
+    return compressed;
+  } catch (error2) {
+    if (options?.rethrow) throw error2;
+    if (isDebug) console.error("Failed to gzip compress data", error2);
+    return null;
+  }
+}
+
+// ../../node_modules/@posthog/core/dist/posthog-core-stateless.mjs
+var PostHogFetchHttpError = class extends Error {
+  constructor(response, reqByteLength, responseBodyDeadline, abortController) {
+    super("HTTP error while fetching PostHog: status=" + response.status + ", reqByteLength=" + reqByteLength), this.response = response, this.reqByteLength = reqByteLength, this.responseBodyDeadline = responseBodyDeadline, this.abortController = abortController, this.name = "PostHogFetchHttpError", this._bodyReadTimedOut = false;
+  }
+  get status() {
+    return this.response.status;
+  }
+  get retryAfterMs() {
+    try {
+      return parseRetryAfterMs(this.response.headers?.get("retry-after"));
+    } catch {
+      return;
+    }
+  }
+  get bodyReadTimedOut() {
+    return this._bodyReadTimedOut;
+  }
+  get text() {
+    if (!this.responseBodyTextPromise) if (Date.now() >= this.responseBodyDeadline) {
+      this._bodyReadTimedOut = true;
+      const timeoutError = createNamedError("AbortError", "Response body read timed out");
+      this.cancelResponseBody(timeoutError);
+      this.responseBodyTextPromise = Promise.reject(timeoutError);
+    } else {
+      const responseBodyTimeout = new Promise((_resolve, reject) => {
+        this.responseBodyTimer = safeSetTimeout(() => {
+          this._bodyReadTimedOut = true;
+          const timeoutError = createNamedError("AbortError", "Response body read timed out");
+          reject(timeoutError);
+          this.cancelResponseBody(timeoutError);
+        }, this.responseBodyDeadline - Date.now());
+      });
+      let responseBodyText;
+      try {
+        responseBodyText = Promise.resolve(this.response.text());
+      } catch (error2) {
+        responseBodyText = Promise.reject(error2);
+      }
+      this.responseBodyTextPromise = Promise.race([
+        responseBodyText,
+        responseBodyTimeout
+      ]).finally(() => clearTimeout(this.responseBodyTimer));
+    }
+    return this.responseBodyTextPromise;
+  }
+  get json() {
+    return this.text.then((text) => JSON.parse(text));
+  }
+  cancelResponseBody(reason) {
+    clearTimeout(this.responseBodyTimer);
+    if (!this.abortController.signal.aborted) this.abortController.abort(reason);
+    (async () => {
+      try {
+        await this.response.body?.cancel();
+      } catch {
+      }
+    })();
+  }
+};
+var PostHogFetchNetworkError = class extends Error {
+  constructor(error2) {
+    super("Network error while fetching PostHog", error2 instanceof Error ? {
+      cause: error2
+    } : {}), this.error = error2, this.name = "PostHogFetchNetworkError";
+  }
+};
+var applyCallerFeatureFlagOverrides = (target, callerProperties) => {
+  for (const key of Object.keys(callerProperties)) if (key.startsWith("$feature/") || "$active_feature_flags" === key) target[key] = callerProperties[key];
+};
+async function logFlushError(err) {
+  if (err instanceof PostHogFetchHttpError) {
+    let text = "";
+    try {
+      text = await err.text;
+    } catch {
+      if (err.bodyReadTimedOut) text = "<response body read timed out>";
+    }
+    console.error(`Error while flushing PostHog: message=${err.message}, response body=${text}`, err);
+  } else console.error("Error while flushing PostHog", err);
+  return Promise.resolve();
+}
+function isPostHogFetchError(err) {
+  return "object" == typeof err && (err instanceof PostHogFetchHttpError || isPostHogFetchNetworkError(err));
+}
+function isPostHogFetchNetworkError(err) {
+  return err instanceof PostHogFetchNetworkError;
+}
+function isRetryableFlagsFetchError(err) {
+  if (err instanceof PostHogFetchHttpError) return 502 === err.status || 504 === err.status;
+  if (!(err instanceof PostHogFetchNetworkError)) return false;
+  const cause = err.error;
+  const code = cause?.code ?? cause?.cause?.code;
+  return "ECONNREFUSED" !== code;
+}
+var OTLP_MAX_BODY_BYTES = 10485760;
+function byteLengthOf(body) {
+  try {
+    if ("string" != typeof body) return body instanceof Uint8Array ? body.byteLength : body.size;
+    if ("u" > typeof Buffer) return Buffer.byteLength(body, STRING_FORMAT);
+    return new TextEncoder().encode(body).length;
+  } catch {
+    return 0;
+  }
+}
+function isPostHogFetchContentTooLargeError(err) {
+  return "object" == typeof err && err instanceof PostHogFetchHttpError && 413 === err.status;
+}
+function isPostHogFetchRetryableError(err) {
+  if (err instanceof PostHogFetchHttpError) return 408 === err.status || 429 === err.status || err.status >= 500;
+  return isPostHogFetchNetworkError(err);
+}
+function isPostHogEventProperties(value) {
+  return null !== value && "object" == typeof value && !Array.isArray(value);
+}
+var DEFAULT_QUEUE_ROUTE = "default";
+var PostHogCoreStateless = class {
+  getErrorPropertiesBuilder() {
+    if (!this._errorPropertiesBuilder) this._errorPropertiesBuilder = this.createErrorPropertiesBuilder();
+    return this._errorPropertiesBuilder;
+  }
+  createErrorPropertiesBuilder() {
+    return new ErrorPropertiesBuilder([
+      new ErrorCoercer(),
+      new ObjectCoercer(),
+      new StringCoercer(),
+      new PrimitiveCoercer()
+    ], createDefaultStackParser());
+  }
+  getEvaluationRuntime() {
+  }
+  constructor(apiKey, options = {}) {
+    this.flushPromise = null;
+    this.pendingFlushPromise = null;
+    this.flushPromises = /* @__PURE__ */ new Set();
+    this._dequeuedMessagesCount = 0;
+    this.shutdownPromise = null;
+    this.promiseQueue = new PromiseQueue();
+    this._events = new SimpleEventEmitter();
+    this._isInitialized = false;
+    const normalizedApiKey = "string" == typeof apiKey ? apiKey.trim() : "";
+    const normalizedHost = "string" == typeof options.host ? options.host.trim() : "";
+    const missingApiKey = !normalizedApiKey;
+    this._logger = createLogger("[PostHog]", this.logMsgIfDebug.bind(this));
+    if (missingApiKey) this._logger.error("You must pass your PostHog project's api key. The client will be disabled.");
+    this.apiKey = normalizedApiKey;
+    this.host = removeTrailingSlash(normalizedHost || "https://us.i.posthog.com");
+    this.flushAt = options.flushAt ? Math.max(options.flushAt, 1) : 20;
+    this.maxBatchSize = Math.max(this.flushAt, options.maxBatchSize ?? 100);
+    this.maxQueueSize = Math.max(this.flushAt, options.maxQueueSize ?? 1e3);
+    this.flushInterval = options.flushInterval ?? 1e4;
+    this.preloadFeatureFlags = options.preloadFeatureFlags ?? true;
+    this.defaultOptIn = options.defaultOptIn ?? true;
+    this.disableSurveys = options.disableSurveys ?? false;
+    this._retryOptions = {
+      retryCount: options.fetchRetryCount ?? 3,
+      retryDelay: options.fetchRetryDelay ?? 3e3,
+      retryCheck: isPostHogFetchRetryableError
+    };
+    this.requestTimeout = options.requestTimeout ?? 1e4;
+    this.featureFlagsRequestTimeoutMs = options.featureFlagsRequestTimeoutMs ?? 3e3;
+    this.featureFlagsRequestMaxRetries = options.featureFlagsRequestMaxRetries ?? 1;
+    this.remoteConfigRequestTimeoutMs = options.remoteConfigRequestTimeoutMs ?? 3e3;
+    this.disableGeoip = options.disableGeoip ?? true;
+    this.disabled = (options.disabled ?? false) || missingApiKey;
+    this.historicalMigration = options?.historicalMigration ?? false;
+    this._initPromise = Promise.resolve();
+    this._isInitialized = true;
+    this.evaluationContexts = options?.evaluationContexts ?? options?.evaluationEnvironments;
+    if (options?.evaluationEnvironments && !options?.evaluationContexts) this._logger.warn("evaluationEnvironments is deprecated. Use evaluationContexts instead. This property will be removed in a future version.");
+    this.disableCompression = !isGzipSupported() || (options?.disableCompression ?? false);
+  }
+  logMsgIfDebug(fn) {
+    if (this.isDebug) fn();
+  }
+  wrap(fn) {
+    if (this.disabled) return void this._logger.warn("The client is disabled");
+    if (this._isInitialized) return fn();
+    this._initPromise.then(() => fn());
+  }
+  getCommonEventProperties() {
+    return {
+      $lib: this.getLibraryId(),
+      $lib_version: this.getLibraryVersion()
+    };
+  }
+  get optedOut() {
+    return this.getPersistedProperty(types_PostHogPersistedProperty.OptedOut) ?? !this.defaultOptIn;
+  }
+  async optIn() {
+    this.wrap(() => {
+      this.setPersistedProperty(types_PostHogPersistedProperty.OptedOut, false);
+    });
+  }
+  async optOut() {
+    this.wrap(() => {
+      this.setPersistedProperty(types_PostHogPersistedProperty.OptedOut, true);
+    });
+  }
+  on(event, cb) {
+    return this._events.on(event, cb);
+  }
+  debug(enabled = true) {
+    this.removeDebugCallback?.();
+    if (enabled) {
+      const removeDebugCallback = this.on("*", (event, payload) => this._logger.info(event, payload));
+      this.removeDebugCallback = () => {
+        removeDebugCallback();
+        this.removeDebugCallback = void 0;
+      };
+    }
+  }
+  get isDebug() {
+    return !!this.removeDebugCallback;
+  }
+  get isDisabled() {
+    return this.disabled;
+  }
+  buildPayload(payload) {
+    const userProperties = payload.properties || {};
+    let properties = {
+      ...userProperties,
+      ...this.getCommonEventProperties()
+    };
+    applyCallerFeatureFlagOverrides(properties, userProperties);
+    if ("$feature_flag_called" === payload.event && false === properties.$feature_flag_has_experiment && this.isMinimalFlagCalledEventsEnabled()) properties = minimizeFlagCalledEventProperties(properties);
+    return {
+      distinct_id: payload.distinct_id,
+      event: payload.event,
+      properties
+    };
+  }
+  isMinimalFlagCalledEventsEnabled() {
+    return false;
+  }
+  addPendingPromise(promise) {
+    return this.promiseQueue.add(promise);
+  }
+  identifyStateless(distinctId, properties, options) {
+    this.wrap(() => {
+      const payload = {
+        ...this.buildPayload({
+          distinct_id: distinctId,
+          event: "$identify",
+          properties
+        })
+      };
+      this.enqueue("identify", payload, options);
+    });
+  }
+  async identifyStatelessImmediate(distinctId, properties, options) {
+    const payload = {
+      ...this.buildPayload({
+        distinct_id: distinctId,
+        event: "$identify",
+        properties
+      })
+    };
+    await this.sendImmediate("identify", payload, options);
+  }
+  captureStateless(distinctId, event, properties, options) {
+    this.wrap(() => {
+      const payload = this.buildPayload({
+        distinct_id: distinctId,
+        event,
+        properties
+      });
+      this.enqueue("capture", payload, options);
+    });
+  }
+  async captureStatelessImmediate(distinctId, event, properties, options) {
+    const payload = this.buildPayload({
+      distinct_id: distinctId,
+      event,
+      properties
+    });
+    await this.sendImmediate("capture", payload, options);
+  }
+  aliasStateless(alias, distinctId, properties, options) {
+    this.wrap(() => {
+      const payload = this.buildPayload({
+        event: "$create_alias",
+        distinct_id: distinctId,
+        properties: {
+          ...properties || {},
+          distinct_id: distinctId,
+          alias
+        }
+      });
+      this.enqueue("alias", payload, options);
+    });
+  }
+  async aliasStatelessImmediate(alias, distinctId, properties, options) {
+    const payload = this.buildPayload({
+      event: "$create_alias",
+      distinct_id: distinctId,
+      properties: {
+        ...properties || {},
+        distinct_id: distinctId,
+        alias
+      }
+    });
+    await this.sendImmediate("alias", payload, options);
+  }
+  groupIdentifyStateless(groupType, groupKey, groupProperties, options, distinctId, eventProperties) {
+    this.wrap(() => {
+      const payload = this.buildPayload({
+        distinct_id: distinctId || `$${groupType}_${groupKey}`,
+        event: "$groupidentify",
+        properties: {
+          $group_type: groupType,
+          $group_key: groupKey,
+          $group_set: groupProperties || {},
+          ...eventProperties || {}
+        }
+      });
+      this.enqueue("capture", payload, options);
+    });
+  }
+  async groupIdentifyStatelessImmediate(groupType, groupKey, groupProperties, options, distinctId, eventProperties) {
+    const payload = this.buildPayload({
+      distinct_id: distinctId || `$${groupType}_${groupKey}`,
+      event: "$groupidentify",
+      properties: {
+        $group_type: groupType,
+        $group_key: groupKey,
+        $group_set: groupProperties || {},
+        ...eventProperties || {}
+      }
+    });
+    await this.sendImmediate("capture", payload, options);
+  }
+  async getRemoteConfig() {
+    await this._initPromise;
+    let host = this.host;
+    if ("https://us.i.posthog.com" === host) host = "https://us-assets.i.posthog.com";
+    else if ("https://eu.i.posthog.com" === host) host = "https://eu-assets.i.posthog.com";
+    const url = `${host}/array/${this.apiKey}/config`;
+    const fetchOptions = {
+      method: "GET",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json"
+      }
+    };
+    return this.fetchWithRetry(url, fetchOptions, {
+      type: "required",
+      consume: (response) => response.json()
+    }, {
+      retryCount: 0
+    }, this.remoteConfigRequestTimeoutMs).catch((error2) => {
+      this._logger.error("Remote config could not be loaded", error2);
+      this._events.emit("error", error2);
+    });
+  }
+  async getFlags(distinctId, groups = {}, personProperties = {}, groupProperties = {}, extraPayload = {}, fetchConfig = false) {
+    await this._initPromise;
+    const configParam = fetchConfig ? "&config=true" : "";
+    const url = `${this.host}/flags/?v=2${configParam}`;
+    const requestData = {
+      token: this.apiKey,
+      distinct_id: distinctId,
+      groups,
+      person_properties: personProperties,
+      group_properties: groupProperties,
+      ...extraPayload
+    };
+    if (personProperties.$device_id) requestData.$device_id = personProperties.$device_id;
+    if (this.evaluationContexts && this.evaluationContexts.length > 0) requestData.evaluation_contexts = this.evaluationContexts;
+    const evaluationRuntime = this.getEvaluationRuntime();
+    if (evaluationRuntime) requestData.evaluation_runtime = evaluationRuntime;
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(requestData)
+    };
+    this._logger.info("Flags URL", url);
+    return this.fetchWithRetry(url, fetchOptions, {
+      type: "required",
+      consume: (response) => response.json()
+    }, {
+      retryCount: this.featureFlagsRequestMaxRetries,
+      retryCheck: isRetryableFlagsFetchError
+    }, this.featureFlagsRequestTimeoutMs).then((response) => ({
+      success: true,
+      response: normalizeFlagsResponse(response)
+    })).catch((error2) => {
+      this._events.emit("error", error2);
+      return {
+        success: false,
+        error: this.categorizeRequestError(error2)
+      };
+    });
+  }
+  categorizeRequestError(error2) {
+    if (error2 instanceof PostHogFetchHttpError) return {
+      type: "api_error",
+      statusCode: error2.status
+    };
+    if (error2 instanceof PostHogFetchNetworkError) {
+      const cause = error2.error;
+      if (cause instanceof Error && ("AbortError" === cause.name || "TimeoutError" === cause.name)) return {
+        type: "timeout"
+      };
+      return {
+        type: "connection_error"
+      };
+    }
+    return {
+      type: "unknown_error"
+    };
+  }
+  async getFeatureFlagStateless(key, distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip) {
+    await this._initPromise;
+    const flagDetailResponse = await this.getFeatureFlagDetailStateless(key, distinctId, groups, personProperties, groupProperties, disableGeoip);
+    if (void 0 === flagDetailResponse) return {
+      response: void 0,
+      requestId: void 0
+    };
+    let response = getFeatureFlagValue(flagDetailResponse.response);
+    if (void 0 === response) response = false;
+    return {
+      response,
+      requestId: flagDetailResponse.requestId
+    };
+  }
+  async getFeatureFlagDetailStateless(key, distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip) {
+    await this._initPromise;
+    const flagsResponse = await this.getFeatureFlagDetailsStateless(distinctId, groups, personProperties, groupProperties, disableGeoip, [
+      key
+    ]);
+    if (void 0 === flagsResponse) return;
+    const featureFlags = flagsResponse.flags;
+    const flagDetail = featureFlags[key];
+    return {
+      response: flagDetail,
+      requestId: flagsResponse.requestId,
+      evaluatedAt: flagsResponse.evaluatedAt
+    };
+  }
+  async getFeatureFlagPayloadStateless(key, distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip) {
+    await this._initPromise;
+    const payloads = await this.getFeatureFlagPayloadsStateless(distinctId, groups, personProperties, groupProperties, disableGeoip, [
+      key
+    ]);
+    if (!payloads) return;
+    const response = payloads[key];
+    if (void 0 === response) return null;
+    return response;
+  }
+  async getFeatureFlagPayloadsStateless(distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip, flagKeysToEvaluate) {
+    await this._initPromise;
+    const payloads = (await this.getFeatureFlagsAndPayloadsStateless(distinctId, groups, personProperties, groupProperties, disableGeoip, flagKeysToEvaluate)).payloads;
+    return payloads;
+  }
+  async getFeatureFlagsStateless(distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip, flagKeysToEvaluate) {
+    await this._initPromise;
+    return await this.getFeatureFlagsAndPayloadsStateless(distinctId, groups, personProperties, groupProperties, disableGeoip, flagKeysToEvaluate);
+  }
+  async getFeatureFlagsAndPayloadsStateless(distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip, flagKeysToEvaluate) {
+    await this._initPromise;
+    const featureFlagDetails = await this.getFeatureFlagDetailsStateless(distinctId, groups, personProperties, groupProperties, disableGeoip, flagKeysToEvaluate);
+    if (!featureFlagDetails) return {
+      flags: void 0,
+      payloads: void 0,
+      requestId: void 0
+    };
+    return {
+      flags: featureFlagDetails.featureFlags,
+      payloads: featureFlagDetails.featureFlagPayloads,
+      requestId: featureFlagDetails.requestId
+    };
+  }
+  async getFeatureFlagDetailsStateless(distinctId, groups = {}, personProperties = {}, groupProperties = {}, disableGeoip, flagKeysToEvaluate) {
+    await this._initPromise;
+    const extraPayload = {
+      geoip_disable: disableGeoip ?? this.disableGeoip
+    };
+    if (flagKeysToEvaluate) extraPayload["flag_keys_to_evaluate"] = flagKeysToEvaluate;
+    const result = await this.getFlags(distinctId, groups, personProperties, groupProperties, extraPayload);
+    if (!result.success) return;
+    const flagsResponse = result.response;
+    if (flagsResponse.errorsWhileComputingFlags) console.error("[FEATURE FLAGS] Error while computing feature flags, some flags may be missing or incorrect. Learn more at https://posthog.com/docs/feature-flags/best-practices");
+    if (flagsResponse.quotaLimited?.includes("feature_flags")) {
+      console.warn("[FEATURE FLAGS] Feature flags quota limit exceeded - feature flags unavailable. Learn more about billing limits at https://posthog.com/docs/billing/limits-alerts");
+      return {
+        flags: {},
+        featureFlags: {},
+        featureFlagPayloads: {},
+        requestId: flagsResponse?.requestId,
+        quotaLimited: flagsResponse.quotaLimited
+      };
+    }
+    return flagsResponse;
+  }
+  async getSurveysStateless() {
+    await this._initPromise;
+    if (this.disabled) return [];
+    if (true === this.disableSurveys) {
+      this._logger.info("Loading surveys is disabled.");
+      return [];
+    }
+    const url = `${this.host}/api/surveys/?token=${this.apiKey}`;
+    const fetchOptions = {
+      method: "GET",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json"
+      }
+    };
+    const response = await this.fetchWithRetry(url, fetchOptions, {
+      type: "required",
+      consume: (response2) => {
+        if (200 !== response2.status || !response2.json) {
+          const msg = `Surveys API could not be loaded: ${response2.status}`;
+          const error2 = new Error(msg);
+          this._logger.error(error2);
+          this._events.emit("error", new Error(msg));
+          return Promise.resolve(void 0);
+        }
+        return response2.json();
+      }
+    }).catch((error2) => {
+      this._logger.error("Surveys API could not be loaded", error2);
+      this._events.emit("error", error2);
+    });
+    const newSurveys = response?.surveys;
+    if (newSurveys) this._logger.info("Surveys fetched from API: ", JSON.stringify(newSurveys));
+    return newSurveys ?? [];
+  }
+  get props() {
+    if (!this._props) this._props = this.getPersistedProperty(types_PostHogPersistedProperty.Props);
+    return this._props || {};
+  }
+  set props(val) {
+    this._props = val;
+  }
+  async register(properties) {
+    this.wrap(() => {
+      this.props = {
+        ...this.props,
+        ...properties
+      };
+      this.setPersistedProperty(types_PostHogPersistedProperty.Props, this.props);
+    });
+  }
+  async unregister(property) {
+    this.wrap(() => {
+      delete this.props[property];
+      this.setPersistedProperty(types_PostHogPersistedProperty.Props, this.props);
+    });
+  }
+  processBeforeEnqueue(message) {
+    return message;
+  }
+  async flushStorage() {
+  }
+  getQueueRouteKey(_message) {
+    return DEFAULT_QUEUE_ROUTE;
+  }
+  persistedQueueKeyForRoute(_route) {
+    return types_PostHogPersistedProperty.Queue;
+  }
+  getActiveQueueRoutes() {
+    return [
+      DEFAULT_QUEUE_ROUTE
+    ];
+  }
+  getRouteQueue(route) {
+    return this.getPersistedProperty(this.persistedQueueKeyForRoute(route)) || [];
+  }
+  enqueue(type, _message, options, explicitRoute) {
+    this.wrap(() => {
+      if (this.optedOut) return void this._events.emit(type, "Library is disabled. Not sending event. To re-enable, call posthog.optIn()");
+      let message = this.prepareMessage(_message, options);
+      message = this.processBeforeEnqueue(message);
+      if (null === message) return;
+      message = this.normalizeMessage(message);
+      const queueKey = this.persistedQueueKeyForRoute(explicitRoute ?? this.getQueueRouteKey(message));
+      const queue = this.getPersistedProperty(queueKey) || [];
+      if (queue.length >= this.maxQueueSize) {
+        queue.shift();
+        this._logger.warn("Queue is full, the oldest event is dropped.");
+      }
+      queue.push({
+        message
+      });
+      this.setPersistedProperty(queueKey, queue);
+      this._events.emit(type, message);
+      if (queue.length >= this.flushAt) this.flushBackground();
+      if (this.flushInterval && !this._flushTimer) this._flushTimer = safeSetTimeout(() => this.flushBackground(), this.flushInterval);
+    });
+  }
+  async sendImmediate(type, _message, options, explicitRoute) {
+    if (this.disabled) return void this._logger.warn("The client is disabled");
+    if (!this._isInitialized) await this._initPromise;
+    if (this.optedOut) return void this._events.emit(type, "Library is disabled. Not sending event. To re-enable, call posthog.optIn()");
+    let message = this.prepareMessage(_message, options);
+    message = this.processBeforeEnqueue(message);
+    if (null === message) return;
+    message = this.normalizeMessage(message);
+    try {
+      await this.sendBatch([
+        message
+      ], void 0, explicitRoute ?? this.getQueueRouteKey(message));
+    } catch (err) {
+      this._events.emit("error", err);
+    }
+  }
+  normalizeMessage(message) {
+    const { type: _type, library, library_version, ...sanitizedMessage } = message;
+    let properties = isPostHogEventProperties(sanitizedMessage.properties) ? sanitizedMessage.properties : void 0;
+    if (void 0 !== library && properties?.$lib === void 0) properties = {
+      ...properties || {},
+      $lib: library
+    };
+    if (void 0 !== library_version && properties?.$lib_version === void 0) properties = {
+      ...properties || {},
+      $lib_version: library_version
+    };
+    if (properties) sanitizedMessage.properties = properties;
+    sanitizedMessage.uuid = getEventUuid(sanitizedMessage.uuid, uuidv7);
+    return sanitizedMessage;
+  }
+  normalizeTimestampForWire(timestamp) {
+    const parsedTimestamp = timestamp instanceof Date ? timestamp : "string" == typeof timestamp ? new Date(timestamp) : null;
+    if (!parsedTimestamp || Number.isNaN(parsedTimestamp.getTime())) return timestamp;
+    const normalized = parsedTimestamp.toISOString();
+    const fractionalSeconds = "string" == typeof timestamp ? timestamp.match(/\.(\d+)(?:Z|[+-]\d{2}:?\d{2})?$/i)?.[1] : void 0;
+    return fractionalSeconds && fractionalSeconds.length > 3 ? normalized.replace(/\.\d{3}Z$/, `.${fractionalSeconds}Z`) : normalized;
+  }
+  prepareMessage(_message, options) {
+    const message = {
+      ..._message,
+      timestamp: options?.timestamp ? options?.timestamp : currentISOTime(),
+      uuid: getEventUuid(options?.uuid, uuidv7)
+    };
+    const addGeoipDisableProperty = options?.disableGeoip ?? this.disableGeoip;
+    if (addGeoipDisableProperty) {
+      if (!isPostHogEventProperties(message.properties)) message.properties = {};
+      message.properties["$geoip_disable"] = true;
+    }
+    if (message.distinctId) {
+      message.distinct_id = message.distinctId;
+      delete message.distinctId;
+    }
+    return message;
+  }
+  clearFlushTimer() {
+    if (this._flushTimer) {
+      clearTimeout(this._flushTimer);
+      this._flushTimer = void 0;
+    }
+  }
+  flushBackground() {
+    if (this.pendingFlushPromise) return;
+    this.flushAutomatic().catch(async (err) => {
+      await logFlushError(err);
+    });
+  }
+  flushAutomatic() {
+    return this.flush();
+  }
+  async waitForPendingPromises(maxPromiseId, ignoredPromises = []) {
+    const ignoredPendingPromises = ignoredPromises.filter((promise) => !!promise);
+    let iteration = 0;
+    while (true) {
+      const promises = this.promiseQueue.getPromises([
+        ...ignoredPendingPromises,
+        ...this.flushPromises
+      ], maxPromiseId);
+      if (0 === promises.length) return;
+      if (iteration > 0) this._logger.debug(`flush() re-checking ${promises.length} pending promise(s) before flushing`);
+      await Promise.all(promises.map((promise) => promise.catch(() => {
+      })));
+      iteration++;
+    }
+  }
+  flushWithPendingPromises() {
+    return this.flushInternal(true);
+  }
+  flush() {
+    return this.flushInternal(false);
+  }
+  flushInternal(waitForPendingPromises) {
+    if (this.disabled) return Promise.resolve();
+    if (!waitForPendingPromises && this.pendingFlushPromise) return this.pendingFlushPromise;
+    const previousFlushPromise = this.flushPromise;
+    const maxPromiseId = this.promiseQueue.maxId;
+    const nextFlushPromise = Promise.resolve().then(() => {
+      if (waitForPendingPromises) return this.waitForPendingPromises(maxPromiseId, [
+        previousFlushPromise,
+        nextFlushPromise
+      ]);
+    }).then(() => allSettled([
+      previousFlushPromise
+    ])).then(() => {
+      if (this.pendingFlushPromise === nextFlushPromise) this.pendingFlushPromise = null;
+      return this._flush();
+    });
+    this.pendingFlushPromise = nextFlushPromise;
+    this.flushPromise = nextFlushPromise;
+    this.flushPromises.add(nextFlushPromise);
+    this.addPendingPromise(nextFlushPromise);
+    allSettled([
+      nextFlushPromise
+    ]).then(() => {
+      this.flushPromises.delete(nextFlushPromise);
+      if (this.pendingFlushPromise === nextFlushPromise) this.pendingFlushPromise = null;
+      if (this.flushPromise === nextFlushPromise) this.flushPromise = null;
+    });
+    return nextFlushPromise;
+  }
+  getCustomHeaders() {
+    const customUserAgent = this.getCustomUserAgent();
+    const headers = {};
+    if (customUserAgent && "" !== customUserAgent) headers["User-Agent"] = customUserAgent;
+    return headers;
+  }
+  compressPayload(payload) {
+    return gzipCompress(payload, this.isDebug);
+  }
+  getBatchEndpointPath(_route) {
+    return "/batch/";
+  }
+  async sendBatch(batchMessages, retryOptions, route = DEFAULT_QUEUE_ROUTE) {
+    const data = {
+      api_key: this.apiKey,
+      batch: batchMessages.map((message) => {
+        if (!message) return message;
+        const timestamp = this.normalizeTimestampForWire(message.timestamp);
+        return timestamp === message.timestamp ? message : {
+          ...message,
+          timestamp
+        };
+      }),
+      sent_at: currentISOTime()
+    };
+    if (this.historicalMigration) data.historical_migration = true;
+    const payload = safeJsonStringify(data);
+    const url = `${this.host}${this.getBatchEndpointPath(route)}`;
+    const gzippedPayload = this.disableCompression ? null : await this.compressPayload(payload);
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json",
+        ...null !== gzippedPayload && {
+          "Content-Encoding": "gzip"
+        }
+      },
+      body: gzippedPayload || payload
+    };
+    await this.fetchWithRetry(url, fetchOptions, {
+      type: "successful-write"
+    }, retryOptions);
+  }
+  async _flush() {
+    this.clearFlushTimer();
+    await this._initPromise;
+    const routes = this.getActiveQueueRoutes();
+    if (!routes.some((route) => this.getRouteQueue(route).length > 0)) return;
+    const sentMessages = [];
+    let firstError;
+    for (const route of routes) try {
+      await this._flushRoute(route, sentMessages);
+    } catch (err) {
+      if (void 0 === firstError) firstError = err;
+    }
+    if (void 0 !== firstError) throw firstError;
+    this._events.emit("flush", sentMessages);
+  }
+  async _flushRoute(route, sentMessages) {
+    const queueKey = this.persistedQueueKeyForRoute(route);
+    let queue = this.getPersistedProperty(queueKey) || [];
+    if (!queue.length) return;
+    const originalQueueLength = queue.length;
+    let sentFromRoute = 0;
+    while (queue.length > 0 && sentFromRoute < originalQueueLength) {
+      const batchItems = queue.slice(0, this.maxBatchSize);
+      const batchMessages = batchItems.map((item) => void 0 === item.message ? item.message : this.normalizeMessage(item.message));
+      const persistQueueChange = async () => {
+        const refreshedQueue = this.getPersistedProperty(queueKey) || [];
+        const remainingBatchItems = [
+          ...batchItems
+        ];
+        const newQueue = refreshedQueue.filter((item) => {
+          const itemUuid = item.message?.uuid;
+          const batchItemIndex = remainingBatchItems.findIndex((batchItem) => batchItem === item || "string" == typeof itemUuid && itemUuid.length > 0 && batchItem.message?.uuid === itemUuid);
+          if (-1 === batchItemIndex) return true;
+          remainingBatchItems.splice(batchItemIndex, 1);
+          return false;
+        });
+        this.setPersistedProperty(queueKey, newQueue);
+        queue = newQueue;
+        this._dequeuedMessagesCount += batchItems.length;
+        await this.flushStorage();
+      };
+      const retryOptions = {
+        retryCheck: (err) => {
+          if (isPostHogFetchContentTooLargeError(err)) return false;
+          return isPostHogFetchRetryableError(err);
+        }
+      };
+      try {
+        await this.sendBatch(batchMessages, retryOptions, route);
+      } catch (err) {
+        if (isPostHogFetchContentTooLargeError(err) && batchMessages.length > 1) {
+          this.maxBatchSize = Math.max(1, Math.floor(batchMessages.length / 2));
+          this._logger.warn(`Received 413 when sending batch of size ${batchMessages.length}, reducing batch size to ${this.maxBatchSize}`);
+          continue;
+        }
+        if (!(err instanceof PostHogFetchNetworkError)) await persistQueueChange();
+        this._events.emit("error", err);
+        throw err;
+      }
+      await persistQueueChange();
+      sentMessages.push(...batchMessages);
+      sentFromRoute += batchMessages.length;
+    }
+  }
+  async _sendOtlpBatch({ path: path6, auth, payload }) {
+    if (this.disabled) return {
+      kind: "fatal",
+      error: new Error("The client is disabled")
+    };
+    let serialized;
+    try {
+      serialized = JSON.stringify(payload);
+    } catch (error2) {
+      this.logMsgIfDebug(() => console.warn(`[PostHog] Could not serialize a ${path6} batch; reporting it as too large`, error2));
+      return {
+        kind: "too-large",
+        measuredLocally: true
+      };
+    }
+    const payloadBytes = byteLengthOf(serialized);
+    if (payloadBytes > OTLP_MAX_BODY_BYTES) {
+      this.logMsgIfDebug(() => console.warn(`[PostHog] Not sending a ${path6} batch of ${payloadBytes} bytes: the endpoint accepts at most ${OTLP_MAX_BODY_BYTES}`));
+      return {
+        kind: "too-large",
+        measuredLocally: true
+      };
+    }
+    const url = "bearer" === auth ? `${this.host}/i/v1/${path6}` : `${this.host}/i/v1/${path6}?token=${encodeURIComponent(this.apiKey)}`;
+    const gzippedPayload = this.disableCompression ? null : await this.compressPayload(serialized);
+    const body = gzippedPayload || serialized;
+    const fetchOptions = {
+      method: "POST",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json",
+        ..."bearer" === auth && {
+          Authorization: `Bearer ${this.apiKey}`
+        },
+        ...null !== gzippedPayload && {
+          "Content-Encoding": "gzip"
+        }
+      },
+      body
+    };
+    try {
+      await this.fetchWithRetry(url, fetchOptions, {
+        type: "successful-write"
+      }, {
+        retryCheck: (err) => {
+          if (isPostHogFetchContentTooLargeError(err)) return false;
+          if (err instanceof PostHogFetchHttpError && void 0 !== err.retryAfterMs) return false;
+          return isPostHogFetchRetryableError(err);
+        }
+      });
+      return {
+        kind: "ok"
+      };
+    } catch (err) {
+      if (isPostHogFetchContentTooLargeError(err)) return {
+        kind: "too-large"
+      };
+      if (isPostHogFetchRetryableError(err)) {
+        const retryAfterMs = err instanceof PostHogFetchHttpError ? err.retryAfterMs : void 0;
+        return {
+          kind: "retry-later",
+          error: err,
+          ...void 0 !== retryAfterMs && {
+            retryAfterMs
+          }
+        };
+      }
+      return {
+        kind: "fatal",
+        error: err
+      };
+    }
+  }
+  async _sendLogsBatch(payload) {
+    return this._sendOtlpBatch({
+      path: "logs",
+      auth: "query-token",
+      payload
+    });
+  }
+  async _sendMetricsBatch(payload) {
+    return this._sendOtlpBatch({
+      path: "metrics",
+      auth: "query-token",
+      payload
+    });
+  }
+  async _sendTracesBatch(payload) {
+    return this._sendOtlpBatch({
+      path: "traces",
+      auth: "bearer",
+      payload
+    });
+  }
+  async fetchWithRetry(url, options, responseHandling, retryOptions, requestTimeout) {
+    const body = options.body ? options.body : "";
+    const reqByteLength = byteLengthOf(body);
+    const retriableOptions = {
+      ...this._retryOptions,
+      ...retryOptions
+    };
+    let attempt = 0;
+    return await retriable(async () => {
+      attempt++;
+      const ctrl = new AbortController();
+      const timeoutMs = requestTimeout ?? this.requestTimeout;
+      const requestDeadline = Date.now() + timeoutMs;
+      let timer;
+      const deadline = new Promise((_resolve, reject) => {
+        timer = safeSetTimeout(() => {
+          const timeoutError = createNamedError("AbortError", `Request timed out after ${timeoutMs}ms`);
+          reject(timeoutError);
+          ctrl.abort(timeoutError);
+        }, timeoutMs);
+      });
+      let res;
+      let responseAccepted = false;
+      let cancellation;
+      const cancelBody = () => cancellation ??= (async () => {
+        try {
+          await res?.body?.cancel();
+        } catch {
+        }
+      })();
+      try {
+        let fetchPromise;
+        try {
+          fetchPromise = this.fetch(url, {
+            signal: ctrl.signal,
+            ...options
+          });
+        } catch (e) {
+          throw new PostHogFetchNetworkError(e);
+        }
+        fetchPromise.then((lateResponse) => {
+          if (ctrl.signal.aborted && !responseAccepted) Promise.resolve(lateResponse.body?.cancel()).catch(() => {
+          });
+        }).catch(() => {
+        });
+        try {
+          res = await Promise.race([
+            fetchPromise,
+            deadline
+          ]);
+          responseAccepted = true;
+        } catch (e) {
+          throw new PostHogFetchNetworkError(e);
+        }
+        const isNoCors = "no-cors" === options.mode;
+        const maxSuccessStatus = "successful-write" === responseHandling.type ? 300 : 400;
+        if (!isNoCors && (res.status < 200 || res.status >= maxSuccessStatus)) throw new PostHogFetchHttpError(res, reqByteLength, requestDeadline, ctrl);
+        if ("successful-write" === responseHandling.type) {
+          try {
+            await Promise.race([
+              cancelBody(),
+              deadline
+            ]);
+          } catch {
+          }
+          return;
+        }
+        try {
+          return await Promise.race([
+            responseHandling.consume(res),
+            deadline
+          ]);
+        } catch (e) {
+          if (ctrl.signal.aborted) throw new PostHogFetchNetworkError(e);
+          throw e;
+        }
+      } finally {
+        clearTimeout(timer);
+        if (ctrl.signal.aborted && res) cancelBody();
+      }
+    }, {
+      ...retriableOptions,
+      retryCheck: (error2) => {
+        const shouldRetry = retriableOptions.retryCheck(error2);
+        if (shouldRetry && attempt <= retriableOptions.retryCount && error2 instanceof PostHogFetchHttpError) error2.cancelResponseBody();
+        return shouldRetry;
+      }
+    });
+  }
+  async _shutdown(shutdownTimeoutMs = 3e4) {
+    await this._initPromise;
+    let hasTimedOut = false;
+    this.clearFlushTimer();
+    if (this.disabled) return;
+    const doShutdown = async () => {
+      try {
+        await this.promiseQueue.join();
+        while (true) {
+          const hasQueuedEvents = this.getActiveQueueRoutes().some((route) => this.getRouteQueue(route).length > 0);
+          if (!hasQueuedEvents) break;
+          const dequeuedBeforeFlush = this._dequeuedMessagesCount;
+          await this.flush();
+          if (hasTimedOut) break;
+          if (this._dequeuedMessagesCount === dequeuedBeforeFlush) {
+            this._logger.warn("Shutdown flush completed but did not send any queued events. Stopping drain to avoid a loop.");
+            break;
+          }
+        }
+      } catch (e) {
+        if (!isPostHogFetchError(e)) throw e;
+        await logFlushError(e);
+      }
+    };
+    return raceWithTimeout(doShutdown(), shutdownTimeoutMs, () => {
+      this._logger.critical("Timeout while shutting down PostHog. Some events may not have been sent.", {
+        shutdownTimeoutMs
+      });
+      hasTimedOut = true;
+    });
+  }
+  async shutdown(shutdownTimeoutMs = 3e4) {
+    if (this.shutdownPromise) this._logger.warn("shutdown() called while already shutting down. shutdown() is meant to be called once before process exit - use flush() for per-request cleanup");
+    else this.shutdownPromise = this._shutdown(shutdownTimeoutMs).finally(() => {
+      this.shutdownPromise = null;
+    });
+    return this.shutdownPromise;
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/featureFlagLocalEvaluation.mjs
+var NULL_VALUES_ALLOWED_OPERATORS = [
+  "is_not",
+  "is_set"
+];
+var LONG_SCALE = 1152921504606847e3;
+var InconclusiveMatchError = class _InconclusiveMatchError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    Object.setPrototypeOf(this, _InconclusiveMatchError.prototype);
+  }
+};
+function isTruthyOrFalsyPropertyValue(value) {
+  if ("boolean" == typeof value) return true;
+  if ("string" == typeof value) {
+    const lowercaseValue = value.toLowerCase();
+    return "true" === lowercaseValue || "false" === lowercaseValue;
+  }
+  if (!Array.isArray(value)) return false;
+  for (let index = 0; index < value.length; index++) if (!isTruthyOrFalsyPropertyValue(index in value ? value[index] : null)) return false;
+  return true;
+}
+function isTruthyPropertyValue(value) {
+  if ("boolean" == typeof value) return value;
+  if ("string" == typeof value) return "true" === value.toLowerCase();
+  if (!Array.isArray(value)) return false;
+  for (let index = 0; index < value.length; index++) if (!isTruthyPropertyValue(index in value ? value[index] : null)) return false;
+  return true;
+}
+function assertUnicodeScalarString(value) {
+  for (let index = 0; index < value.length; index++) {
+    const unit = value.charCodeAt(index);
+    if (unit >= 55296 && unit <= 56319) {
+      const next = value.charCodeAt(index + 1);
+      if (index + 1 >= value.length || next < 56320 || next > 57343) throw new InconclusiveMatchError("Cannot stringify an unpaired surrogate like the flags service");
+      index++;
+    } else if (unit >= 56320 && unit <= 57343) throw new InconclusiveMatchError("Cannot stringify an unpaired surrogate like the flags service");
+  }
+}
+function assertJsonRepresentable(value, seen = /* @__PURE__ */ new Set()) {
+  if (null === value || "boolean" == typeof value) return;
+  if ("string" == typeof value) return void assertUnicodeScalarString(value);
+  if ("number" == typeof value) {
+    if (!Number.isFinite(value)) throw new InconclusiveMatchError(`Cannot represent non-finite number ${value} like the flags service`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    if (seen.has(value)) throw new InconclusiveMatchError("Cannot represent a circular array during local evaluation");
+    seen.add(value);
+    try {
+      for (let index = 0; index < value.length; index++) if (index in value) assertJsonRepresentable(value[index], seen);
+    } finally {
+      seen.delete(value);
+    }
+    return;
+  }
+  if ("object" == typeof value) {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && null !== prototype) throw new InconclusiveMatchError("Cannot represent a non-JSON object like the flags service");
+    if (seen.has(value)) throw new InconclusiveMatchError("Cannot represent a circular object during local evaluation");
+    seen.add(value);
+    try {
+      for (const key of Object.keys(value)) {
+        assertUnicodeScalarString(key);
+        assertJsonRepresentable(value[key], seen);
+      }
+    } finally {
+      seen.delete(value);
+    }
+    return;
+  }
+  throw new InconclusiveMatchError(`Cannot represent ${typeof value} like the flags service`);
+}
+function compareJsonObjectKeys(left, right) {
+  let leftIndex = 0;
+  let rightIndex = 0;
+  while (leftIndex < left.length && rightIndex < right.length) {
+    const leftUnit = left.charCodeAt(leftIndex);
+    const rightUnit = right.charCodeAt(rightIndex);
+    const leftIsHighSurrogate = leftUnit >= 55296 && leftUnit <= 56319;
+    const rightIsHighSurrogate = rightUnit >= 55296 && rightUnit <= 56319;
+    const leftNext = leftIsHighSurrogate ? left.charCodeAt(leftIndex + 1) : 0;
+    const rightNext = rightIsHighSurrogate ? right.charCodeAt(rightIndex + 1) : 0;
+    const leftCodePoint = leftIsHighSurrogate ? (leftUnit - 55296) * 1024 + leftNext - 56320 + 65536 : leftUnit;
+    const rightCodePoint = rightIsHighSurrogate ? (rightUnit - 55296) * 1024 + rightNext - 56320 + 65536 : rightUnit;
+    if (leftCodePoint !== rightCodePoint) return leftCodePoint - rightCodePoint;
+    leftIndex += leftIsHighSurrogate ? 2 : 1;
+    rightIndex += rightIsHighSurrogate ? 2 : 1;
+  }
+  return left.length - right.length;
+}
+function serializeJsonValue(value, seen = /* @__PURE__ */ new Set()) {
+  if (null === value) return "null";
+  if ("string" == typeof value) {
+    assertUnicodeScalarString(value);
+    return JSON.stringify(value);
+  }
+  if ("boolean" == typeof value) return value ? "true" : "false";
+  if ("number" == typeof value) {
+    if (!Number.isFinite(value)) throw new InconclusiveMatchError(`Cannot stringify non-finite number ${value} like the flags service`);
+    if (Number.isInteger(value)) throw new InconclusiveMatchError(`Cannot distinguish integer ${value} from an integral JSON float during local evaluation`);
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    if (seen.has(value)) throw new InconclusiveMatchError("Cannot stringify a circular array during local evaluation");
+    seen.add(value);
+    try {
+      const items = [];
+      for (let index = 0; index < value.length; index++) items.push(index in value ? serializeJsonValue(value[index], seen) : "null");
+      return `[${items.join(",")}]`;
+    } finally {
+      seen.delete(value);
+    }
+  }
+  if ("object" == typeof value) {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && null !== prototype) throw new InconclusiveMatchError("Cannot stringify a non-JSON object like the flags service");
+    if (seen.has(value)) throw new InconclusiveMatchError("Cannot stringify a circular object during local evaluation");
+    seen.add(value);
+    try {
+      const keys = Object.keys(value);
+      keys.forEach(assertUnicodeScalarString);
+      return `{${keys.sort(compareJsonObjectKeys).map((key) => `${JSON.stringify(key)}:${serializeJsonValue(value[key], seen)}`).join(",")}}`;
+    } finally {
+      seen.delete(value);
+    }
+  }
+  throw new InconclusiveMatchError(`Cannot stringify ${typeof value} like the flags service`);
+}
+function exactMatchString(value) {
+  if ("string" == typeof value) {
+    assertUnicodeScalarString(value);
+    return value;
+  }
+  return serializeJsonValue(value);
+}
+function isValidRegex(regex) {
+  try {
+    new RegExp(regex);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function asciiLowercase(value) {
+  return String(value).replace(/[A-Z]/g, (character) => character.toLowerCase());
+}
+function parseSemverNumericIdentifier(part, raw, parsingPolicy) {
+  if (!/^\d+$/.test(part) || "strict" === parsingPolicy && part.length > 1 && "0" === part[0]) throw new InconclusiveMatchError(`Invalid semver: ${raw}`);
+  return parseInt(part, 10);
+}
+function parseFeatureFlagSemver(value, parsingPolicy = "strict") {
+  const text = String(value).trim().replace(/^[vV]/, "");
+  const baseVersion = text.split("-")[0].split("+")[0];
+  if (!baseVersion || baseVersion.startsWith(".")) throw new InconclusiveMatchError(`Invalid semver: ${value}`);
+  const parts = baseVersion.split(".");
+  const parsePart = (part) => {
+    if (void 0 === part || "" === part) return 0;
+    return parseSemverNumericIdentifier(part, value, parsingPolicy);
+  };
+  return [
+    parsePart(parts[0]),
+    parsePart(parts[1]),
+    parsePart(parts[2])
+  ];
+}
+function compareSemverTuples(a, b) {
+  for (let i = 0; i < 3; i++) {
+    if (a[i] < b[i]) return -1;
+    if (a[i] > b[i]) return 1;
+  }
+  return 0;
+}
+function computeTildeBounds(value, parsingPolicy) {
+  const parsed = parseFeatureFlagSemver(value, parsingPolicy);
+  return {
+    lower: [
+      parsed[0],
+      parsed[1],
+      parsed[2]
+    ],
+    upper: [
+      parsed[0],
+      parsed[1] + 1,
+      0
+    ]
+  };
+}
+function computeCaretBounds(value, parsingPolicy) {
+  const [major, minor, patch] = parseFeatureFlagSemver(value, parsingPolicy);
+  const lower = [
+    major,
+    minor,
+    patch
+  ];
+  let upper;
+  upper = major > 0 ? [
+    major + 1,
+    0,
+    0
+  ] : minor > 0 ? [
+    0,
+    minor + 1,
+    0
+  ] : [
+    0,
+    0,
+    patch + 1
+  ];
+  return {
+    lower,
+    upper
+  };
+}
+function computeWildcardBounds(value, parsingPolicy) {
+  const text = String(value).trim().replace(/^[vV]/, "");
+  const cleanedText = text.replace(/\.\*$/, "").replace(/\*$/, "");
+  if (!cleanedText) throw new InconclusiveMatchError(`Invalid wildcard semver: ${value}`);
+  const parts = cleanedText.split(".");
+  const parseWildcardPart = (part) => {
+    if ("legacy-permissive" === parsingPolicy) {
+      const parsed = parseInt(part, 10);
+      if (!isNaN(parsed)) return parsed;
+    } else try {
+      return parseSemverNumericIdentifier(part, value, parsingPolicy);
+    } catch {
+    }
+    throw new InconclusiveMatchError(`Invalid wildcard semver: ${value}`);
+  };
+  const major = parseWildcardPart(parts[0]);
+  if (1 === parts.length) return {
+    lower: [
+      major,
+      0,
+      0
+    ],
+    upper: [
+      major + 1,
+      0,
+      0
+    ]
+  };
+  const minor = parseWildcardPart(parts[1]);
+  return {
+    lower: [
+      major,
+      minor,
+      0
+    ],
+    upper: [
+      major,
+      minor + 1,
+      0
+    ]
+  };
+}
+function convertToDateTime(value) {
+  if (value instanceof Date) return value;
+  if ("string" == typeof value || "number" == typeof value) {
+    const date3 = new Date(value);
+    if (!isNaN(date3.valueOf())) return date3;
+    throw new InconclusiveMatchError(`${value} is in an invalid date format`);
+  }
+  throw new InconclusiveMatchError(`The date provided ${value} must be a string, number, or date object`);
+}
+function relativeDateParseForFeatureFlagMatching(value) {
+  const regex = /^-?(?<number>[0-9]+)(?<interval>[a-z])$/;
+  const match = value.match(regex);
+  const parsedDt = new Date((/* @__PURE__ */ new Date()).toISOString());
+  if (!match || !match.groups) return null;
+  const number3 = parseInt(match.groups["number"]);
+  if (number3 >= 1e4) return null;
+  const interval = match.groups["interval"];
+  if ("h" === interval) parsedDt.setUTCHours(parsedDt.getUTCHours() - number3);
+  else if ("d" === interval) parsedDt.setUTCDate(parsedDt.getUTCDate() - number3);
+  else if ("w" === interval) parsedDt.setUTCDate(parsedDt.getUTCDate() - 7 * number3);
+  else if ("m" === interval) parsedDt.setUTCMonth(parsedDt.getUTCMonth() - number3);
+  else {
+    if ("y" !== interval) return null;
+    parsedDt.setUTCFullYear(parsedDt.getUTCFullYear() - number3);
+  }
+  return parsedDt;
+}
+function matchFeatureFlagProperty(property, propertyValues, options = {}) {
+  const key = property.key;
+  const value = property.value;
+  const operator = property.operator || "exact";
+  const parsingPolicy = options.semverParsingPolicy ?? "strict";
+  const hasProperty = Object.prototype.hasOwnProperty.call(propertyValues, key);
+  if (hasProperty) {
+    if ("is_not_set" === operator) return false;
+    else if ("is_set" === operator) return true;
+  } else throw new InconclusiveMatchError(`Property ${key} not found in propertyValues`);
+  const overrideValue = propertyValues[key];
+  if (void 0 === overrideValue) {
+    options.warnFunction?.(`Property ${key} cannot have a value of undefined with the ${operator} operator`);
+    return "is_not" === operator;
+  }
+  if (null === overrideValue && !NULL_VALUES_ALLOWED_OPERATORS.includes(operator) && "exact" !== operator && "is_not" !== operator) {
+    options.warnFunction?.(`Property ${key} cannot have a value of null with the ${operator} operator`);
+    return false;
+  }
+  const computeExactMatch = (target, actual) => {
+    if (2 !== options.propertyMatchingVersion && isTruthyOrFalsyPropertyValue(target) || Array.isArray(target) && 0 === target.length) {
+      assertJsonRepresentable(actual);
+      return isTruthyPropertyValue(target) === isTruthyPropertyValue(actual);
+    }
+    if (2 === options.propertyMatchingVersion && "number" == typeof actual && isTruthyOrFalsyPropertyValue(target)) {
+      assertJsonRepresentable(actual);
+      return false;
+    }
+    if (Array.isArray(target)) {
+      const actualString = exactMatchString(actual).toLowerCase();
+      return target.some((item) => exactMatchString(item).toLowerCase() === actualString);
+    }
+    return exactMatchString(target).toLowerCase() === exactMatchString(actual).toLowerCase();
+  };
+  const compare = (lhs, rhs, comparisonOperator) => {
+    if ("gt" === comparisonOperator) return lhs > rhs;
+    if ("gte" === comparisonOperator) return lhs >= rhs;
+    if ("lt" === comparisonOperator) return lhs < rhs;
+    if ("lte" === comparisonOperator) return lhs <= rhs;
+    throw new Error(`Invalid operator: ${comparisonOperator}`);
+  };
+  switch (operator) {
+    case "exact":
+      return computeExactMatch(value, overrideValue);
+    case "is_not":
+      return !computeExactMatch(value, overrideValue);
+    case "is_set":
+      return true;
+    case "icontains":
+      return asciiLowercase(overrideValue).includes(asciiLowercase(value));
+    case "not_icontains":
+      return !asciiLowercase(overrideValue).includes(asciiLowercase(value));
+    case "starts_with":
+      return asciiLowercase(overrideValue).startsWith(asciiLowercase(value));
+    case "not_starts_with":
+      return !asciiLowercase(overrideValue).startsWith(asciiLowercase(value));
+    case "ends_with":
+      return asciiLowercase(overrideValue).endsWith(asciiLowercase(value));
+    case "not_ends_with":
+      return !asciiLowercase(overrideValue).endsWith(asciiLowercase(value));
+    case "regex":
+      return isValidRegex(String(value)) && null !== String(overrideValue).match(String(value));
+    case "not_regex":
+      return isValidRegex(String(value)) && null === String(overrideValue).match(String(value));
+    case "gt":
+    case "gte":
+    case "lt":
+    case "lte": {
+      const parsedValue = "number" == typeof value ? value : parseFloat(String(value));
+      const parsedOverride = "number" == typeof overrideValue ? overrideValue : null != overrideValue ? parseFloat(String(overrideValue)) : 0 / 0;
+      if (Number.isFinite(parsedValue) && Number.isFinite(parsedOverride)) return compare(parsedOverride, parsedValue, operator);
+      return compare(String(overrideValue), String(value), operator);
+    }
+    case "is_date_after":
+    case "is_date_before": {
+      if ("boolean" == typeof value) throw new InconclusiveMatchError("Date operations cannot be performed on boolean values");
+      let parsedDate = relativeDateParseForFeatureFlagMatching(String(value));
+      if (null == parsedDate) parsedDate = convertToDateTime(value);
+      const overrideDate = convertToDateTime(overrideValue);
+      return "is_date_before" === operator ? overrideDate < parsedDate : overrideDate > parsedDate;
+    }
+    case "semver_eq":
+      return 0 === compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy));
+    case "semver_neq":
+      return 0 !== compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy));
+    case "semver_gt":
+      return compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy)) > 0;
+    case "semver_gte":
+      return compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy)) >= 0;
+    case "semver_lt":
+      return compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy)) < 0;
+    case "semver_lte":
+      return compareSemverTuples(parseFeatureFlagSemver(String(overrideValue), parsingPolicy), parseFeatureFlagSemver(String(value), parsingPolicy)) <= 0;
+    case "semver_tilde": {
+      const overrideParsed = parseFeatureFlagSemver(String(overrideValue), parsingPolicy);
+      const { lower, upper } = computeTildeBounds(String(value), parsingPolicy);
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0;
+    }
+    case "semver_caret": {
+      const overrideParsed = parseFeatureFlagSemver(String(overrideValue), parsingPolicy);
+      const { lower, upper } = computeCaretBounds(String(value), parsingPolicy);
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0;
+    }
+    case "semver_wildcard": {
+      const overrideParsed = parseFeatureFlagSemver(String(overrideValue), parsingPolicy);
+      const { lower, upper } = computeWildcardBounds(String(value), parsingPolicy);
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0;
+    }
+    default:
+      throw new InconclusiveMatchError(`Unknown operator: ${operator}`);
+  }
+}
+async function hashSHA1(text) {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) throw new Error("SubtleCrypto API not available");
+  const hashBuffer = await subtle.digest("SHA-1", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(hashBuffer)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+async function getFeatureFlagHash(key, bucketingValue, salt = "", separator = ".") {
+  const hashString = await hashSHA1(`${key}${separator}${bucketingValue}${salt}`);
+  return parseInt(hashString.slice(0, 15), 16) / LONG_SCALE;
+}
+async function getHoldoutVariant(holdout, bucketingValue) {
+  if (null == holdout || null == holdout.id || null == holdout.exclusion_percentage) return;
+  const rawPercentage = Number(holdout.exclusion_percentage);
+  if (!Number.isFinite(rawPercentage)) return;
+  const percentage = Math.min(Math.max(rawPercentage, 0), 100);
+  if (100 !== percentage) {
+    const hash = await getFeatureFlagHash("holdout", bucketingValue, "", "-");
+    if (hash > percentage / 100) return;
+  }
+  return `holdout-${holdout.id}`;
+}
+function getFeatureFlagVariantLookupTable(variants) {
+  const table = [];
+  let valueMin = 0;
+  for (const variant of variants) {
+    const valueMax = valueMin + variant.rollout_percentage / 100;
+    table.push({
+      valueMin,
+      valueMax,
+      key: variant.key
+    });
+    valueMin = valueMax;
+  }
+  return table;
+}
+async function getFeatureFlagVariant(key, bucketingValue, variants) {
+  const hashValue = await getFeatureFlagHash(key, bucketingValue, "variant");
+  return getFeatureFlagVariantLookupTable(variants).find((variant) => hashValue >= variant.valueMin && hashValue < variant.valueMax)?.key;
+}
+function resolveFeatureFlagPayload(payloads, flagValue) {
+  if (false === flagValue || null == flagValue || !payloads) return null;
+  const payloadKey = "boolean" == typeof flagValue ? flagValue.toString() : flagValue;
+  const payload = payloads[payloadKey] || null;
+  return null == payload ? null : parsePayload(payload);
+}
+
+// ../../node_modules/@posthog/core/dist/utils/otlp-any-value.mjs
+var INT64_RANGE_LIMIT = 9223372036854776e3;
+var INT64_RANGE_LIMIT_DECIMAL = "9223372036854775808";
+var propertyIsEnumerable = Object.prototype.propertyIsEnumerable;
+function newState() {
+  return {
+    ancestors: /* @__PURE__ */ new WeakSet(),
+    remainingNodes: MAX_JSON_SAFE_VALUE_NODES
+  };
+}
+function toOtlpKeyValueList(attrs, logger) {
+  try {
+    return encodeKeyValueList(attrs, logger, newState(), 0);
+  } catch {
+    return [];
+  }
+}
+function encodeBigInt(value, logger) {
+  const decimal = value.toString();
+  const limit = BigInt(INT64_RANGE_LIMIT_DECIMAL);
+  if (value >= limit || value < -limit) {
+    logger?.debug(`Attribute ${decimal} is outside the int64 range; encoding it as a string`);
+    return {
+      stringValue: decimal
+    };
+  }
+  return {
+    intValue: decimal
+  };
+}
+function encodeAnyValue(value, logger, state, depth) {
+  if (state.remainingNodes <= 0) return {
+    stringValue: TRUNCATED_VALUE
+  };
+  state.remainingNodes--;
+  if (isBoolean(value)) return {
+    boolValue: value
+  };
+  if ("bigint" == typeof value) return encodeBigInt(value, logger);
+  if ("number" == typeof value) {
+    if (!Number.isFinite(value)) return {
+      stringValue: String(value)
+    };
+    if (Number.isInteger(value)) {
+      if (Number.isSafeInteger(value)) return {
+        intValue: String(value)
+      };
+      if ("u" < typeof BigInt) return {
+        stringValue: String(value)
+      };
+      const decimal = BigInt(value).toString();
+      if (value >= INT64_RANGE_LIMIT || value < -INT64_RANGE_LIMIT) {
+        logger?.debug(`Attribute ${decimal} is outside the int64 range; encoding it as a string`);
+        return {
+          stringValue: decimal
+        };
+      }
+      return {
+        intValue: decimal
+      };
+    }
+    return {
+      doubleValue: value
+    };
+  }
+  if ("string" == typeof value) return {
+    stringValue: sanitizeString(value)
+  };
+  if ("function" == typeof value) return {
+    stringValue: FUNCTION_VALUE
+  };
+  if ("symbol" == typeof value) return {
+    stringValue: String(value)
+  };
+  if ("object" == typeof value && null !== value) {
+    if (state.ancestors.has(value)) return {
+      stringValue: CIRCULAR_VALUE
+    };
+    if (depth >= MAX_JSON_SAFE_VALUE_DEPTH) return {
+      stringValue: TRUNCATED_VALUE
+    };
+    if (value instanceof Date) {
+      const time3 = value.getTime();
+      const iso = Number.isFinite(time3) ? value.toISOString() : String(value);
+      return {
+        stringValue: "string" == typeof iso ? sanitizeString(iso) : String(iso)
+      };
+    }
+    state.ancestors.add(value);
+    try {
+      try {
+        const toJSON = value.toJSON;
+        if ("function" == typeof toJSON) return encodeAnyValue(toJSON.call(value), logger, state, depth + 1);
+      } catch {
+      }
+      if (isArray(value)) return {
+        arrayValue: {
+          values: encodeArrayValues(value, logger, state, depth + 1)
+        }
+      };
+      return {
+        kvlistValue: {
+          values: encodeKeyValueList(value, logger, state, depth + 1)
+        }
+      };
+    } finally {
+      state.ancestors.delete(value);
+    }
+  }
+  return {
+    stringValue: sanitizeString(String(value))
+  };
+}
+function encodeArrayValues(values, logger, state, depth) {
+  const result = [];
+  const itemCount = Math.min(values.length, MAX_JSON_SAFE_VALUE_ITEMS);
+  let index = 0;
+  for (; index < itemCount && state.remainingNodes > 0; index++) try {
+    const element = index in values ? values[index] : void 0;
+    if (isNullish(element)) continue;
+    result.push(encodeAnyValue(element, logger, state, depth));
+  } catch {
+    result.push({
+      stringValue: UNSERIALIZABLE_VALUE
+    });
+  }
+  if (values.length > index) result.push({
+    stringValue: TRUNCATED_VALUE
+  });
+  return result;
+}
+function encodeKeyValueList(attrs, logger, state, depth) {
+  const result = [];
+  for (const key in attrs) if (propertyIsEnumerable.call(attrs, key)) {
+    if (!key) {
+      logger?.debug("Dropping an attribute with an empty key");
+      continue;
+    }
+    if (result.length >= MAX_JSON_SAFE_VALUE_ITEMS || state.remainingNodes <= 0) {
+      logger?.debug("Attributes truncated: the value exceeds the OTLP encoder budget");
+      break;
+    }
+    try {
+      const value = attrs[key];
+      if (isNull(value) || isUndefined(value)) continue;
+      result.push({
+        key: sanitizeString(key),
+        value: encodeAnyValue(value, logger, state, depth)
+      });
+    } catch {
+      result.push({
+        key: sanitizeString(key),
+        value: {
+          stringValue: UNSERIALIZABLE_VALUE
+        }
+      });
+    }
+  }
+  return result;
+}
+
+// ../../node_modules/@posthog/core/dist/utils/otlp-resource.mjs
+function buildOtlpResourceAttributes(config2, sdkName, sdkVersion) {
+  return {
+    ...assignUserAttributes({}, config2.resourceAttributes),
+    "service.name": config2.serviceName || "unknown_service",
+    ...config2.environment && {
+      "deployment.environment": config2.environment
+    },
+    ...config2.serviceVersion && {
+      "service.version": config2.serviceVersion
+    },
+    "telemetry.sdk.name": sdkName,
+    "telemetry.sdk.version": sdkVersion
+  };
+}
+var SDK_RESOURCE_KEYS = [
+  "service.name",
+  "deployment.environment",
+  "service.version",
+  "telemetry.sdk.name",
+  "telemetry.sdk.version"
+];
+function toOtlpResourceKeyValueList(attributes, logger) {
+  const user = assignUserAttributes({}, attributes);
+  const sdk = {};
+  for (const key of SDK_RESOURCE_KEYS) if (Object.prototype.hasOwnProperty.call(user, key)) {
+    sdk[key] = user[key];
+    delete user[key];
+  }
+  return [
+    ...toOtlpKeyValueList(user, logger),
+    ...toOtlpKeyValueList(sdk, logger)
+  ];
+}
+var OS_NAMES = {
+  darwin: "macOS",
+  win32: "Windows",
+  cygwin: "Windows",
+  linux: "Linux",
+  android: "Android",
+  freebsd: "FreeBSD",
+  openbsd: "OpenBSD",
+  netbsd: "NetBSD",
+  sunos: "SunOS",
+  aix: "AIX",
+  haiku: "Haiku",
+  "Mac OS X": "macOS"
+};
+function normalizeOsName(name) {
+  if (!name) return;
+  return Object.prototype.hasOwnProperty.call(OS_NAMES, name) ? OS_NAMES[name] : name;
+}
+function osResourceAttributes(name, version4) {
+  const osName = normalizeOsName(name);
+  return {
+    ...osName ? {
+      "os.name": osName
+    } : {},
+    ...version4 ? {
+      "os.version": version4
+    } : {}
+  };
+}
+
+// ../../node_modules/@posthog/core/dist/logs/logs-utils.mjs
+var OTLP_SEVERITY_MAP = {
+  trace: {
+    text: "TRACE",
+    number: 1
+  },
+  debug: {
+    text: "DEBUG",
+    number: 5
+  },
+  info: {
+    text: "INFO",
+    number: 9
+  },
+  warn: {
+    text: "WARN",
+    number: 13
+  },
+  error: {
+    text: "ERROR",
+    number: 17
+  },
+  fatal: {
+    text: "FATAL",
+    number: 21
+  }
+};
+var DEFAULT_OTLP_SEVERITY = OTLP_SEVERITY_MAP.info;
+
+// ../../node_modules/@posthog/core/dist/utils/flush-timer.mjs
+var FlushTimer = class {
+  constructor(_onFire) {
+    this._onFire = _onFire;
+    this._firesAt = 0;
+  }
+  get pending() {
+    return !!this._timer;
+  }
+  arm(delayMs) {
+    this.clear();
+    this._firesAt = Date.now() + delayMs;
+    this._timer = safeSetTimeout(() => {
+      this._timer = void 0;
+      this._onFire();
+    }, delayMs);
+  }
+  armNoEarlierThan(delayMs) {
+    if (this._timer && Date.now() + delayMs <= this._firesAt) return;
+    this.arm(delayMs);
+  }
+  clear() {
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = void 0;
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/utils/backoff.mjs
+var MAX_FLUSH_BACKOFF_EXPONENT = 6;
+var MAX_FLUSH_BACKOFF_MS = 3e4;
+var JITTER = 0.25;
+function drawJitter() {
+  return 1 - JITTER + Math.random() * JITTER * 2;
+}
+var NO_JITTER = 1;
+function backoffDelayMs(baseMs, failures, jitter, maxMs) {
+  const exponent = Math.min(Math.max(0, failures - 1), MAX_FLUSH_BACKOFF_EXPONENT);
+  const delay = baseMs * 2 ** exponent;
+  const capped = void 0 === maxMs ? delay : Math.min(delay, Math.max(maxMs, baseMs));
+  return Math.round(capped * jitter);
+}
+
+// ../../node_modules/@posthog/core/dist/metrics/metrics-utils.mjs
+var DEFAULT_HISTOGRAM_BOUNDS = [
+  0,
+  5,
+  10,
+  25,
+  50,
+  75,
+  100,
+  250,
+  500,
+  750,
+  1e3,
+  2500,
+  5e3,
+  7500,
+  1e4
+];
+function msToUnixNano(ms) {
+  return String(ms) + "000000";
+}
+function seriesKey(type, name, unit, attributes) {
+  let attrsKey = "";
+  if (attributes) {
+    const keys = Object.keys(attributes).sort();
+    attrsKey = keys.map((k) => `${JSON.stringify(k)}:${JSON.stringify(attributes[k])}`).join(",");
+  }
+  return `${type}\0${name}\0${unit ?? ""}\0${attrsKey}`;
+}
+function bucketIndexFor(value, bounds) {
+  for (let i = 0; i < bounds.length; i++) if (value <= bounds[i]) return i;
+  return bounds.length;
+}
+function buildMetricsResourceAttributes(config2, scopeName, scopeVersion) {
+  return buildOtlpResourceAttributes(config2, scopeName, scopeVersion);
+}
+function buildOtlpMetricsPayload(metrics, resourceAttributes, scopeName, scopeVersion) {
+  return {
+    resourceMetrics: [
+      {
+        resource: {
+          attributes: toOtlpResourceKeyValueList(resourceAttributes)
+        },
+        scopeMetrics: [
+          {
+            scope: {
+              name: scopeName,
+              version: scopeVersion
+            },
+            metrics
+          }
+        ]
+      }
+    ]
+  };
+}
+
+// ../../node_modules/@posthog/core/dist/metrics/config.mjs
+var DEFAULT_FLUSH_INTERVAL_MS = 1e4;
+var DEFAULT_MAX_SERIES_PER_FLUSH = 1e3;
+function resolveMetricsConfig(config2) {
+  const resourceAttributes = config2?.resourceAttributes;
+  return {
+    serviceName: resourceAttributes?.["service.name"] ?? config2?.serviceName,
+    serviceVersion: resourceAttributes?.["service.version"] ?? config2?.serviceVersion,
+    environment: resourceAttributes?.["deployment.environment"] ?? config2?.environment,
+    resourceAttributes,
+    beforeSend: config2?.beforeSend,
+    flushIntervalMs: config2?.flushIntervalMs ?? DEFAULT_FLUSH_INTERVAL_MS,
+    maxSeriesPerFlush: config2?.maxSeriesPerFlush ?? DEFAULT_MAX_SERIES_PER_FLUSH
+  };
+}
+
+// ../../node_modules/@posthog/core/dist/metrics/index.mjs
+var OTLP_TEMPORALITY_DELTA = 1;
+var PostHogMetrics = class {
+  constructor(_instance, _config, _logger) {
+    this._instance = _instance;
+    this._config = _config;
+    this._logger = _logger;
+    this._series = /* @__PURE__ */ new Map();
+    this._flushTimer = new FlushTimer(() => this.flush().catch((e) => {
+      this._logger.error("Metrics flush failed:", e);
+    }));
+    this._flushPromise = null;
+    this._seriesCapWarned = false;
+    this._typeByName = /* @__PURE__ */ new Map();
+    this._typeCollisionWarned = /* @__PURE__ */ new Set();
+    this._retryAfter = new RetryAfterWindow();
+    this._consecutiveFlushFailures = 0;
+    this._flushJitter = NO_JITTER;
+    this._generation = 0;
+  }
+  count(name, value = 1, options) {
+    this._capture({
+      name,
+      type: "count",
+      value,
+      unit: options?.unit,
+      attributes: options?.attributes
+    });
+  }
+  gauge(name, value, options) {
+    this._capture({
+      name,
+      type: "gauge",
+      value,
+      unit: options?.unit,
+      attributes: options?.attributes
+    });
+  }
+  histogram(name, value, options) {
+    this._capture({
+      name,
+      type: "histogram",
+      value,
+      unit: options?.unit,
+      attributes: options?.attributes
+    });
+  }
+  flush() {
+    const prev = this._flushPromise;
+    const run = async () => {
+      if (prev) await prev.catch(() => {
+      });
+      await this._doFlush();
+    };
+    const p = run().finally(() => {
+      if (this._flushPromise === p) this._flushPromise = null;
+    });
+    this._flushPromise = p;
+    return p;
+  }
+  drainWindow() {
+    if (0 === this._series.size) return null;
+    const window = this._series;
+    this._series = /* @__PURE__ */ new Map();
+    this._seriesCapWarned = false;
+    this._typeByName = /* @__PURE__ */ new Map();
+    this._typeCollisionWarned = /* @__PURE__ */ new Set();
+    return this._buildPayload(window);
+  }
+  reset() {
+    this._generation++;
+    this._retryAfter.reset();
+    this._consecutiveFlushFailures = 0;
+    this._flushJitter = NO_JITTER;
+    this._flushTimer.clear();
+    this._series = /* @__PURE__ */ new Map();
+    this._flushPromise = null;
+    this._seriesCapWarned = false;
+    this._typeByName = /* @__PURE__ */ new Map();
+    this._typeCollisionWarned = /* @__PURE__ */ new Set();
+  }
+  _capture(sample) {
+    if (this._instance.isDisabled || this._instance.optedOut) return;
+    const filtered = this._runBeforeSend(sample);
+    if (null === filtered) return;
+    if (!filtered.name || "string" != typeof filtered.name) return void this._logger.warn("Dropping metric with empty name");
+    if ("number" != typeof filtered.value || !Number.isFinite(filtered.value)) return void this._logger.warn(`Dropping metric '${filtered.name}': value must be a finite number`);
+    if ("count" === filtered.type && filtered.value < 0) return void this._logger.warn(`Dropping count '${filtered.name}': counters are monotonic, value must be >= 0`);
+    let attributes;
+    let key;
+    try {
+      attributes = filtered.attributes ? {
+        ...filtered.attributes
+      } : void 0;
+      key = seriesKey(filtered.type, filtered.name, filtered.unit, attributes);
+    } catch (e) {
+      this._logger.warn(`Dropping metric '${filtered.name}': attributes could not be serialized`, e);
+      return;
+    }
+    let state = this._series.get(key);
+    if (!state) {
+      if (!this._admitNewSeries()) return;
+      state = {
+        name: filtered.name,
+        type: filtered.type,
+        unit: filtered.unit,
+        attributes,
+        windowStartMs: Date.now()
+      };
+      this._series.set(key, state);
+    }
+    const seenType = this._typeByName.get(filtered.name);
+    if (void 0 === seenType) this._typeByName.set(filtered.name, filtered.type);
+    else if (seenType !== filtered.type && !this._typeCollisionWarned.has(filtered.name)) {
+      this._typeCollisionWarned.add(filtered.name);
+      this._logger.warn(`Metric name '${filtered.name}' is already used as a ${seenType}; recording it as a ${filtered.type} too will blend both series in charts. Use a distinct name.`);
+    }
+    this._fold(state, filtered.value);
+    this._armFlushTimer();
+  }
+  _admitNewSeries() {
+    if (this._series.size < this._config.maxSeriesPerFlush) return true;
+    if (!this._seriesCapWarned) {
+      this._seriesCapWarned = true;
+      this._logger.warn(`Metric series cap reached (${this._config.maxSeriesPerFlush} per flush window); dropping new series until the next flush. Reduce attribute cardinality.`);
+    }
+    return false;
+  }
+  _fold(state, value) {
+    switch (state.type) {
+      case "count":
+        state.total = (state.total ?? 0) + value;
+        break;
+      case "gauge":
+        state.last = value;
+        break;
+      case "histogram": {
+        if (!state.hist) state.hist = {
+          count: 0,
+          sum: 0,
+          min: value,
+          max: value,
+          bucketCounts: new Array(DEFAULT_HISTOGRAM_BOUNDS.length + 1).fill(0)
+        };
+        const hist = state.hist;
+        hist.count += 1;
+        hist.sum += value;
+        hist.min = Math.min(hist.min, value);
+        hist.max = Math.max(hist.max, value);
+        hist.bucketCounts[bucketIndexFor(value, DEFAULT_HISTOGRAM_BOUNDS)] += 1;
+        break;
+      }
+    }
+  }
+  _runBeforeSend(sample) {
+    const beforeSend = this._config.beforeSend;
+    if (!beforeSend) return sample;
+    const fns = isArray(beforeSend) ? beforeSend : [
+      beforeSend
+    ];
+    let result = sample;
+    for (const fn of fns) try {
+      const next = fn(result);
+      if (!next) {
+        this._logger.info("Metric was rejected in beforeSend function");
+        return null;
+      }
+      result = next;
+    } catch (e) {
+      this._logger.error("Error in beforeSend function for metric:", e);
+      return null;
+    }
+    return result;
+  }
+  _armFlushTimer() {
+    if (this._flushTimer.pending) return;
+    this._flushTimer.arm(this._nextFlushDelay());
+  }
+  _nextFlushDelay() {
+    return Math.max(backoffDelayMs(this._config.flushIntervalMs, this._consecutiveFlushFailures, this._flushJitter, MAX_FLUSH_BACKOFF_MS), this._retryAfter.remainingMs());
+  }
+  async _doFlush() {
+    this._flushTimer.clear();
+    if (0 === this._series.size) return;
+    const window = this._series;
+    this._series = /* @__PURE__ */ new Map();
+    this._seriesCapWarned = false;
+    this._typeByName = /* @__PURE__ */ new Map();
+    this._typeCollisionWarned = /* @__PURE__ */ new Set();
+    const generation = this._generation;
+    const outcome = await this._instance._sendMetricsBatch(this._buildPayload(window));
+    if (generation !== this._generation) return;
+    this._retryAfter.record(outcome);
+    if ("retry-later" === outcome.kind) {
+      this._consecutiveFlushFailures++;
+      this._flushJitter = drawJitter();
+    } else {
+      this._consecutiveFlushFailures = 0;
+      this._flushJitter = NO_JITTER;
+    }
+    if (this._flushTimer.pending) this._flushTimer.arm(this._nextFlushDelay());
+    switch (outcome.kind) {
+      case "ok":
+        return;
+      case "retry-later":
+        this._mergeWindowBack(window);
+        this._flushTimer.armNoEarlierThan(this._nextFlushDelay());
+        return;
+      case "too-large":
+        this._logger.warn("Metrics batch exceeded the server size limit and was dropped");
+        return;
+      case "fatal":
+        this._logger.error("Failed to send metrics batch:", outcome.error);
+        return;
+    }
+  }
+  _buildPayload(window) {
+    return buildOtlpMetricsPayload(this._buildMetrics(window), buildMetricsResourceAttributes(this._config, this._instance.getLibraryId(), this._instance.getLibraryVersion()), this._instance.getLibraryId(), this._instance.getLibraryVersion());
+  }
+  _buildMetrics(window) {
+    const nowNano = msToUnixNano(Date.now());
+    const byMetric = /* @__PURE__ */ new Map();
+    for (const state of window.values()) {
+      const metricKey = seriesKey(state.type, state.name, state.unit, void 0);
+      let metric = byMetric.get(metricKey);
+      if (!metric) {
+        metric = {
+          name: state.name,
+          ...state.unit && {
+            unit: state.unit
+          }
+        };
+        if ("count" === state.type) metric.sum = {
+          aggregationTemporality: OTLP_TEMPORALITY_DELTA,
+          isMonotonic: true,
+          dataPoints: []
+        };
+        else if ("gauge" === state.type) metric.gauge = {
+          dataPoints: []
+        };
+        else metric.histogram = {
+          aggregationTemporality: OTLP_TEMPORALITY_DELTA,
+          dataPoints: []
+        };
+        byMetric.set(metricKey, metric);
+      }
+      const attributes = toOtlpKeyValueList(state.attributes ?? {}, this._logger);
+      const startNano = msToUnixNano(state.windowStartMs);
+      if ("count" === state.type) {
+        const dp = {
+          attributes,
+          startTimeUnixNano: startNano,
+          timeUnixNano: nowNano,
+          asDouble: state.total ?? 0
+        };
+        metric.sum.dataPoints.push(dp);
+      } else if ("gauge" === state.type) {
+        const dp = {
+          attributes,
+          timeUnixNano: nowNano,
+          asDouble: state.last ?? 0
+        };
+        metric.gauge.dataPoints.push(dp);
+      } else if (state.hist) {
+        const dp = {
+          attributes,
+          startTimeUnixNano: startNano,
+          timeUnixNano: nowNano,
+          count: state.hist.count,
+          sum: state.hist.sum,
+          min: state.hist.min,
+          max: state.hist.max,
+          bucketCounts: state.hist.bucketCounts,
+          explicitBounds: DEFAULT_HISTOGRAM_BOUNDS
+        };
+        metric.histogram.dataPoints.push(dp);
+      }
+    }
+    return Array.from(byMetric.values());
+  }
+  _mergeWindowBack(window) {
+    for (const [key, old] of window) {
+      const current = this._series.get(key);
+      if (!current) {
+        if (this._admitNewSeries()) this._series.set(key, old);
+        continue;
+      }
+      current.windowStartMs = Math.min(current.windowStartMs, old.windowStartMs);
+      switch (current.type) {
+        case "count":
+          current.total = (current.total ?? 0) + (old.total ?? 0);
+          break;
+        case "gauge":
+          break;
+        case "histogram":
+          if (old.hist) if (current.hist) {
+            current.hist.count += old.hist.count;
+            current.hist.sum += old.hist.sum;
+            current.hist.min = Math.min(current.hist.min, old.hist.min);
+            current.hist.max = Math.max(current.hist.max, old.hist.max);
+            for (let i = 0; i < current.hist.bucketCounts.length; i++) current.hist.bucketCounts[i] += old.hist.bucketCounts[i];
+          } else current.hist = old.hist;
+          break;
+      }
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/traces/ids.mjs
+var TRACE_ID_BYTES = 16;
+var SPAN_ID_BYTES = 8;
+var TRACE_ID_HEX = 2 * TRACE_ID_BYTES;
+var SPAN_ID_HEX = 2 * SPAN_ID_BYTES;
+var INVALID_TRACE_ID = "0".repeat(TRACE_ID_HEX);
+var INVALID_SPAN_ID = "0".repeat(SPAN_ID_HEX);
+var HEX_RE = /^[0-9a-f]+$/;
+function getRandomBytes(byteLength) {
+  const bytes = new Uint8Array(byteLength);
+  const cryptoLike = globalThis.crypto;
+  if (cryptoLike && "function" == typeof cryptoLike.getRandomValues) try {
+    cryptoLike.getRandomValues(bytes);
+    return bytes;
+  } catch {
+  }
+  for (let i = 0; i < byteLength; i++) bytes[i] = Math.floor(256 * Math.random());
+  return bytes;
+}
+function bytesToHex(bytes) {
+  let hex = "";
+  for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, "0");
+  return hex;
+}
+function randomHexId(byteLength) {
+  const hex = bytesToHex(getRandomBytes(byteLength));
+  return /[^0]/.test(hex) ? hex : hex.slice(0, -1) + "1";
+}
+function newTraceId() {
+  return randomHexId(TRACE_ID_BYTES);
+}
+function newSpanId() {
+  return randomHexId(SPAN_ID_BYTES);
+}
+function isValidHexId(value, length, invalid) {
+  return "string" == typeof value && value.length === length && value !== invalid && HEX_RE.test(value);
+}
+function isValidTraceId(value) {
+  return isValidHexId(value, TRACE_ID_HEX, INVALID_TRACE_ID);
+}
+function isValidSpanId(value) {
+  return isValidHexId(value, SPAN_ID_HEX, INVALID_SPAN_ID);
+}
+
+// ../../node_modules/@posthog/core/dist/traces/traceparent.mjs
+var TRACEPARENT_RE = /^([0-9a-f]{2})-([0-9a-f]{32})-([0-9a-f]{16})-([0-9a-f]{2})(-.*)?$/;
+function parseTraceparent(value) {
+  const fields = matchTraceparent(value);
+  return fields && {
+    traceId: fields.traceId,
+    spanId: fields.spanId,
+    flags: definedFlags(fields.flags)
+  };
+}
+function definedFlags(flags) {
+  return 1 & parseInt(flags, 16) ? TRACE_FLAGS_SAMPLED : TRACE_FLAGS_UNSAMPLED;
+}
+function matchTraceparent(value) {
+  if ("string" != typeof value) return;
+  const match = TRACEPARENT_RE.exec(value.trim());
+  if (!match) return;
+  const [, version4, traceId, spanId, flags, trailing] = match;
+  if ("ff" === version4) return;
+  if ("00" === version4 && trailing) return;
+  if (!isValidTraceId(traceId) || !isValidSpanId(spanId)) return;
+  return {
+    version: version4,
+    traceId,
+    spanId,
+    flags
+  };
+}
+function normalizeTraceparent(value) {
+  return matchTraceparent(value) && value.trim();
+}
+function traceparentHeader(value) {
+  return Array.isArray(value) && 1 === value.length ? value[0] : value;
+}
+var TRACE_FLAGS_SAMPLED = "01";
+var TRACE_FLAGS_UNSAMPLED = "00";
+function formatTraceparent(traceId, spanId, flags = TRACE_FLAGS_SAMPLED) {
+  return `00-${traceId}-${spanId}-${flags}`;
+}
+var TRACESTATE_MAX_MEMBERS = 32;
+var TRACESTATE_MAX_LENGTH = 512;
+function sanitizeTracestate(value) {
+  if ("string" != typeof value) return;
+  const trimmed = value.trim();
+  if (!trimmed) return;
+  if (/[^\x20-\x7e\t]/.test(trimmed)) return;
+  const members = trimmed.split(",");
+  if (members.length > TRACESTATE_MAX_MEMBERS) return;
+  for (const member of members) if (member.trim() && !member.includes("=")) return;
+  if (trimmed.length <= TRACESTATE_MAX_LENGTH) return trimmed;
+  return trimToLength(members);
+}
+var TRACESTATE_LARGE_MEMBER_LENGTH = 128;
+function trimToLength(members) {
+  const kept = [
+    ...members
+  ];
+  const joinedLength = () => kept.reduce((total, member) => total + member.length, 0) + kept.length - 1;
+  for (let index = kept.length - 1; index >= 0 && joinedLength() > TRACESTATE_MAX_LENGTH; index--) if (kept[index].length > TRACESTATE_LARGE_MEMBER_LENGTH) kept.splice(index, 1);
+  while (kept.length && joinedLength() > TRACESTATE_MAX_LENGTH) kept.pop();
+  return kept.length ? kept.join(",") : void 0;
+}
+
+// ../../node_modules/@posthog/core/dist/traces/sanitize.mjs
+var FALLBACK_SPAN_NAME = "unknown";
+var MAX_TIMESTAMP_MS = 9223372036854;
+var MIN_TIMESTAMP_MS = 0;
+var DEEP_BACKDATE_WARNING_MS = 864e5;
+function sanitizeName(name, label, maxLength, logger) {
+  if ("string" == typeof name && name.trim()) return name.length > maxLength ? name.slice(0, maxLength) : name;
+  logger?.debug(`${label} must be a non-empty string; using "${FALLBACK_SPAN_NAME}"`);
+  return FALLBACK_SPAN_NAME;
+}
+function toEpochMs(value) {
+  if (null == value) return;
+  let ms = value;
+  if (value instanceof Date) try {
+    ms = value.getTime();
+  } catch {
+    return;
+  }
+  if ("number" != typeof ms || !Number.isFinite(ms)) return;
+  if (ms < MIN_TIMESTAMP_MS || ms > MAX_TIMESTAMP_MS) return;
+  return ms;
+}
+function resolveStartTime(value, now, logger) {
+  const supplied = toEpochMs(value);
+  if (void 0 === supplied) {
+    if (void 0 !== value) logger?.debug("Span startTime is out of range or not a valid time; using the current time");
+    return now;
+  }
+  if (now - supplied > DEEP_BACKDATE_WARNING_MS) logger?.debug("Span startTime is more than 24 hours in the past; the server will clamp it to receive time and keep the original in $originalTimestamp");
+  else if (supplied > now) logger?.debug("Span startTime is in the future; the span may export with a zero duration");
+  return supplied;
+}
+function clampEndTime(endTime, startTime) {
+  return endTime < startTime ? startTime : endTime;
+}
+function resolveSuppliedTime(value, derived, label, logger) {
+  const supplied = toEpochMs(value);
+  if (void 0 === supplied) {
+    if (void 0 !== value) logger?.debug(`Span ${label} is out of range or not a valid time; using the derived time`);
+    return derived;
+  }
+  return supplied;
+}
+
+// ../../node_modules/@posthog/core/dist/traces/span.mjs
+function monotonicNow() {
+  const perf = globalThis.performance;
+  return "function" == typeof perf?.now ? perf.now() : void 0;
+}
+var PostHogSpan = class {
+  constructor(init, _onEnd, _logger) {
+    this._onEnd = _onEnd;
+    this._logger = _logger;
+    this._events = [];
+    this._ended = false;
+    this._userAttributeCount = 0;
+    this._userEventCount = 0;
+    this._droppedAttributes = 0;
+    this._droppedEvents = 0;
+    this._traceId = init.traceId;
+    this._spanId = init.spanId;
+    this._parentSpanId = init.parentSpanId;
+    this._traceState = init.traceState;
+    this._traceFlags = init.traceFlags ?? TRACE_FLAGS_SAMPLED;
+    this._parentIsRemote = init.parentIsRemote ?? false;
+    this._name = init.name;
+    this._kind = init.kind;
+    this._autoKeys = new Set(init.autoAttributeKeys);
+    this._maxAttributes = init.maxAttributes;
+    this._maxEvents = init.maxEvents;
+    this._maxAttributesPerEvent = init.maxAttributesPerEvent;
+    this._maxAttributeValueLength = init.maxAttributeValueLength;
+    this._attributes = /* @__PURE__ */ Object.create(null);
+    for (const key of Object.keys(init.attributes)) this._writeAttribute(key, init.attributes[key]);
+    this._startMono = init.backdated ? void 0 : monotonicNow();
+    this._startTime = init.clockAnchor && void 0 !== this._startMono ? init.clockAnchor.wall + (this._startMono - init.clockAnchor.mono) : init.startTime;
+    if (void 0 !== this._startMono) this._clockAnchor = init.clockAnchor ?? {
+      wall: this._startTime,
+      mono: this._startMono
+    };
+  }
+  _now() {
+    if (void 0 !== this._startMono) {
+      const mono = monotonicNow();
+      if (void 0 !== mono) return this._startTime + Math.max(0, mono - this._startMono);
+    }
+    return Date.now();
+  }
+  _mutable(operation) {
+    if (this._ended) {
+      this._logger?.debug(`Ignoring ${operation} on a span that has already ended`);
+      return false;
+    }
+    return true;
+  }
+  _writeAttribute(key, value) {
+    if (isNullish(value)) {
+      if (key in this._attributes && !this._autoKeys.has(key)) this._userAttributeCount--;
+      delete this._attributes[key];
+      return;
+    }
+    if (!this._autoKeys.has(key) && !(key in this._attributes)) {
+      if (this._userAttributeCount >= this._maxAttributes) return void this._droppedAttributes++;
+      this._userAttributeCount++;
+    }
+    this._attributes[key] = truncateAttributeValue(value, this._maxAttributeValueLength);
+  }
+  setAttribute(key, value) {
+    if (this._mutable("setAttribute")) this._writeAttribute(key, value);
+    return this;
+  }
+  setAttributes(attributes) {
+    if (this._mutable("setAttributes")) {
+      const safe = assignUserAttributes({}, attributes);
+      for (const key of Object.keys(safe)) this._writeAttribute(key, safe[key]);
+    }
+    return this;
+  }
+  addEvent(name, attributes, timestamp) {
+    if (this._mutable("addEvent")) {
+      if (this._userEventCount >= this._maxEvents) {
+        this._droppedEvents++;
+        return this;
+      }
+      this._userEventCount++;
+      const bounded = attributes && boundAttributes(attributes, this._maxAttributesPerEvent, this._maxAttributeValueLength);
+      this._events.push({
+        name: sanitizeName(name, "Span event name", this._maxAttributeValueLength, this._logger),
+        timestamp: resolveSuppliedTime(timestamp, this._now(), "event timestamp", this._logger),
+        ...bounded && {
+          attributes: bounded.attributes,
+          ...bounded.dropped && {
+            droppedAttributesCount: bounded.dropped
+          }
+        }
+      });
+    }
+    return this;
+  }
+  setStatus(status, message) {
+    if (this._mutable("setStatus")) {
+      if ("ok" !== status && "error" !== status) {
+        this._logger?.debug(`Ignoring unknown span status "${String(status)}"; expected "ok" or "error"`);
+        return this;
+      }
+      this._status = {
+        code: status,
+        ...message && {
+          message: truncateString(message, this._maxAttributeValueLength)
+        }
+      };
+    }
+    return this;
+  }
+  get statusIsExplicitlyOk() {
+    return this._status?.code === "ok";
+  }
+  recordException(error2) {
+    if (!this._mutable("recordException")) return this;
+    const { type, message, stack } = describeError(error2);
+    this.addEvent(EXCEPTION_EVENT_NAME, {
+      "exception.type": type,
+      "exception.message": message,
+      ...stack && {
+        "exception.stacktrace": stack
+      }
+    });
+    return this.setStatus("error", message);
+  }
+  updateName(name) {
+    if (this._mutable("updateName")) this._name = sanitizeName(name, "Span name", this._maxAttributeValueLength, this._logger);
+    return this;
+  }
+  traceparent() {
+    return formatTraceparent(this._traceId, this._spanId, this._traceFlags);
+  }
+  tracestate() {
+    return this._traceState ?? null;
+  }
+  childContext() {
+    return {
+      traceId: this._traceId,
+      parentSpanId: this._spanId,
+      traceState: this._traceState,
+      traceFlags: this._traceFlags,
+      clockAnchor: this._clockAnchor
+    };
+  }
+  end(endTime) {
+    if (this._ended) return void this._logger?.debug("Ignoring end() on a span that has already ended");
+    this._ended = true;
+    const derived = this._now();
+    const resolved = resolveSuppliedTime(endTime, derived, "end time", this._logger);
+    this._onEnd({
+      traceId: this._traceId,
+      spanId: this._spanId,
+      ...this._parentSpanId && {
+        parentSpanId: this._parentSpanId
+      },
+      ...this._traceState && {
+        traceState: this._traceState
+      },
+      traceFlags: this._traceFlags,
+      parentIsRemote: this._parentIsRemote,
+      name: this._name,
+      kind: this._kind,
+      ...this._status && {
+        status: this._status
+      },
+      attributes: {
+        ...this._attributes
+      },
+      events: this._events,
+      startTime: this._startTime,
+      endTime: clampEndTime(resolved, this._startTime),
+      ...this._droppedAttributes && {
+        droppedAttributesCount: this._droppedAttributes
+      },
+      ...this._droppedEvents && {
+        droppedEventsCount: this._droppedEvents
+      }
+    }, this._autoKeys);
+  }
+};
+var EXCEPTION_EVENT_NAME = "exception";
+var MAX_UINT32 = 4294967295;
+function safeString(value) {
+  try {
+    return "string" == typeof value ? value : String(value);
+  } catch {
+    return UNSERIALIZABLE_VALUE;
+  }
+}
+function nonNegativeCount(value) {
+  if ("number" != typeof value || !Number.isFinite(value) || value <= 0) return 0;
+  return Math.min(Math.floor(value), MAX_UINT32);
+}
+function orderedKeys(attributes, keysBeforeHook) {
+  if (!keysBeforeHook.length) return Object.keys(attributes);
+  const beforeHook = keysBeforeHook.filter((key) => Object.prototype.propertyIsEnumerable.call(attributes, key));
+  const seen = new Set(beforeHook);
+  return [
+    ...beforeHook,
+    ...Object.keys(attributes).filter((key) => !seen.has(key))
+  ];
+}
+function applySpanLimits(record3, autoKeys, maxAttributes, maxEvents, maxAttributesPerEvent, maxAttributeValueLength, keysBeforeHook = []) {
+  let kept = 0;
+  let droppedAttributes = 0;
+  const attributes = {};
+  for (const key of orderedKeys(record3.attributes, keysBeforeHook)) {
+    const value = record3.attributes[key];
+    if (!isNullish(value)) {
+      if (!autoKeys.has(key)) {
+        if (kept >= maxAttributes) {
+          droppedAttributes++;
+          continue;
+        }
+        kept++;
+      }
+      Object.defineProperty(attributes, key, {
+        value: truncateAttributeValue(value, maxAttributeValueLength),
+        enumerable: true,
+        writable: true,
+        configurable: true
+      });
+    }
+  }
+  record3.attributes = attributes;
+  if (droppedAttributes) record3.droppedAttributesCount = nonNegativeCount(record3.droppedAttributesCount) + droppedAttributes;
+  let keptEvents = 0;
+  let droppedEvents = 0;
+  const events = [];
+  for (const event of record3.events) {
+    if (keptEvents >= maxEvents) {
+      droppedEvents++;
+      continue;
+    }
+    keptEvents++;
+    if (event.attributes) {
+      const bounded = boundAttributes(event.attributes, maxAttributesPerEvent, maxAttributeValueLength);
+      event.attributes = bounded.attributes;
+      if (bounded.dropped) event.droppedAttributesCount = nonNegativeCount(event.droppedAttributesCount) + bounded.dropped;
+    }
+    events.push(event);
+  }
+  record3.events = events;
+  if (droppedEvents) record3.droppedEventsCount = nonNegativeCount(record3.droppedEventsCount) + droppedEvents;
+  if (record3.status?.message) record3.status = {
+    ...record3.status,
+    message: truncateString(safeString(record3.status.message), maxAttributeValueLength)
+  };
+}
+var NoopSpan = class {
+  setAttribute() {
+    return this;
+  }
+  setAttributes() {
+    return this;
+  }
+  addEvent() {
+    return this;
+  }
+  setStatus() {
+    return this;
+  }
+  recordException() {
+    return this;
+  }
+  updateName() {
+    return this;
+  }
+  traceparent() {
+    return null;
+  }
+  tracestate() {
+    return null;
+  }
+  end() {
+  }
+};
+var NOOP_SPAN = /* @__PURE__ */ new NoopSpan();
+var PassThroughSpan = class extends NoopSpan {
+  constructor(_traceparent, _tracestate) {
+    super(), this._traceparent = _traceparent, this._tracestate = _tracestate;
+  }
+  traceparent() {
+    return this._traceparent;
+  }
+  tracestate() {
+    return this._tracestate ?? null;
+  }
+};
+function readStack(error2) {
+  try {
+    const stack = error2.stack;
+    return "string" == typeof stack && stack ? {
+      stack
+    } : {};
+  } catch {
+    return {};
+  }
+}
+function inertSpan(options, active) {
+  const parent = traceparentHeader(options?.parent) ?? active;
+  const inbound = "string" == typeof parent || null == parent ? parent : readHandle(parent, "traceparent");
+  const traceparent = normalizeTraceparent(inbound);
+  if (!traceparent) return NOOP_SPAN;
+  const tracestate = "string" == typeof parent || null == parent ? options?.tracestate : readHandle(parent, "tracestate");
+  return new PassThroughSpan(traceparent, sanitizeTracestate(tracestate));
+}
+function readHandle(parent, method) {
+  try {
+    const fn = parent[method];
+    return "function" == typeof fn ? fn.call(parent) : void 0;
+  } catch {
+    return;
+  }
+}
+function truncateString(value, maxLength) {
+  return value.length > maxLength ? value.slice(0, maxLength) : value;
+}
+function truncateAttributeValue(value, maxLength) {
+  return truncateValue(value, maxLength, {
+    ancestors: /* @__PURE__ */ new WeakSet(),
+    remainingNodes: MAX_JSON_SAFE_VALUE_NODES
+  }, 0);
+}
+function truncateValue(value, maxLength, state, depth) {
+  if (null === value || "object" != typeof value) {
+    if (isNullish(value)) return value;
+    if (state.remainingNodes <= 0) return value;
+    state.remainingNodes--;
+    return "string" == typeof value ? truncateString(value, maxLength) : value;
+  }
+  if (state.ancestors.has(value)) return CIRCULAR_VALUE;
+  if (state.remainingNodes <= 0 || depth >= MAX_JSON_SAFE_VALUE_DEPTH) return value;
+  state.remainingNodes--;
+  state.ancestors.add(value);
+  try {
+    if (value instanceof Date) return value;
+    const resolved = resolveToJson(value);
+    if (resolved.selfDescribed) return isNullish(resolved.value) ? String(resolved.value) : truncateValue(resolved.value, maxLength, state, depth + 1);
+    if (isArray(value)) {
+      const walked = Math.min(value.length, MAX_JSON_SAFE_VALUE_ITEMS);
+      const boundedItems = [];
+      for (let index = 0; index < walked; index++) try {
+        boundedItems.push(truncateValue(value[index], maxLength, state, depth + 1));
+      } catch {
+        boundedItems.push(UNSERIALIZABLE_VALUE);
+      }
+      if (value.length > walked) boundedItems.length = value.length;
+      return boundedItems;
+    }
+    const bounded = {};
+    let emittable = 0;
+    for (const key of Object.keys(value)) {
+      if (emittable >= MAX_JSON_SAFE_VALUE_ITEMS) break;
+      let boundedItem;
+      try {
+        boundedItem = truncateValue(value[key], maxLength, state, depth + 1);
+      } catch {
+        boundedItem = UNSERIALIZABLE_VALUE;
+      }
+      if (key && !isNullish(boundedItem)) emittable++;
+      Object.defineProperty(bounded, key, {
+        value: boundedItem,
+        enumerable: true,
+        writable: true,
+        configurable: true
+      });
+    }
+    return bounded;
+  } catch {
+    return value;
+  } finally {
+    state.ancestors.delete(value);
+  }
+}
+function resolveToJson(value) {
+  try {
+    const toJSON = value.toJSON;
+    if ("function" == typeof toJSON) return {
+      selfDescribed: true,
+      value: toJSON.call(value)
+    };
+  } catch {
+  }
+  return {
+    selfDescribed: false
+  };
+}
+function boundAttributes(source, max, maxLength) {
+  let keys;
+  try {
+    keys = Object.keys(source);
+  } catch {
+    return {
+      attributes: {},
+      dropped: 0
+    };
+  }
+  const attributes = {};
+  let kept = 0;
+  let dropped = 0;
+  for (const key of keys) {
+    if (kept >= max) {
+      dropped++;
+      continue;
+    }
+    let value;
+    try {
+      value = truncateAttributeValue(source[key], maxLength);
+    } catch {
+      value = UNSERIALIZABLE_VALUE;
+    }
+    if (!isNullish(value)) {
+      kept++;
+      Object.defineProperty(attributes, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true
+      });
+    }
+  }
+  return {
+    attributes,
+    dropped
+  };
+}
+function truncateAttributes(attributes, maxLength) {
+  for (const key of Object.keys(attributes)) attributes[key] = truncateAttributeValue(attributes[key], maxLength);
+  return attributes;
+}
+function runWithActiveSpan(contextManager, span, fn) {
+  return span === NOOP_SPAN ? fn(span) : contextManager.with(span, () => fn(span));
+}
+function describeError(error2) {
+  try {
+    const stack = readStack(error2);
+    if (isError(error2)) return {
+      type: error2.name || "Error",
+      message: error2.message || "",
+      ...stack
+    };
+    if ("string" == typeof error2) return {
+      type: "string",
+      message: error2
+    };
+    if (error2 && "object" == typeof error2) {
+      const maybe = error2;
+      if ("string" == typeof maybe.message) return {
+        type: "string" == typeof maybe.name ? maybe.name : "Object",
+        message: maybe.message,
+        ...stack
+      };
+    }
+    return {
+      type: typeof error2,
+      message: String(error2)
+    };
+  } catch {
+    return {
+      type: typeof error2,
+      message: ""
+    };
+  }
+}
+
+// ../../node_modules/@posthog/core/dist/traces/otlp.mjs
+var SPAN_KIND_TO_OTLP = {
+  internal: 1,
+  server: 2,
+  client: 3,
+  producer: 4,
+  consumer: 5
+};
+var SPAN_STATUS_TO_OTLP = {
+  ok: 1,
+  error: 2
+};
+var TRACE_FLAGS_SAMPLED2 = 1;
+var SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE = 256;
+var SPAN_FLAGS_CONTEXT_IS_REMOTE = 512;
+function spanFlags(record3) {
+  const traceFlags = parseInt(record3.traceFlags, 16);
+  const w3c = Number.isFinite(traceFlags) ? 255 & traceFlags : TRACE_FLAGS_SAMPLED2;
+  return w3c | SPAN_FLAGS_CONTEXT_HAS_IS_REMOTE | (record3.parentIsRemote ? SPAN_FLAGS_CONTEXT_IS_REMOTE : 0);
+}
+function wireString(value) {
+  if ("string" == typeof value) return sanitizeString(value);
+  try {
+    return sanitizeString(String(value));
+  } catch {
+    return UNSERIALIZABLE_VALUE;
+  }
+}
+function spanKindToOtlp(kind) {
+  if (kind && Object.prototype.hasOwnProperty.call(SPAN_KIND_TO_OTLP, kind)) return SPAN_KIND_TO_OTLP[kind];
+  return SPAN_KIND_TO_OTLP.internal;
+}
+function msToUnixNanoString(ms) {
+  let whole = Math.floor(ms);
+  let fractionalNanos = Math.round((ms - whole) * 1e6);
+  if (fractionalNanos >= 1e6) {
+    whole += 1;
+    fractionalNanos = 0;
+  }
+  return String(whole) + String(fractionalNanos).padStart(6, "0");
+}
+function toOtlpEvent(event, logger) {
+  const encoded = {
+    name: wireString(event.name),
+    timeUnixNano: msToUnixNanoString(event.timestamp)
+  };
+  if (event.attributes) {
+    const attributes = toOtlpKeyValueList(event.attributes, logger);
+    if (attributes.length) encoded.attributes = attributes;
+  }
+  const dropped = nonNegativeCount(event.droppedAttributesCount);
+  if (dropped) encoded.droppedAttributesCount = dropped;
+  return encoded;
+}
+function buildOtlpSpan(record3, logger) {
+  const span = {
+    traceId: record3.traceId,
+    spanId: record3.spanId,
+    name: wireString(record3.name),
+    kind: spanKindToOtlp(record3.kind),
+    startTimeUnixNano: msToUnixNanoString(record3.startTime),
+    endTimeUnixNano: msToUnixNanoString(record3.endTime),
+    flags: spanFlags(record3)
+  };
+  if (record3.parentSpanId) span.parentSpanId = record3.parentSpanId;
+  if (record3.traceState) span.traceState = wireString(record3.traceState);
+  const attributes = toOtlpKeyValueList(record3.attributes, logger);
+  if (attributes.length) span.attributes = attributes;
+  if (record3.events.length) span.events = record3.events.map((event) => toOtlpEvent(event, logger));
+  const droppedAttributes = nonNegativeCount(record3.droppedAttributesCount);
+  if (droppedAttributes) span.droppedAttributesCount = droppedAttributes;
+  const droppedEvents = nonNegativeCount(record3.droppedEventsCount);
+  if (droppedEvents) span.droppedEventsCount = droppedEvents;
+  if (record3.status) span.status = {
+    code: SPAN_STATUS_TO_OTLP[record3.status.code],
+    ...record3.status.message && {
+      message: wireString(record3.status.message)
+    }
+  };
+  return span;
+}
+function buildTracesResourceAttributes(config2, sdkName, sdkVersion) {
+  return buildOtlpResourceAttributes(config2, sdkName, sdkVersion);
+}
+function buildOtlpTracesPayload(spans, resourceAttributes, scopeName, scopeVersion, logger) {
+  return {
+    resourceSpans: [
+      {
+        resource: {
+          attributes: toOtlpResourceKeyValueList(resourceAttributes, logger)
+        },
+        scopeSpans: [
+          {
+            scope: {
+              name: scopeName,
+              version: scopeVersion
+            },
+            spans
+          }
+        ]
+      }
+    ]
+  };
+}
+
+// ../../node_modules/@posthog/core/dist/traces/index.mjs
+var MAX_RETRIES_PER_BATCH = 8;
+function clockNow() {
+  return monotonicNow() ?? Date.now();
+}
+function isOwnSpan(value) {
+  try {
+    return value instanceof PostHogSpan;
+  } catch {
+    return false;
+  }
+}
+function remoteContext(header, tracestate) {
+  const remote = parseTraceparent(header);
+  if (!remote) return;
+  return {
+    traceId: remote.traceId,
+    parentSpanId: remote.spanId,
+    traceState: sanitizeTracestate(tracestate),
+    traceFlags: remote.flags,
+    isRemote: true
+  };
+}
+function looksLikeSpan(value) {
+  try {
+    return "function" == typeof value.traceparent;
+  } catch {
+    return false;
+  }
+}
+function isSpanRecordShape(record3) {
+  return !!record3.attributes && "object" == typeof record3.attributes && !Array.isArray(record3.attributes) && Array.isArray(record3.events) && void 0 !== record3.name && void 0 !== record3.kind && void 0 !== record3.startTime && void 0 !== record3.endTime;
+}
+function restoreField(record3, field, value) {
+  if (record3[field] !== value) record3[field] = value;
+}
+function withRestoredIdentity(hooked, original) {
+  try {
+    const descriptors = Object.getOwnPropertyDescriptors(hooked);
+    for (const field of [
+      "traceId",
+      "spanId",
+      "parentSpanId",
+      "traceState"
+    ]) descriptors[field] = {
+      value: original[field],
+      enumerable: true,
+      writable: true,
+      configurable: true
+    };
+    return Object.create(Object.getPrototypeOf(hooked), descriptors);
+  } catch {
+    return hooked;
+  }
+}
+var PostHogTraces = class {
+  constructor(_instance, _config, _logger, _getContext, _contextManager, _onSpanQueued) {
+    this._instance = _instance;
+    this._config = _config;
+    this._logger = _logger;
+    this._getContext = _getContext;
+    this._contextManager = _contextManager;
+    this._onSpanQueued = _onSpanQueued;
+    this._queue = [];
+    this._flushTimer = new FlushTimer(() => this._flushInBackground());
+    this._flushPromise = null;
+    this._droppedSinceWarning = 0;
+    this._lastDropWarningAt = 0;
+    this._dropReasons = /* @__PURE__ */ new Set();
+    this._consecutiveFlushFailures = 0;
+    this._flushJitter = NO_JITTER;
+    this._retryAfter = new RetryAfterWindow();
+    this._headBatchFailures = 0;
+    this._headBatchSize = 0;
+    this._headBatchChargeableAt = 0;
+    this._generation = 0;
+    this._liveSpans = /* @__PURE__ */ new Map();
+    this._maxExportBatchSize = _config.maxExportBatchSize;
+  }
+  startSpan(name, options) {
+    if (this._instance.isDisabled || this._instance.optedOut) return inertSpan(options, this._contextManager.active());
+    const explicitParent = traceparentHeader(options?.parent);
+    if (explicitParent && "string" != typeof explicitParent && !isOwnSpan(explicitParent)) {
+      if (looksLikeSpan(explicitParent)) {
+        this._logger.debug("Span parent is not a span from this SDK; returning an inert span");
+        return inertSpan(options, this._contextManager.active());
+      }
+      this._logger.debug("Ignoring an unusable span parent");
+    }
+    const parent = this._resolveParent(explicitParent, options);
+    if (this._liveSpans.size >= this._config.maxLiveSpans) this._evictAgedSpans();
+    if (this._liveSpans.size >= this._config.maxLiveSpans) {
+      this._recordDrop(1, `the live-span limit (${this._config.maxLiveSpans}) was reached \u2014 spans are being started and never ended`);
+      return inertSpan(options, this._contextManager.active());
+    }
+    const now = Date.now();
+    const startTime = resolveStartTime(options?.startTime, now, this._logger);
+    const spanId = newSpanId();
+    this._liveSpans.set(spanId, clockNow());
+    const autoAttributes = this._autoContextAttributes();
+    return new PostHogSpan({
+      traceId: parent?.traceId ?? newTraceId(),
+      spanId,
+      parentSpanId: parent?.parentSpanId,
+      traceState: parent?.traceState,
+      traceFlags: parent?.traceFlags,
+      parentIsRemote: parent?.isRemote,
+      name: sanitizeName(name, "Span name", this._config.maxAttributeValueLength, this._logger),
+      kind: options?.kind ?? "internal",
+      attributes: assignUserAttributes({
+        ...autoAttributes
+      }, options?.attributes),
+      autoAttributeKeys: Object.keys(autoAttributes),
+      maxAttributes: this._config.maxAttributesPerSpan,
+      maxEvents: this._config.maxEventsPerSpan,
+      maxAttributesPerEvent: this._config.maxAttributesPerEvent,
+      maxAttributeValueLength: this._config.maxAttributeValueLength,
+      startTime,
+      backdated: startTime !== now,
+      clockAnchor: void 0 === toEpochMs(options?.startTime) ? parent?.clockAnchor : void 0
+    }, (record3, autoKeys) => this._onSpanEnd(record3, autoKeys), this._logger);
+  }
+  withSpan(name, optionsOrFn, maybeFn) {
+    const options = "function" == typeof optionsOrFn ? void 0 : optionsOrFn;
+    const fn = "function" == typeof optionsOrFn ? optionsOrFn : maybeFn;
+    const span = this.startSpan(name, options);
+    try {
+      const result = runWithActiveSpan(this._contextManager, span, fn);
+      if (isPromise(result)) return result.then((value) => {
+        span.end();
+        return value;
+      }, (error2) => {
+        this._recordCallbackError(span, error2);
+        span.end();
+        throw error2;
+      });
+      span.end();
+      return result;
+    } catch (error2) {
+      this._recordCallbackError(span, error2);
+      span.end();
+      throw error2;
+    }
+  }
+  getActiveSpan() {
+    return this._contextManager.active() ?? null;
+  }
+  get throttled() {
+    return this._retryAfter.isOpen();
+  }
+  async flush() {
+    for (; ; ) {
+      if (!this._queue.length) return;
+      const inFlight = this._flushPromise;
+      const removed = await (inFlight ?? this._startFlush());
+      if (!removed) return;
+    }
+  }
+  _startFlush() {
+    this._flushTimer.clear();
+    const startedAtGeneration = this._generation;
+    const promise = Promise.resolve().then(() => startedAtGeneration === this._generation ? this._flushInner() : 0).finally(() => {
+      if (this._flushPromise === promise) this._flushPromise = null;
+      this._armFlushTimerIfQueuedNoEarlierThan();
+    });
+    this._flushPromise = promise;
+    return promise;
+  }
+  reset() {
+    this._flushTimer.clear();
+    if (this._queue.length) this._logger.critical(`Discarding ${this._queue.length} span(s) that were still queued when tracing was shut down. Raise the shutdown timeout or flush earlier if they matter.`);
+    this._queue = [];
+    this._liveSpans.clear();
+    this._flushPromise = null;
+    this._generation++;
+    this._maxExportBatchSize = this._config.maxExportBatchSize;
+    this._droppedSinceWarning = 0;
+    this._dropReasons.clear();
+    this._lastDropWarningAt = 0;
+    this._consecutiveFlushFailures = 0;
+    this._flushJitter = NO_JITTER;
+    this._retryAfter.reset();
+    this._resetHeadBatchBudget();
+  }
+  _resetHeadBatchBudget() {
+    this._headBatchFailures = 0;
+    this._headBatchChargeableAt = 0;
+  }
+  _resolveParent(explicit, options) {
+    if ("string" == typeof explicit) {
+      const remote = remoteContext(explicit, options?.tracestate);
+      if (!remote) this._logger.debug("Ignoring malformed traceparent; starting a new trace");
+      return remote;
+    }
+    if (isOwnSpan(explicit)) return explicit.childContext();
+    const active = this._contextManager.active();
+    if (isOwnSpan(active)) return active.childContext();
+    if (active instanceof PassThroughSpan) return remoteContext(active.traceparent(), active.tracestate() ?? void 0);
+  }
+  _autoContextAttributes() {
+    let context;
+    try {
+      context = this._getContext();
+    } catch (error2) {
+      this._logger.debug("Failed to read tracing context; span will carry no PostHog attributes", error2);
+      return {};
+    }
+    const attributes = {};
+    if (context.distinctId) attributes.posthogDistinctId = context.distinctId;
+    if (context.sessionId) attributes.sessionId = context.sessionId;
+    if (context.currentUrl) attributes["url.full"] = context.currentUrl;
+    if (context.screenName) attributes["screen.name"] = context.screenName;
+    if (context.appState) attributes["app.state"] = context.appState;
+    return attributes;
+  }
+  _recordCallbackError(span, error2) {
+    if (!(span instanceof PostHogSpan)) return;
+    const { type, message, stack } = describeError(error2);
+    span.addEvent("exception", {
+      "exception.type": type,
+      "exception.message": message,
+      ...stack && {
+        "exception.stacktrace": stack
+      }
+    });
+    if (!span.statusIsExplicitlyOk) span.setStatus("error", message);
+  }
+  _evictAgedSpans() {
+    const cutoff = clockNow() - this._config.maxSpanAgeMs;
+    let evicted = 0;
+    for (const [spanId, startedAt] of this._liveSpans) {
+      if (startedAt > cutoff) break;
+      this._liveSpans.delete(spanId);
+      evicted++;
+    }
+    if (evicted) this._recordDrop(evicted, `they were still live after ${this._config.maxSpanAgeMs}ms`);
+  }
+  _onSpanEnd(incoming, autoKeys) {
+    if (!this._liveSpans.delete(incoming.spanId)) return;
+    if (this._instance.isDisabled || this._instance.optedOut) return void this._recordDrop(1, "the user has opted out");
+    const record3 = this._runBeforeSpanSend(incoming, autoKeys);
+    if (!record3) return;
+    this._reportLimitDrops(record3);
+    if (this._queue.length >= this._config.maxQueueSize) return void this._recordDrop(1, `the queue is full (${this._config.maxQueueSize}) \u2014 raise the flush frequency or reduce span volume`);
+    this._queue.push(record3);
+    try {
+      this._onSpanQueued?.();
+    } catch (error2) {
+      this._logger.debug("Span queue notification failed", error2);
+    }
+    if (!(this._queue.length >= this._maxExportBatchSize) || this._consecutiveFlushFailures || this._retryAfter.isOpen()) this._armFlushTimerIfQueued();
+    else this._flushInBackground();
+  }
+  _reportLimitDrops(record3) {
+    const attributes = record3.droppedAttributesCount ?? 0;
+    const events = record3.droppedEventsCount ?? 0;
+    let eventAttributes = 0;
+    for (const event of record3.events) eventAttributes += event.droppedAttributesCount ?? 0;
+    if (attributes || events || eventAttributes) this._logger.debug(`Span limits discarded data from "${record3.name}": ${attributes} attributes, ${events} events, ${eventAttributes} event attributes`);
+  }
+  _runBeforeSpanSend(record3, autoKeys) {
+    if (!this._config.beforeSpanSend.length) return record3;
+    const identity = {
+      traceId: record3.traceId,
+      spanId: record3.spanId,
+      parentSpanId: record3.parentSpanId,
+      traceState: record3.traceState
+    };
+    const originalTimes = {
+      startTime: record3.startTime,
+      endTime: record3.endTime
+    };
+    const originalDropped = {
+      attributes: record3.droppedAttributesCount,
+      events: record3.droppedEventsCount
+    };
+    const keysBeforeHook = Object.keys(record3.attributes);
+    const originalPropagation = {
+      traceFlags: record3.traceFlags,
+      parentIsRemote: record3.parentIsRemote
+    };
+    const originalStatus = record3.status && {
+      ...record3.status
+    };
+    let hooked = record3;
+    let current = record3;
+    try {
+      for (const hook of this._config.beforeSpanSend) {
+        const result = hook(hooked);
+        if (!result) {
+          this._recordDrop(1, "beforeSpanSend dropped it");
+          return null;
+        }
+        hooked = this._keepSpanIdentity(result, identity);
+      }
+      const rebuilt = {
+        traceId: identity.traceId,
+        spanId: identity.spanId,
+        parentSpanId: identity.parentSpanId,
+        traceState: identity.traceState,
+        name: hooked.name,
+        kind: hooked.kind,
+        status: hooked.status,
+        attributes: hooked.attributes,
+        events: hooked.events,
+        startTime: hooked.startTime,
+        endTime: hooked.endTime,
+        traceFlags: originalPropagation.traceFlags,
+        parentIsRemote: originalPropagation.parentIsRemote,
+        droppedAttributesCount: originalDropped.attributes,
+        droppedEventsCount: originalDropped.events
+      };
+      current = rebuilt;
+      if (!isSpanRecordShape(current)) {
+        this._logger.debug("beforeSpanSend did not return a span record; dropping the span");
+        this._recordDrop(1, "beforeSpanSend returned an unusable record");
+        return null;
+      }
+      current.name = sanitizeName(current.name, "Span name", this._config.maxAttributeValueLength, this._logger);
+      if (current.status && "ok" !== current.status.code && "error" !== current.status.code) {
+        this._logger.debug("beforeSpanSend set an unknown span status; keeping the original");
+        current.status = originalStatus;
+      }
+      current.startTime = toEpochMs(current.startTime) ?? originalTimes.startTime;
+      current.endTime = clampEndTime(toEpochMs(current.endTime) ?? originalTimes.endTime, current.startTime);
+      const sanitizedEvents = [];
+      for (const event of current.events) try {
+        sanitizedEvents.push({
+          ...event,
+          name: sanitizeName(event.name, "Span event name", this._config.maxAttributeValueLength, this._logger),
+          timestamp: resolveSuppliedTime(event.timestamp, current.startTime, "event timestamp", this._logger)
+        });
+      } catch {
+        this._logger.debug("beforeSpanSend left an unreadable span event; dropping it");
+      }
+      current.events = sanitizedEvents;
+      applySpanLimits(current, autoKeys, this._config.maxAttributesPerSpan, this._config.maxEventsPerSpan, this._config.maxAttributesPerEvent, this._config.maxAttributeValueLength, keysBeforeHook);
+      return current;
+    } catch (error2) {
+      this._logger.debug("beforeSpanSend failed; dropping the span rather than exporting it unscrubbed", error2);
+      this._recordDrop(1, "beforeSpanSend failed");
+      return null;
+    }
+  }
+  _keepSpanIdentity(hooked, original) {
+    if (hooked.traceId !== original.traceId || hooked.spanId !== original.spanId || hooked.parentSpanId !== original.parentSpanId) this._logger.debug("beforeSpanSend changed a span identity field; keeping the original ids");
+    try {
+      restoreField(hooked, "traceId", original.traceId);
+      restoreField(hooked, "spanId", original.spanId);
+      restoreField(hooked, "parentSpanId", original.parentSpanId);
+      restoreField(hooked, "traceState", original.traceState);
+    } catch {
+      return withRestoredIdentity(hooked, original);
+    }
+    return hooked;
+  }
+  _recordDrop(count, reason) {
+    this._droppedSinceWarning += count;
+    this._dropReasons.add(reason);
+    if (Date.now() - this._lastDropWarningAt >= this._config.flushIntervalMs) this._warnAboutDrops();
+  }
+  _warnAboutDrops() {
+    if (!this._droppedSinceWarning) return;
+    this._lastDropWarningAt = Date.now();
+    this._logger.warn(`Dropping ${this._droppedSinceWarning} span(s): ${[
+      ...this._dropReasons
+    ].join("; ")}`);
+    this._droppedSinceWarning = 0;
+    this._dropReasons.clear();
+  }
+  _encodeBatch(batch) {
+    const encoded = [];
+    for (const record3 of batch) try {
+      encoded.push(buildOtlpSpan(record3, this._logger));
+    } catch (error2) {
+      this._logger.debug("Failed to encode a span; dropping it", error2);
+      this._recordDrop(1, "its attributes could not be encoded");
+    }
+    return encoded;
+  }
+  _discardQueueIfConsentWithdrawn() {
+    if (!this._instance.isDisabled && !this._instance.optedOut) return 0;
+    const discarded = this._queue.length;
+    this._queue = [];
+    this._resetHeadBatchBudget();
+    this._recordDrop(discarded, "the user has opted out");
+    this._warnAboutDrops();
+    return discarded;
+  }
+  async _flushInner() {
+    if (!this._queue.length) return 0;
+    const discardedBeforeDrain = this._discardQueueIfConsentWithdrawn();
+    if (discardedBeforeDrain) return discardedBeforeDrain;
+    const resourceAttributes = truncateAttributes(buildTracesResourceAttributes(this._config, this._instance.getLibraryId(), this._instance.getLibraryVersion()), this._config.maxAttributeValueLength);
+    const scopeName = this._instance.getLibraryId();
+    const scopeVersion = this._instance.getLibraryVersion();
+    let remaining = this._queue.length;
+    let removed = 0;
+    let localCap = 1 / 0;
+    const generation = this._generation;
+    try {
+      while (remaining > 0 && this._queue.length > 0) {
+        const discardedMidDrain = this._discardQueueIfConsentWithdrawn();
+        if (discardedMidDrain) return removed + discardedMidDrain;
+        const cap = this._headBatchFailures > 0 ? Math.min(this._maxExportBatchSize, this._headBatchSize) : this._maxExportBatchSize;
+        const size = Math.max(1, Math.min(cap, localCap, remaining, this._queue.length));
+        const batch = this._queue.slice(0, size);
+        const spans = this._encodeBatch(batch);
+        if (!spans.length) {
+          this._queue.splice(0, size);
+          remaining -= size;
+          removed += size;
+          this._resetHeadBatchBudget();
+          continue;
+        }
+        const chargeable = clockNow() >= this._headBatchChargeableAt && !this._retryAfter.isOpen();
+        const outcome = await this._instance._sendTracesBatch(buildOtlpTracesPayload(spans, resourceAttributes, scopeName, scopeVersion, this._logger));
+        if (generation !== this._generation) break;
+        this._retryAfter.record(outcome);
+        if ("ok" === outcome.kind) {
+          this._consecutiveFlushFailures = 0;
+          this._flushJitter = NO_JITTER;
+          this._resetHeadBatchBudget();
+          this._queue.splice(0, size);
+          remaining -= size;
+          removed += size;
+          if (this._maxExportBatchSize < this._config.maxExportBatchSize) this._maxExportBatchSize++;
+          continue;
+        }
+        if ("too-large" === outcome.kind) {
+          if (1 === size) {
+            this._queue.splice(0, 1);
+            remaining -= 1;
+            removed += 1;
+            this._recordDrop(1, "it is too large for the ingestion endpoint");
+            this._consecutiveFlushFailures = 0;
+            this._flushJitter = NO_JITTER;
+            this._resetHeadBatchBudget();
+            continue;
+          }
+          const halved = Math.max(1, Math.floor(size / 2));
+          if (outcome.measuredLocally) localCap = halved;
+          else this._maxExportBatchSize = halved;
+          this._resetHeadBatchBudget();
+          this._logger.debug(`Batch too large; retrying the same spans in batches of ${halved}`);
+          continue;
+        }
+        if ("retry-later" === outcome.kind) {
+          this._consecutiveFlushFailures++;
+          this._flushJitter = drawJitter();
+          this._headBatchSize = size;
+          if (chargeable) {
+            this._headBatchFailures++;
+            this._headBatchChargeableAt = clockNow() + this._nextFlushDelay();
+          }
+          if (this._headBatchFailures < MAX_RETRIES_PER_BATCH) {
+            this._logger.debug("Span export failed; retrying on the next flush", outcome.error);
+            return removed;
+          }
+          this._queue.splice(0, size);
+          remaining -= size;
+          removed += size;
+          this._consecutiveFlushFailures = 0;
+          this._flushJitter = NO_JITTER;
+          this._resetHeadBatchBudget();
+          this._recordDrop(size, `the ingestion endpoint failed ${MAX_RETRIES_PER_BATCH} times in a row`);
+          if (this._retryAfter.isOpen()) return removed;
+          continue;
+        }
+        this._logger.debug("Dropping a span batch the ingestion endpoint rejected", outcome.error);
+        this._queue.splice(0, size);
+        remaining -= size;
+        removed += size;
+        this._consecutiveFlushFailures = 0;
+        this._flushJitter = NO_JITTER;
+        this._resetHeadBatchBudget();
+        this._recordDrop(size, "the ingestion endpoint rejected the batch");
+      }
+      return removed;
+    } finally {
+      this._warnAboutDrops();
+    }
+  }
+  _flushInBackground() {
+    if (this._backgroundFlush) return;
+    this._backgroundFlush = this.flush().catch((error2) => {
+      this._logger.debug("Background span flush failed", error2);
+    }).finally(() => {
+      this._backgroundFlush = void 0;
+      this._armFlushTimerIfQueuedNoEarlierThan();
+    });
+  }
+  _armFlushTimerIfQueued() {
+    if (this._flushTimer.pending || !this._queue.length) return;
+    this._flushTimer.arm(this._nextFlushDelay());
+  }
+  _armFlushTimerIfQueuedNoEarlierThan() {
+    if (!this._queue.length) return;
+    this._flushTimer.armNoEarlierThan(this._nextFlushDelay());
+  }
+  _nextFlushDelay() {
+    return Math.max(backoffDelayMs(this._config.flushIntervalMs, this._consecutiveFlushFailures, this._flushJitter, MAX_FLUSH_BACKOFF_MS), this._retryAfter.remainingMs());
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/traces/context.mjs
+var SyncSpanContextManager = class {
+  active() {
+    return this._active;
+  }
+  with(span, fn) {
+    const previous = this._active;
+    this._active = span;
+    try {
+      return fn();
+    } finally {
+      this._active = previous;
+    }
+  }
+};
+
+// ../../node_modules/@posthog/core/dist/traces/config.mjs
+var DEFAULT_FLUSH_INTERVAL_MS2 = 5e3;
+var DEFAULT_MAX_EXPORT_BATCH_SIZE = 512;
+var DEFAULT_MAX_QUEUE_SIZE = 2048;
+var DEFAULT_MAX_ATTRIBUTES_PER_SPAN = 128;
+var DEFAULT_MAX_EVENTS_PER_SPAN = 128;
+var DEFAULT_MAX_ATTRIBUTES_PER_EVENT = 128;
+var DEFAULT_MAX_ATTRIBUTE_VALUE_LENGTH = 8192;
+var DEFAULT_MAX_LIVE_SPANS = 1e4;
+var DEFAULT_MAX_SPAN_AGE_MS = 36e5;
+function positiveInteger(value, fallback) {
+  return "number" == typeof value && Number.isInteger(value) && value >= 1 ? value : fallback;
+}
+var IDENTITY_KEYS = [
+  "service.name",
+  "service.version",
+  "deployment.environment"
+];
+function withUsableIdentityKeys(attributes) {
+  if (!attributes || "object" != typeof attributes || Array.isArray(attributes)) return;
+  try {
+    if (IDENTITY_KEYS.every((key) => !(key in attributes) || "string" == typeof attributes[key])) return attributes;
+    const usable = {
+      ...attributes
+    };
+    for (const key of IDENTITY_KEYS) if (key in usable && "string" != typeof usable[key]) delete usable[key];
+    return usable;
+  } catch {
+    return;
+  }
+}
+function resolveBeforeSpanSend(beforeSpanSend, logger) {
+  if (!beforeSpanSend) return [];
+  const supplied = [
+    beforeSpanSend
+  ].flat().filter((hook) => Boolean(hook));
+  const hooks = supplied.filter((hook) => "function" == typeof hook);
+  if (hooks.length !== supplied.length) logger?.critical(`beforeSpanSend: ignoring ${supplied.length - hooks.length} of ${supplied.length} entries that are not functions. Spans export without them, so whatever they were redacting is not redacted.`);
+  return hooks;
+}
+function resolveTracesConfig(config2, hostResourceAttributes, logger) {
+  const resourceAttributes = assignUserAttributes({
+    ...hostResourceAttributes
+  }, withUsableIdentityKeys(config2?.resourceAttributes));
+  const maxExportBatchSize = positiveInteger(config2?.maxExportBatchSize, DEFAULT_MAX_EXPORT_BATCH_SIZE);
+  return {
+    serviceName: resourceAttributes?.["service.name"] ?? config2?.serviceName,
+    serviceVersion: resourceAttributes?.["service.version"] ?? config2?.serviceVersion,
+    environment: resourceAttributes?.["deployment.environment"] ?? config2?.environment,
+    resourceAttributes,
+    beforeSpanSend: resolveBeforeSpanSend(config2?.beforeSpanSend, logger),
+    maxAttributesPerSpan: positiveInteger(config2?.maxAttributesPerSpan, DEFAULT_MAX_ATTRIBUTES_PER_SPAN),
+    maxEventsPerSpan: positiveInteger(config2?.maxEventsPerSpan, DEFAULT_MAX_EVENTS_PER_SPAN),
+    maxAttributesPerEvent: DEFAULT_MAX_ATTRIBUTES_PER_EVENT,
+    maxAttributeValueLength: positiveInteger(config2?.maxAttributeValueLength, DEFAULT_MAX_ATTRIBUTE_VALUE_LENGTH),
+    flushIntervalMs: positiveInteger(config2?.flushIntervalMs, DEFAULT_FLUSH_INTERVAL_MS2),
+    maxExportBatchSize,
+    maxQueueSize: Math.max(positiveInteger(config2?.maxQueueSize, DEFAULT_MAX_QUEUE_SIZE), maxExportBatchSize),
+    maxLiveSpans: positiveInteger(config2?.maxLiveSpans, DEFAULT_MAX_LIVE_SPANS),
+    maxSpanAgeMs: positiveInteger(config2?.maxSpanAgeMs, DEFAULT_MAX_SPAN_AGE_MS)
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/logger.mjs
+var activeLogger;
+function writeLog(logger, message) {
+  if (logger) try {
+    logger(message);
+  } catch {
+  }
+}
+function createLogger2(logger) {
+  return logger ? (message) => writeLog(logger, message) : log;
+}
+function log(message) {
+  writeLog(activeLogger, message);
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/constants.mjs
+var INACTIVITY_TIMEOUT_IN_MINUTES = 30;
+var DEFAULT_CONTEXT_PARAMETER_DESCRIPTION = `Explain in 15-25 words, in third person, why this tool is called and how it supports the user's goal. For analytics only. You MUST describe only the abstract purpose of the tool call. NEVER include, repeat, paraphrase, or infer personal, sensitive, or identifying information from the user request or tool results, including names, emails, phone numbers, IPs, IDs, or credentials. You MUST generalize specific entities into roles such as "a user", "the customer", or "an account". Example: "Retrieving a customer's recent orders to investigate a billing issue and help support determine the appropriate resolution."`;
+var DEFAULT_MODEL_PARAMETER_DESCRIPTION = 'The exact model identifier you (the assistant) are running as, taken from your system prompt or environment (e.g. "claude-opus-4-8", "gpt-5.2"). Used for analytics only. If you do not know your model identifier with certainty, pass "unknown" \u2014 never guess.';
+var DEFAULT_CONVERSATION_ID_DESCRIPTION = "Pass the exact conversation_id from the server's previous response, unchanged. The server provides it on the first call \u2014 never invent one, and do not issue parallel tool calls until you have it. Keep passing the same conversation_id for the rest of the conversation, including after later user messages or on a different task; do not reset it when the user starts a new request.";
+var POSTHOG_MCP_ANALYTICS_SOURCE = "posthog_mcp_analytics";
+var POSTHOG_MCP_LIB_NAME = "posthog-node-mcp";
+var PostHogMCPAnalyticsEvent = {
+  Custom: "$mcp_custom",
+  Exception: "$exception",
+  Feedback: "$mcp_feedback",
+  Identify: "$identify",
+  Initialize: "$mcp_initialize",
+  MissingCapability: "$mcp_missing_capability",
+  PromptGet: "$mcp_prompt_get",
+  PromptsList: "$mcp_prompts_list",
+  ResourceRead: "$mcp_resource_read",
+  ResourcesList: "$mcp_resources_list",
+  ToolCall: "$mcp_tool_call",
+  ToolsList: "$mcp_tools_list"
+};
+var PostHogMCPAnalyticsProperty = {
+  ClientName: "$mcp_client_name",
+  ClientUserAgent: "$mcp_client_user_agent",
+  ClientVersion: "$mcp_client_version",
+  ConversationId: "$mcp_conversation_id",
+  DurationMs: "$mcp_duration_ms",
+  ErrorMessage: "$mcp_error_message",
+  ErrorType: "$mcp_error_type",
+  FeedbackDetails: "$mcp_feedback_details",
+  FeedbackFrictionPoints: "$mcp_feedback_friction_points",
+  FeedbackSentiment: "$mcp_feedback_sentiment",
+  FeedbackSuggestedImprovement: "$mcp_feedback_suggested_improvement",
+  FeedbackSummary: "$mcp_feedback_summary",
+  FeedbackTaskCompleted: "$mcp_feedback_task_completed",
+  FeedbackTool: "$mcp_feedback_tool",
+  FeedbackType: "$mcp_feedback_type",
+  IsError: "$mcp_is_error",
+  InputAliasesUsed: "$mcp_input_aliases_used",
+  InputKeys: "$mcp_input_keys",
+  Intent: "$mcp_intent",
+  IntentSource: "$mcp_intent_source",
+  ListedToolNames: "$mcp_listed_tool_names",
+  LlmModel: "$mcp_llm_model",
+  LlmModelSource: "$mcp_llm_model_source",
+  Parameters: "$mcp_parameters",
+  ProtocolVersion: "$mcp_protocol_version",
+  ResourceName: "$mcp_resource_name",
+  Response: "$mcp_response",
+  ServerBuild: "$mcp_server_build",
+  ServerName: "$mcp_server_name",
+  ServerVersion: "$mcp_server_version",
+  SessionId: "$session_id",
+  Source: "$mcp_source",
+  ToolCategory: "$mcp_tool_category",
+  ToolDescription: "$mcp_tool_description",
+  ToolName: "$mcp_tool_name",
+  VendorClient: "$mcp_vendor_client"
+};
+
+// ../../node_modules/@posthog/mcp/dist/extensions/event-types.mjs
+var MCPAnalyticsEventType = {
+  identify: "posthog:identify",
+  custom: "posthog:custom",
+  mcpFeedback: "mcp:feedback",
+  mcpMissingCapability: "mcp:missing_capability",
+  mcpInitialize: "mcp:initialize",
+  mcpPromptsGet: "mcp:prompts/get",
+  mcpPromptsList: "mcp:prompts/list",
+  mcpResourcesList: "mcp:resources/list",
+  mcpResourcesRead: "mcp:resources/read",
+  mcpToolsCall: "mcp:tools/call",
+  mcpToolsList: "mcp:tools/list"
+};
+
+// ../../node_modules/@posthog/mcp/dist/extensions/posthog-events.mjs
+var BUILT_IN_EVENT_NAME_BY_TYPE = {
+  [MCPAnalyticsEventType.custom]: PostHogMCPAnalyticsEvent.Custom,
+  [MCPAnalyticsEventType.identify]: PostHogMCPAnalyticsEvent.Identify,
+  [MCPAnalyticsEventType.mcpFeedback]: PostHogMCPAnalyticsEvent.Feedback,
+  [MCPAnalyticsEventType.mcpMissingCapability]: PostHogMCPAnalyticsEvent.MissingCapability,
+  [MCPAnalyticsEventType.mcpInitialize]: PostHogMCPAnalyticsEvent.Initialize,
+  [MCPAnalyticsEventType.mcpPromptsGet]: PostHogMCPAnalyticsEvent.PromptGet,
+  [MCPAnalyticsEventType.mcpPromptsList]: PostHogMCPAnalyticsEvent.PromptsList,
+  [MCPAnalyticsEventType.mcpResourcesList]: PostHogMCPAnalyticsEvent.ResourcesList,
+  [MCPAnalyticsEventType.mcpResourcesRead]: PostHogMCPAnalyticsEvent.ResourceRead,
+  [MCPAnalyticsEventType.mcpToolsCall]: PostHogMCPAnalyticsEvent.ToolCall,
+  [MCPAnalyticsEventType.mcpToolsList]: PostHogMCPAnalyticsEvent.ToolsList
+};
+function getDistinctId(event) {
+  return event.identifyActorGivenId || event.sessionId || "anonymous";
+}
+function getTimestamp(event) {
+  return event.timestamp ? event.timestamp.toISOString() : (/* @__PURE__ */ new Date()).toISOString();
+}
+function buildPostHogCaptureEvents(event, options = {}) {
+  const batch = [
+    buildCaptureEvent(event)
+  ];
+  if (event.isError && event.error && false !== options.enableExceptionAutocapture) batch.push(buildExceptionEvent(event));
+  return batch;
+}
+function buildCaptureEvent(event) {
+  const distinctId = getDistinctId(event);
+  const timestamp = getTimestamp(event);
+  const properties = {
+    [PostHogMCPAnalyticsProperty.Source]: POSTHOG_MCP_ANALYTICS_SOURCE
+  };
+  addSessionIdProperty(event, properties);
+  addConversationIdProperty(event, properties);
+  addPersonProcessingProperty(event, properties);
+  addGroupsProperty(event, properties);
+  addCommonEventProperties(event, properties);
+  addCustomEventProperties(event, properties);
+  addServerBuildProperty(event, properties);
+  return {
+    event: event.eventName ?? BUILT_IN_EVENT_NAME_BY_TYPE[event.eventType],
+    distinct_id: distinctId,
+    properties,
+    timestamp,
+    type: "capture"
+  };
+}
+function addSessionIdProperty(event, properties) {
+  if ("string" == typeof event.sessionId && event.sessionId.length > 0) properties[PostHogMCPAnalyticsProperty.SessionId] = event.sessionId;
+}
+function addConversationIdProperty(event, properties) {
+  if (void 0 !== event.conversationId && "" !== event.conversationId) properties[PostHogMCPAnalyticsProperty.ConversationId] = event.conversationId;
+}
+function addGroupsProperty(event, properties) {
+  if (event.groups && Object.keys(event.groups).length > 0) properties.$groups = event.groups;
+}
+function addPersonProcessingProperty(event, properties) {
+  if (!event.identifyActorGivenId) properties.$process_person_profile = false;
+}
+function addCommonEventProperties(event, properties) {
+  if (event.resourceName) {
+    properties[PostHogMCPAnalyticsProperty.ResourceName] = event.resourceName;
+    if (event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolName] = event.resourceName;
+  }
+  if (event.toolDescription && event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolDescription] = event.toolDescription;
+  if (event.toolCategory && event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolCategory] = event.toolCategory;
+  if (event.listedToolNames && event.listedToolNames.length > 0 && event.eventType === MCPAnalyticsEventType.mcpToolsList) properties[PostHogMCPAnalyticsProperty.ListedToolNames] = event.listedToolNames;
+  if (void 0 !== event.duration) properties[PostHogMCPAnalyticsProperty.DurationMs] = event.duration;
+  if (event.serverName) properties[PostHogMCPAnalyticsProperty.ServerName] = event.serverName;
+  if (event.serverVersion) properties[PostHogMCPAnalyticsProperty.ServerVersion] = event.serverVersion;
+  if (event.clientName) properties[PostHogMCPAnalyticsProperty.ClientName] = event.clientName;
+  if (event.clientVersion) properties[PostHogMCPAnalyticsProperty.ClientVersion] = event.clientVersion;
+  if (event.clientUserAgent) properties[PostHogMCPAnalyticsProperty.ClientUserAgent] = event.clientUserAgent;
+  if (event.vendorClient) properties[PostHogMCPAnalyticsProperty.VendorClient] = event.vendorClient;
+  if (event.protocolVersion) properties[PostHogMCPAnalyticsProperty.ProtocolVersion] = event.protocolVersion;
+  if (event.userIntent) properties[PostHogMCPAnalyticsProperty.Intent] = event.userIntent;
+  if (event.userIntentSource) properties[PostHogMCPAnalyticsProperty.IntentSource] = event.userIntentSource;
+  if (event.llmModel) properties[PostHogMCPAnalyticsProperty.LlmModel] = event.llmModel;
+  if (event.llmModelSource) properties[PostHogMCPAnalyticsProperty.LlmModelSource] = event.llmModelSource;
+  if (void 0 !== event.isError) properties[PostHogMCPAnalyticsProperty.IsError] = event.isError;
+  if (event.isError) {
+    const firstException = event.error?.$exception_list?.[0];
+    const errorType = event.errorType ?? firstException?.type;
+    if (errorType) properties[PostHogMCPAnalyticsProperty.ErrorType] = errorType;
+    if (firstException?.value) properties[PostHogMCPAnalyticsProperty.ErrorMessage] = firstException.value;
+  }
+  if (void 0 !== event.parameters) properties[PostHogMCPAnalyticsProperty.Parameters] = event.parameters;
+  if (void 0 !== event.response) properties[PostHogMCPAnalyticsProperty.Response] = event.response;
+  if (event.identifyActorData && Object.keys(event.identifyActorData).length > 0) properties.$set = {
+    ...event.identifyActorData
+  };
+}
+function addCustomEventProperties(event, properties) {
+  if (event.properties) for (const [key, value] of Object.entries(event.properties)) properties[key] = value;
+}
+function addServerBuildProperty(event, properties) {
+  if (event.serverBuild) properties[PostHogMCPAnalyticsProperty.ServerBuild] = event.serverBuild;
+}
+function buildExceptionEvent(event) {
+  const distinctId = getDistinctId(event);
+  const timestamp = getTimestamp(event);
+  const properties = {};
+  addSessionIdProperty(event, properties);
+  addConversationIdProperty(event, properties);
+  addPersonProcessingProperty(event, properties);
+  addGroupsProperty(event, properties);
+  if (event.error) Object.assign(properties, event.error);
+  if (event.resourceName) {
+    properties[PostHogMCPAnalyticsProperty.ResourceName] = event.resourceName;
+    if (event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolName] = event.resourceName;
+  }
+  if (event.toolDescription && event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolDescription] = event.toolDescription;
+  if (event.toolCategory && event.eventType === MCPAnalyticsEventType.mcpToolsCall) properties[PostHogMCPAnalyticsProperty.ToolCategory] = event.toolCategory;
+  if (event.serverName) properties[PostHogMCPAnalyticsProperty.ServerName] = event.serverName;
+  if (event.serverVersion) properties[PostHogMCPAnalyticsProperty.ServerVersion] = event.serverVersion;
+  if (event.clientName) properties[PostHogMCPAnalyticsProperty.ClientName] = event.clientName;
+  if (event.clientVersion) properties[PostHogMCPAnalyticsProperty.ClientVersion] = event.clientVersion;
+  if (event.clientUserAgent) properties[PostHogMCPAnalyticsProperty.ClientUserAgent] = event.clientUserAgent;
+  if (event.vendorClient) properties[PostHogMCPAnalyticsProperty.VendorClient] = event.vendorClient;
+  if (event.protocolVersion) properties[PostHogMCPAnalyticsProperty.ProtocolVersion] = event.protocolVersion;
+  addCustomEventProperties(event, properties);
+  addServerBuildProperty(event, properties);
+  return {
+    event: PostHogMCPAnalyticsEvent.Exception,
+    distinct_id: distinctId,
+    properties,
+    timestamp,
+    type: "capture"
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/ids.mjs
+function newPrefixedId(prefix) {
+  return `${prefix}_${uuidv7()}`;
+}
+function deterministicPrefixedId(prefix, input) {
+  return `${prefix}_${fnv1aHex(input)}${fnv1aHex(`${input}::salt`)}`;
+}
+function fnv1aHex(input) {
+  let h1 = 2216829733;
+  let h2 = 3421674724;
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 435);
+    h2 = Math.imul(h2 ^ c, 403);
+  }
+  return (h1 >>> 0).toString(16).padStart(8, "0") + (h2 >>> 0).toString(16).padStart(8, "0");
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/truncation.mjs
+var MAX_DEPTH = 10;
+var MAX_BREADTH = 100;
+var MAX_STRING_LENGTH = 32768;
+var MAX_EVENT_BYTES = 102400;
+var MAX_USER_INTENT_LENGTH = 2048;
+var MAX_ERROR_MESSAGE_LENGTH = 2048;
+var MAX_RESOURCE_NAME_LENGTH = 256;
+var MAX_METADATA_LENGTH = 256;
+var MAX_STACK_FRAMES = 50;
+var MAX_CONTENT_TEXT_LENGTH = 32768;
+var TRUNCATION_SUFFIX = "...";
+function normalize(input, depth = MAX_DEPTH, maxBreadth = MAX_BREADTH, maxStringLength = MAX_STRING_LENGTH) {
+  const memo = /* @__PURE__ */ new WeakSet();
+  return visit(input, depth, maxBreadth, maxStringLength, memo);
+}
+function visit(value, remainingDepth, maxBreadth, maxStringLength, memo) {
+  if (null === value) return null;
+  if (void 0 === value) return "[undefined]";
+  if ("boolean" == typeof value) return value;
+  if ("number" == typeof value) {
+    if (Number.isNaN(value)) return "[NaN]";
+    if (!Number.isFinite(value)) return value > 0 ? "[Infinity]" : "[-Infinity]";
+    return value;
+  }
+  if ("bigint" == typeof value) return `[BigInt: ${value}]`;
+  if ("string" == typeof value) {
+    if (value.length > maxStringLength) return value.slice(0, maxStringLength) + TRUNCATION_SUFFIX;
+    return value;
+  }
+  if ("symbol" == typeof value) {
+    const desc = value.description;
+    return desc ? `[Symbol(${desc})]` : "[Symbol()]";
+  }
+  if ("function" == typeof value) {
+    const name = value.name || "<anonymous>";
+    return `[Function: ${name}]`;
+  }
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? "[Invalid Date]" : value.toISOString();
+  if ("object" == typeof value) {
+    if (memo.has(value)) return "[Circular ~]";
+    if (remainingDepth <= 0) return Array.isArray(value) ? "[Array]" : "[Object]";
+    memo.add(value);
+    let result;
+    result = Array.isArray(value) ? visitArray(value, remainingDepth - 1, maxBreadth, maxStringLength, memo) : visitObject(value, remainingDepth - 1, maxBreadth, maxStringLength, memo);
+    memo.delete(value);
+    return result;
+  }
+  return String(value);
+}
+function visitArray(arr, remainingDepth, maxBreadth, maxStringLength, memo) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i >= maxBreadth) {
+      result.push("[MaxProperties ~]");
+      break;
+    }
+    result.push(visit(arr[i], remainingDepth, maxBreadth, maxStringLength, memo));
+  }
+  return result;
+}
+function visitObject(obj, remainingDepth, maxBreadth, maxStringLength, memo) {
+  const result = {};
+  const keys = Object.keys(obj);
+  let count = 0;
+  for (const key of keys) {
+    if (count >= maxBreadth) {
+      result["..."] = "[MaxProperties ~]";
+      break;
+    }
+    if (void 0 !== obj[key]) {
+      result[key] = visit(obj[key], remainingDepth, maxBreadth, maxStringLength, memo);
+      count++;
+    }
+  }
+  return result;
+}
+function truncateString2(str, maxLength) {
+  if (null == str) return str;
+  if (str.length <= maxLength) return str;
+  return str.slice(0, maxLength) + TRUNCATION_SUFFIX;
+}
+function truncateStackFrames(frames) {
+  if (!frames || frames.length <= MAX_STACK_FRAMES) return frames;
+  const half = Math.floor(MAX_STACK_FRAMES / 2);
+  return [
+    ...frames.slice(0, half),
+    ...frames.slice(-half)
+  ];
+}
+function truncateExceptionList(error2) {
+  if (!Array.isArray(error2.$exception_list)) return error2;
+  return {
+    ...error2,
+    $exception_list: error2.$exception_list.map((exception) => {
+      const next = {
+        ...exception
+      };
+      if ("string" == typeof next.value) next.value = truncateString2(next.value, MAX_ERROR_MESSAGE_LENGTH);
+      if (next.stacktrace?.frames) next.stacktrace = {
+        ...next.stacktrace,
+        frames: truncateStackFrames(next.stacktrace.frames)
+      };
+      return next;
+    })
+  };
+}
+function truncateResponseContent(response) {
+  if (null == response || "object" != typeof response) return response;
+  const result = {
+    ...response
+  };
+  if (Array.isArray(result.content)) result.content = result.content.map((block) => {
+    if (null != block && "object" == typeof block && "type" in block && "text" in block && block?.type === "text" && "string" == typeof block.text && block.text.length > MAX_CONTENT_TEXT_LENGTH) return {
+      ...block,
+      text: block.text.slice(0, MAX_CONTENT_TEXT_LENGTH) + TRUNCATION_SUFFIX
+    };
+    return block;
+  });
+  return result;
+}
+var textEncoder = new TextEncoder();
+function jsonByteSize(value) {
+  return textEncoder.encode(JSON.stringify(value)).length;
+}
+function truncateLargestFields(obj, maxBytes) {
+  const result = structuredClone(obj);
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const currentSize = jsonByteSize(result);
+    if (currentSize <= maxBytes) break;
+    const excess = currentSize - maxBytes;
+    const stringPaths = [];
+    collectStringPaths(result, [], stringPaths);
+    stringPaths.sort((a, b) => b.length - a.length);
+    if (0 === stringPaths.length) break;
+    let remaining = excess + 200;
+    let truncated = false;
+    for (const { path: path6, length } of stringPaths) {
+      if (remaining <= 0) break;
+      const reduction = Math.min(remaining, Math.floor(0.5 * length));
+      if (reduction < 10) continue;
+      const newLength = length - reduction;
+      const currentValue = getNestedValue(result, path6);
+      if ("string" == typeof currentValue) {
+        setNestedValue(result, path6, currentValue.slice(0, newLength) + TRUNCATION_SUFFIX);
+        remaining -= reduction;
+        truncated = true;
+      }
+    }
+    if (!truncated) break;
+  }
+  return result;
+}
+function collectStringPaths(obj, currentPath, results) {
+  if (1 === currentPath.length && "serverBuild" === currentPath[0]) return;
+  if ("string" == typeof obj && obj.length > 100) return void results.push({
+    path: [
+      ...currentPath
+    ],
+    length: obj.length
+  });
+  if (Array.isArray(obj)) {
+    for (const [i, item] of obj.entries()) collectStringPaths(item, [
+      ...currentPath,
+      String(i)
+    ], results);
+    return;
+  }
+  if (null != obj && "object" == typeof obj) for (const [key, value] of Object.entries(obj)) collectStringPaths(value, [
+    ...currentPath,
+    key
+  ], results);
+}
+function getNestedValue(obj, path6) {
+  let current = obj;
+  for (const key of path6) {
+    if (null == current || "object" != typeof current) return;
+    current = current[key];
+  }
+  return current;
+}
+function setNestedValue(obj, path6, value) {
+  let current = obj;
+  for (let i = 0; i < path6.length - 1; i++) {
+    if (null == current || "object" != typeof current) return;
+    current = current[path6[i]];
+  }
+  const finalKey = path6.at(-1);
+  if (void 0 !== finalKey && null != current && "object" == typeof current) current[finalKey] = value;
+}
+var REDUCIBLE_FIELDS = [
+  "parameters",
+  "response",
+  "identifyActorData",
+  "error"
+];
+function truncateToSize(event) {
+  if (jsonByteSize(event) <= MAX_EVENT_BYTES) return event;
+  const nesting = Math.max(...REDUCIBLE_FIELDS.map((field) => nestingDepth(event[field])));
+  let atDepthOne;
+  for (let depth = nesting - 1; depth >= 1; depth--) {
+    const reduced = normalizeReducibleFields(event, depth);
+    if (jsonByteSize(reduced) <= MAX_EVENT_BYTES) return reduced;
+    if (1 === depth) atDepthOne = reduced;
+  }
+  return truncateLargestFields(atDepthOne ?? normalizeReducibleFields(event, 1), MAX_EVENT_BYTES);
+}
+function nestingDepth(value, limit = MAX_DEPTH) {
+  if (0 === limit || null === value || "object" != typeof value) return 0;
+  let deepest = 0;
+  for (const item of Array.isArray(value) ? value : Object.values(value)) {
+    deepest = Math.max(deepest, nestingDepth(item, limit - 1));
+    if (deepest === limit - 1) break;
+  }
+  return deepest + 1;
+}
+function normalizeReducibleFields(event, depth) {
+  const reduced = {
+    ...event
+  };
+  for (const field of REDUCIBLE_FIELDS) if (null != reduced[field]) reduced[field] = normalize(reduced[field], depth);
+  return reduced;
+}
+function truncateEvent(event) {
+  const result = {
+    ...event
+  };
+  result.userIntent = truncateString2(result.userIntent, MAX_USER_INTENT_LENGTH);
+  result.resourceName = truncateString2(result.resourceName, MAX_RESOURCE_NAME_LENGTH);
+  result.serverName = truncateString2(result.serverName, MAX_METADATA_LENGTH);
+  result.serverVersion = truncateString2(result.serverVersion, MAX_METADATA_LENGTH);
+  result.clientName = truncateString2(result.clientName, MAX_METADATA_LENGTH);
+  result.clientVersion = truncateString2(result.clientVersion, MAX_METADATA_LENGTH);
+  result.clientUserAgent = truncateString2(result.clientUserAgent, MAX_METADATA_LENGTH);
+  result.vendorClient = truncateString2(result.vendorClient, MAX_METADATA_LENGTH);
+  result.errorType = truncateString2(result.errorType, MAX_METADATA_LENGTH);
+  result.llmModel = truncateString2(result.llmModel, MAX_METADATA_LENGTH);
+  if (null != result.error && "object" == typeof result.error) result.error = truncateExceptionList(result.error);
+  result.response = truncateResponseContent(result.response);
+  if (null != result.parameters) result.parameters = normalize(result.parameters);
+  if (null != result.response) result.response = normalize(result.response);
+  if (null != result.identifyActorData) result.identifyActorData = normalize(result.identifyActorData);
+  if (null != result.error) result.error = normalize(result.error);
+  return truncateToSize(result);
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/mcp-payloads.mjs
+var CONTEXT_ARGUMENT_NAME = "context";
+var REDACTED_VALUE = "[redacted]";
+var BINARY_REDACTED_VALUE = "[binary data redacted - not supported by PostHog MCP analytics]";
+var BASE64_PATTERN = /^[A-Za-z0-9+/\n\r]+=*$/;
+var BASE64URL_PATTERN = /^[A-Za-z0-9_-]+={0,2}$/;
+var BASE64URL_SPECIFIC_CHAR_PATTERN = /[-_]/;
+var BASE64_DATA_URL_PREFIX_PATTERN = /^data:[^,\s]*;base64,/i;
+var BASE64_DATA_URL_PAYLOAD_PATTERN = /^[A-Za-z0-9+/_-]+={0,2}$/;
+var SIZE_GATE = 10240;
+var SCANNED_HEAD_LENGTH = 4 * MAX_STRING_LENGTH;
+var MIN_REDACTED_HEAD_LENGTH = 2 * MAX_STRING_LENGTH;
+var POSTHOG_TOKEN_PATTERN = /\bph[a-z]_[A-Za-z0-9_-]{20,}\b/g;
+var SENSITIVE_KEY_PATTERN = /^(authorization|cookie|set-cookie|x-api-key|api[-_]?key|api[-_]?token|access[-_]?token|refresh[-_]?token|token|password|secret|client[-_]?secret|private[-_]?key)$/i;
+var URL_PATTERN = /[a-z][a-z0-9+.-]{0,63}:[^\s<>"]+/gi;
+var URL_END_PATTERN = /[\s<>"]/;
+var URL_PATTERN_ONCE = new RegExp(URL_PATTERN.source, "i");
+var URL_AUTHORITY_SEARCH = /[a-z][a-z0-9+.-]{0,63}:\/\//i;
+var URL_AUTHORITY_PATTERN = new RegExp(`^${URL_AUTHORITY_SEARCH.source}`, "i");
+var URL_AUTHORITY_SEARCH_ALL = new RegExp(URL_AUTHORITY_SEARCH.source, "gi");
+var URL_FIELD_CHARACTERS = "=&";
+var LEGACY_FIELD_SEPARATOR = ";";
+var URL_TRAILING_PUNCTUATION = ".,;:!?)]}'";
+var MAX_URL_LENGTH = 8192;
+var MAX_URL_QUERY_FIELDS = 128;
+var SENSITIVE_QUERY_KEY_SEGMENT_PATTERN = /(^|[-_./;])(auth|token|secret|password|passwd|pwd|credential|signature|sig|key|hmac|sas|bearer|jwt|session|sessionid)([-_./;]|$)/i;
+var SENSITIVE_QUERY_KEY_EXACT_PATTERN = /^(code|AWSAccessKeyId|GoogleAccessId|Policy)$/i;
+var UNICODE_SPACE_PATTERN = /[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g;
+var EMAIL_PATTERN = /[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,24}/g;
+var IPV4_PATTERN = /\b(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/g;
+var IPV6_PATTERN = /\b(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}\b|(?<![\w:])(?:[0-9A-Fa-f]{1,4}:){1,7}:(?![\w:])|(?<![\w:])(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4}){0,5}(?![\w])|(?<![\w:])::(?:[0-9A-Fa-f]{1,4}(?::[0-9A-Fa-f]{1,4}){0,6})(?![\w])/g;
+var US_SSN_PATTERN = /\b\d{3}[ .-]\d{2}[ .-]\d{4}\b/g;
+var CREDIT_CARD_CANDIDATE_PATTERN = /\b\d(?:[ ./-]?\d){12,}\b/g;
+var DIGIT_GROUP_PATTERN = /\d+/g;
+var PHONE_NANP_PATTERN = /(?<![\w+])(?:\+?1[ ./-]?)?(?:\(\d{3}\)[ ./-]?|\d{3}[ ./-])\d{3}[ ./-]\d{4}(?![\w])/g;
+var PHONE_INTL_PATTERN = /(?<!\w)\+\d{1,3}(?:[ ./()-]{0,2}\d){7,13}(?![\w])/g;
+function isRecord2(value) {
+  return !!value && "object" == typeof value && !Array.isArray(value);
+}
+function shouldRedactKey(key) {
+  return SENSITIVE_KEY_PATTERN.test(key);
+}
+function shouldRedactQueryKey(key) {
+  return shouldRedactKey(key) || SENSITIVE_QUERY_KEY_SEGMENT_PATTERN.test(key) || SENSITIVE_QUERY_KEY_EXACT_PATTERN.test(key);
+}
+function isBase64DataUrl(value) {
+  const prefix = BASE64_DATA_URL_PREFIX_PATTERN.exec(value);
+  if (!prefix) return false;
+  let payload;
+  try {
+    payload = decodeURIComponent(value.slice(prefix[0].length));
+  } catch {
+    return false;
+  }
+  return BASE64_DATA_URL_PAYLOAD_PATTERN.test(payload.replace(/[\r\n]/g, ""));
+}
+function exceedsUrlFieldLimit(fields) {
+  return fields.split("&", MAX_URL_QUERY_FIELDS + 1).length > MAX_URL_QUERY_FIELDS;
+}
+function hasLegacySensitiveField(value) {
+  return value.split(LEGACY_FIELD_SEPARATOR).some((piece) => shouldRedactQueryKey(piece.split("=", 1)[0]));
+}
+function sanitizeUrlFieldValue(key, value, allowNestedUrls) {
+  if (shouldRedactQueryKey(key)) return REDACTED_VALUE;
+  if (value.includes(LEGACY_FIELD_SEPARATOR) && hasLegacySensitiveField(value)) return REDACTED_VALUE;
+  if (!URL_PATTERN_ONCE.test(value)) return value;
+  return allowNestedUrls ? sanitizeUrlsInString(value, {
+    allowNestedUrls: false,
+    stripPunctuation: true
+  }) : REDACTED_VALUE;
+}
+function sanitizeUrlFields(fields, allowNestedUrls) {
+  const sanitized = new URLSearchParams();
+  let changed = false;
+  let lastFieldSensitive = false;
+  for (const [key, value] of new URLSearchParams(fields)) {
+    const sanitizedValue = sanitizeUrlFieldValue(key, value, allowNestedUrls);
+    changed ||= sanitizedValue !== value;
+    lastFieldSensitive = shouldRedactQueryKey(key) || sanitizedValue !== value;
+    sanitized.append(key, sanitizedValue);
+  }
+  return {
+    changed,
+    lastFieldSensitive,
+    serialized: sanitized.toString()
+  };
+}
+function splitTrailingPunctuation(value) {
+  let end = value.length;
+  while (end > 0 && URL_TRAILING_PUNCTUATION.includes(value[end - 1])) end--;
+  return {
+    address: value.slice(0, end),
+    suffix: value.slice(end)
+  };
+}
+function sanitizeFragmentTail(tail, headLastFieldSensitive, allowNestedUrls) {
+  if (!headLastFieldSensitive) return sanitizeFragmentPart(tail, allowNestedUrls);
+  return {
+    value: "" === tail ? "" : REDACTED_VALUE,
+    lastFieldSensitive: true
+  };
+}
+function splitFragmentParts(hash) {
+  const fragment = hash.slice(1);
+  const separator = fragment.indexOf("?");
+  if (separator < 0) return {
+    head: fragment,
+    tail: null
+  };
+  return {
+    head: fragment.slice(0, separator),
+    tail: fragment.slice(separator + 1)
+  };
+}
+function sanitizeFragmentPart(part, allowNestedUrls) {
+  if (!part.includes("=")) return {
+    value: sanitizeFragmentText(part, allowNestedUrls),
+    lastFieldSensitive: false
+  };
+  const fields = sanitizeUrlFields(part, allowNestedUrls);
+  return {
+    value: fields.changed ? fields.serialized : part,
+    lastFieldSensitive: fields.lastFieldSensitive
+  };
+}
+function sanitizeFragmentText(text, allowNestedUrls) {
+  if (!allowNestedUrls) return URL_PATTERN_ONCE.test(text) ? REDACTED_VALUE : text;
+  return sanitizeUrlsInString(text, {
+    allowNestedUrls: false,
+    stripPunctuation: true
+  });
+}
+function findEmbeddedAuthorityIndexes(value) {
+  if (!value.includes("://")) return [];
+  const starts = [
+    ...value.matchAll(URL_AUTHORITY_SEARCH_ALL)
+  ].map((match) => match.index);
+  const indexes = [];
+  const delimiters = {
+    query: false,
+    fragment: false,
+    fragmentQuery: false
+  };
+  let pending = 0;
+  let inFields = false;
+  let lastStructural = "";
+  for (let cursor = 0; cursor < value.length && pending < starts.length; cursor++) {
+    if (starts[pending] === cursor) {
+      if (cursor > 0 && "=" !== lastStructural) indexes.push(cursor);
+      pending++;
+    }
+    const character = value[cursor];
+    if (isDelimiter(character, delimiters, lastStructural)) {
+      lastStructural = character;
+      inFields = true;
+    } else if (inFields && URL_FIELD_CHARACTERS.includes(character)) lastStructural = character;
+  }
+  return indexes;
+}
+function isDelimiter(character, seen, lastStructural) {
+  if ("#" === character) return seen.fragment ? false : seen.fragment = true;
+  if ("?" !== character) return false;
+  if (seen.fragment) {
+    if ("=" === lastStructural) return false;
+    return seen.fragmentQuery ? false : seen.fragmentQuery = true;
+  }
+  return seen.query ? false : seen.query = true;
+}
+function sanitizeUrl(value, mode) {
+  const embedded = findEmbeddedAuthorityIndexes(value);
+  if (0 === embedded.length) return sanitizeSingleUrl(value, mode);
+  let result = "";
+  let start = 0;
+  for (const index of embedded) {
+    result += sanitizeSingleUrl(value.slice(start, index), {
+      ...mode,
+      stripPunctuation: false
+    });
+    start = index;
+  }
+  return result + sanitizeSingleUrl(value.slice(start), mode);
+}
+function sanitizeSingleUrl(value, mode) {
+  if (value.length > MAX_URL_LENGTH && URL_AUTHORITY_PATTERN.test(value)) return REDACTED_VALUE;
+  const { address, suffix } = mode.stripPunctuation ? splitTrailingPunctuation(value) : {
+    address: value,
+    suffix: ""
+  };
+  let url;
+  try {
+    url = new URL(address);
+  } catch {
+    return REDACTED_VALUE + suffix;
+  }
+  const query = url.search.slice(1);
+  const hasFragment = "" !== url.hash;
+  const fragment = splitFragmentParts(url.hash);
+  if (exceedsUrlFieldLimit(query) || exceedsUrlFieldLimit(fragment.head) || exceedsUrlFieldLimit(fragment.tail ?? "")) return REDACTED_VALUE + suffix;
+  let changed = false;
+  if (url.username || url.password) {
+    url.username = REDACTED_VALUE;
+    url.password = "";
+    changed = true;
+  }
+  const sanitizedQuery = sanitizeUrlFields(query, mode.allowNestedUrls);
+  if (sanitizedQuery.changed) {
+    url.search = sanitizedQuery.serialized;
+    changed = true;
+  }
+  const sanitizedHead = sanitizeFragmentPart(fragment.head, mode.allowNestedUrls);
+  const sanitizedTail = null === fragment.tail ? null : sanitizeFragmentTail(fragment.tail, sanitizedHead.lastFieldSensitive, mode.allowNestedUrls);
+  const sanitizedHash = null === sanitizedTail ? sanitizedHead.value : `${sanitizedHead.value}?${sanitizedTail.value}`;
+  if (sanitizedHash !== url.hash.slice(1)) {
+    url.hash = sanitizedHash;
+    changed = true;
+  }
+  const trailingFields = hasFragment ? sanitizedTail ?? sanitizedHead : sanitizedQuery;
+  return (changed ? url.toString() : address) + (trailingFields.lastFieldSensitive ? "" : suffix);
+}
+function sanitizeUrlsInString(text, mode) {
+  return text.replace(URL_PATTERN, (match) => sanitizeUrl(match, {
+    ...mode,
+    stripPunctuation: mode.stripPunctuation && match.length !== text.length
+  }));
+}
+function isBinaryBlob(value) {
+  return value.length >= SIZE_GATE && (BASE64_PATTERN.test(value) || isBase64DataUrl(value) || BASE64URL_SPECIFIC_CHAR_PATTERN.test(value) && BASE64URL_PATTERN.test(value));
+}
+function redactCredentials(value) {
+  return value.replace(POSTHOG_TOKEN_PATTERN, REDACTED_VALUE);
+}
+function redactUrls(value) {
+  return sanitizeUrlsInString(value, {
+    allowNestedUrls: true,
+    stripPunctuation: true
+  });
+}
+function redactCapturedHead(value, redact) {
+  if (value.length > SCANNED_HEAD_LENGTH) {
+    const head = redact(value.slice(0, headLength(value)));
+    if (head.length >= MIN_REDACTED_HEAD_LENGTH) return head + TRUNCATION_SUFFIX;
+  }
+  return redact(value);
+}
+function headLength(value) {
+  let end = SCANNED_HEAD_LENGTH;
+  while (end > 0 && !URL_END_PATTERN.test(value[end - 1])) end--;
+  return end;
+}
+function sanitizeString2(value) {
+  return isBinaryBlob(value) ? BINARY_REDACTED_VALUE : redactCapturedHead(value, (head) => redactUrls(redactCredentials(head)));
+}
+function sanitizeFreeText(value) {
+  if (isBinaryBlob(value)) return BINARY_REDACTED_VALUE;
+  return redactCapturedHead(value, (head) => redactUrls(redactPii(redactCredentials(head))));
+}
+function passesLuhn(digits) {
+  let sum = 0;
+  let double = false;
+  for (let index = digits.length - 1; index >= 0; index--) {
+    let digit = digits.charCodeAt(index) - 48;
+    if (digit < 0 || digit > 9) return false;
+    if (double) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    sum += digit;
+    double = !double;
+  }
+  return sum % 10 === 0;
+}
+function redactCardInMatch(match) {
+  const groups = [];
+  for (let m = DIGIT_GROUP_PATTERN.exec(match); null !== m; m = DIGIT_GROUP_PATTERN.exec(match)) groups.push({
+    digits: m[0],
+    start: m.index,
+    end: m.index + m[0].length
+  });
+  let output = "";
+  let cursor = 0;
+  let first = 0;
+  while (first < groups.length) {
+    let digits = "";
+    let matchedLast = -1;
+    for (let last = first; last < groups.length; last++) {
+      digits += groups[last].digits;
+      if (digits.length > 19) break;
+      if (digits.length >= 13 && passesLuhn(digits)) matchedLast = last;
+    }
+    if (matchedLast >= 0) {
+      output += match.slice(cursor, groups[first].start) + REDACTED_VALUE;
+      cursor = groups[matchedLast].end;
+      first = matchedLast + 1;
+    } else first++;
+  }
+  return output + match.slice(cursor);
+}
+function redactPii(value) {
+  let result = value.replace(UNICODE_SPACE_PATTERN, " ");
+  result = result.replace(EMAIL_PATTERN, REDACTED_VALUE);
+  result = result.replace(IPV4_PATTERN, REDACTED_VALUE);
+  result = result.replace(IPV6_PATTERN, REDACTED_VALUE);
+  result = result.replace(CREDIT_CARD_CANDIDATE_PATTERN, redactCardInMatch);
+  result = result.replace(US_SSN_PATTERN, REDACTED_VALUE);
+  result = result.replace(PHONE_NANP_PATTERN, REDACTED_VALUE);
+  result = result.replace(PHONE_INTL_PATTERN, REDACTED_VALUE);
+  return result;
+}
+function sanitizeCapturedValue(value) {
+  return sanitizeValueWith(value, sanitizeString2);
+}
+function sanitizeFreeTextValue(value) {
+  return sanitizeValueWith(value, sanitizeFreeText);
+}
+function sanitizeValueWith(value, sanitizeStringFn) {
+  if (null == value) return value;
+  if ("string" == typeof value) return sanitizeStringFn(value);
+  if (Array.isArray(value)) return value.map((item) => sanitizeValueWith(item, sanitizeStringFn));
+  if (value instanceof Date) return value;
+  if ("object" != typeof value) return value;
+  const result = {};
+  for (const [key, nestedValue] of Object.entries(value)) result[key] = shouldRedactKey(key) ? REDACTED_VALUE : sanitizeValueWith(nestedValue, sanitizeStringFn);
+  return result;
+}
+function buildCapturedMcpArguments(argumentsValue) {
+  if (!isRecord2(argumentsValue)) return sanitizeCapturedValue(argumentsValue);
+  const capturedArguments = {};
+  for (const [key, value] of Object.entries(argumentsValue)) if (key !== CONTEXT_ARGUMENT_NAME) capturedArguments[key] = sanitizeCapturedValue(value);
+  return capturedArguments;
+}
+function buildCapturedMcpParams(params) {
+  if (!isRecord2(params)) return sanitizeCapturedValue(params);
+  const capturedParams = {};
+  for (const [key, value] of Object.entries(params)) capturedParams[key] = "arguments" === key ? buildCapturedMcpArguments(value) : sanitizeCapturedValue(value);
+  return capturedParams;
+}
+function buildCapturedMcpParameters(request) {
+  if (!isRecord2(request)) return {
+    request: sanitizeCapturedValue(request)
+  };
+  const capturedRequest = {};
+  for (const key of [
+    "id",
+    "jsonrpc",
+    "method"
+  ]) if (key in request) capturedRequest[key] = sanitizeCapturedValue(request[key]);
+  if ("params" in request) capturedRequest.params = buildCapturedMcpParams(request.params);
+  return {
+    request: capturedRequest
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/sanitization.mjs
+function isRecord3(value) {
+  return !!value && "object" == typeof value && !Array.isArray(value);
+}
+function sanitizeEvent(event) {
+  const result = {
+    ...event
+  };
+  if (null != result.response) result.response = sanitizeResponse(result.response);
+  if (null != result.parameters) result.parameters = sanitizeParameters(result.parameters);
+  if (null != result.resourceName) result.resourceName = sanitizeCapturedValue(result.resourceName);
+  if (null != result.userIntent) result.userIntent = sanitizeFreeText(result.userIntent);
+  if (null != result.llmModel) result.llmModel = sanitizeCapturedValue(result.llmModel);
+  if (null != result.error) result.error = sanitizeExceptionValues(result.error);
+  return result;
+}
+function sanitizeExceptionValues(error2) {
+  if (!Array.isArray(error2.$exception_list)) return error2;
+  return {
+    ...error2,
+    $exception_list: error2.$exception_list.map((exception) => ({
+      ...exception,
+      value: sanitizeCapturedValue(exception.value)
+    }))
+  };
+}
+function sanitizeResponse(response) {
+  if (null == response || "object" != typeof response) return sanitizeCapturedValue(response);
+  const sanitized = sanitizeCapturedValue(response);
+  if (!isRecord3(sanitized)) return sanitized;
+  const result = {
+    ...sanitized
+  };
+  const content = result.content;
+  if (Array.isArray(content)) result.content = content.map(sanitizeContentBlock);
+  if (null != result.structuredContent && "object" == typeof result.structuredContent) result.structuredContent = sanitizeCapturedValue(result.structuredContent);
+  return result;
+}
+function sanitizeContentBlock(block) {
+  if (null == block || "object" != typeof block) return block;
+  if (!isRecord3(block)) return block;
+  switch (block.type) {
+    case "text":
+      return sanitizeCapturedValue(block);
+    case "image":
+      return {
+        type: "text",
+        text: "[image content redacted - not supported by PostHog MCP analytics]"
+      };
+    case "audio":
+      return {
+        type: "text",
+        text: "[audio content redacted - not supported by PostHog MCP analytics]"
+      };
+    case "resource":
+      return sanitizeResourceBlock(block);
+    case "resource_link":
+      return sanitizeCapturedValue(block);
+    default:
+      return {
+        type: "text",
+        text: `[unsupported content type "${block.type}" redacted - not supported by PostHog MCP analytics]`
+      };
+  }
+}
+function sanitizeResourceBlock(block) {
+  if (isRecord3(block.resource) && "blob" in block.resource) return {
+    type: "text",
+    text: "[binary resource content redacted - not supported by PostHog MCP analytics]"
+  };
+  return sanitizeCapturedValue(block);
+}
+function sanitizeParameters(obj) {
+  return sanitizeCapturedValue(obj);
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/sink.mjs
+async function processMcpEvent(event, options, logger = log) {
+  let processed = event;
+  try {
+    processed = sanitizeEvent(processed);
+  } catch (err) {
+    logger(`Failed to sanitize event: ${err}`);
+    return null;
+  }
+  try {
+    processed = truncateEvent(processed);
+  } catch (err) {
+    logger(`Failed to truncate event: ${err}`);
+    return null;
+  }
+  processed.id = processed.id || newPrefixedId("evt");
+  const fullEvent = processed;
+  const built = buildPostHogCaptureEvents(fullEvent, {
+    enableExceptionAutocapture: options.enableExceptionAutocapture
+  });
+  const captures = await applyBeforeSend(built, options.beforeSend, logger);
+  return {
+    event: fullEvent,
+    captures
+  };
+}
+async function applyBeforeSend(captures, beforeSend, logger) {
+  if (!beforeSend) return captures;
+  const kept = [];
+  for (const capture of captures) try {
+    const result = await beforeSend(capture);
+    if (result) kept.push(result);
+  } catch (err) {
+    logger(`beforeSend threw for event ${capture.event}; dropping it: ${err}`);
+  }
+  return kept;
+}
+var McpEventSink = class {
+  constructor(posthog, logger = log) {
+    this.posthog = posthog;
+    this.logger = logger;
+  }
+  async capture(event, options) {
+    const result = await processMcpEvent(event, options, this.logger);
+    if (!result) return;
+    const { event: fullEvent, captures } = result;
+    try {
+      for (const captureEvent2 of captures) {
+        const groups = captureEvent2.properties.$groups;
+        this.posthog.capture({
+          distinctId: captureEvent2.distinct_id,
+          event: captureEvent2.event,
+          properties: captureEvent2.properties,
+          ...groups ? {
+            groups
+          } : {},
+          timestamp: new Date(captureEvent2.timestamp),
+          uuid: uuidv7()
+        });
+      }
+      this.logger(`Captured PostHog event ${fullEvent.id} | ${fullEvent.eventType} | ${fullEvent.duration} ms | ${fullEvent.identifyActorGivenId ? "identified" : "anonymous"}`);
+    } catch (err) {
+      this.logger(`Failed to capture PostHog event ${fullEvent.id}: ${err}`);
+    }
+  }
+};
+
+// ../../node_modules/@posthog/mcp/dist/version.mjs
+var version2 = "0.21.4";
+
+// ../../node_modules/@posthog/mcp/dist/extensions/headers.mjs
+function readHeaderValue(headers, name) {
+  if (!headers || "object" != typeof headers) return;
+  const record3 = headers;
+  let value = record3[name];
+  if (void 0 === value) {
+    const key = Object.keys(record3).find((k) => k.toLowerCase() === name);
+    value = void 0 === key ? void 0 : record3[key];
+  }
+  return normalizeHeaderString(value);
+}
+function normalizeHeaderString(value) {
+  const first = Array.isArray(value) ? value[0] : value;
+  if ("string" != typeof first) return;
+  const trimmed = first.trim();
+  return trimmed.length > 0 ? trimmed : void 0;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/request-headers.mjs
+function getRequestHeaders(extra) {
+  if (!extra || "object" != typeof extra) return;
+  const record3 = extra;
+  const http = record3.http;
+  const requestInfo = record3.requestInfo;
+  const source = http?.req?.headers ?? requestInfo?.headers;
+  if (!source || "object" != typeof source) return;
+  return toHeaderBag(source);
+}
+function toHeaderBag(source) {
+  try {
+    const entries = isHeadersLike(source) ? [
+      ...source.entries()
+    ] : Object.entries(source);
+    const bag = {};
+    for (const [key, value] of entries) if ("string" == typeof key && null != value) {
+      if ("string" == typeof value || Array.isArray(value)) bag[key.toLowerCase()] = value;
+    }
+    return bag;
+  } catch {
+    return;
+  }
+}
+function isHeadersLike(source) {
+  const candidate = source;
+  return "function" == typeof candidate.entries && "function" == typeof candidate.get;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/client-identity.mjs
+var META_CLIENT_INFO_KEY = "io.modelcontextprotocol/clientInfo";
+var META_PROTOCOL_VERSION_KEY = "io.modelcontextprotocol/protocolVersion";
+var PROTOCOL_VERSION_HEADER = "mcp-protocol-version";
+var MAX_PROTOCOL_VERSION_LENGTH = 64;
+function nonEmptyString(value) {
+  return "string" == typeof value && value.length > 0 ? value : void 0;
+}
+function readClientInfoValue(value) {
+  if (!value || "object" != typeof value) return;
+  const { name, version: version4 } = value;
+  const result = {};
+  const clientName = nonEmptyString(name);
+  const clientVersion = nonEmptyString(version4);
+  if (clientName) result.clientName = clientName;
+  if (clientVersion) result.clientVersion = clientVersion;
+  return result.clientName || result.clientVersion ? result : void 0;
+}
+function readReservedKeys(bag) {
+  if (!bag || "object" != typeof bag) return;
+  const record3 = bag;
+  const result = {
+    ...readClientInfoValue(record3[META_CLIENT_INFO_KEY])
+  };
+  const protocolVersion = nonEmptyString(record3[META_PROTOCOL_VERSION_KEY]);
+  if (protocolVersion) result.protocolVersion = protocolVersion;
+  return result.clientName || result.clientVersion || result.protocolVersion ? result : void 0;
+}
+function readMetaClientInfo(request) {
+  return readReservedKeys(request.params?._meta);
+}
+function readEnvelopeClientInfo(extra) {
+  return readReservedKeys(extra?.mcpReq?.envelope);
+}
+function readHeaderProtocolVersion(extra) {
+  const protocolVersion = readHeaderValue(getRequestHeaders(extra), PROTOCOL_VERSION_HEADER);
+  if (!protocolVersion || protocolVersion.length > MAX_PROTOCOL_VERSION_LENGTH) return;
+  return {
+    protocolVersion
+  };
+}
+function readServerClientIdentity(server) {
+  if (!server) return;
+  const result = {};
+  try {
+    if (hasClientVersionAccessor(server)) Object.assign(result, readClientInfoValue(server.getClientVersion()));
+    if (hasNegotiatedProtocolVersionAccessor(server)) {
+      const negotiated = server.getNegotiatedProtocolVersion();
+      const protocolVersion = nonEmptyString(negotiated);
+      if (protocolVersion) result.protocolVersion = protocolVersion;
+    }
+  } catch {
+  }
+  return result.clientName || result.clientVersion || result.protocolVersion ? result : void 0;
+}
+function resolveClientIdentity({ request, extra, server }) {
+  const chain = [
+    readEnvelopeClientInfo(extra),
+    readMetaClientInfo(request),
+    readHeaderProtocolVersion(extra),
+    readServerClientIdentity(server)
+  ];
+  const result = {};
+  for (const source of chain) if (source) {
+    result.clientName ??= source.clientName;
+    result.clientVersion ??= source.clientVersion;
+    result.protocolVersion ??= source.protocolVersion;
+  }
+  return result.clientName || result.clientVersion || result.protocolVersion ? result : void 0;
+}
+function stampClientIdentity(event, request, extra, server) {
+  const info = resolveClientIdentity({
+    request,
+    extra,
+    server
+  });
+  if (!info) return;
+  if (info.clientName) event.clientName = info.clientName;
+  if (info.clientVersion) event.clientVersion = info.clientVersion;
+  if (info.protocolVersion) event.protocolVersion = info.protocolVersion;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/session-token.mjs
+var MCP_SESSION_HEADER = "mcp-session-id";
+var MAX_TOKEN_LENGTH = 4096;
+var MAX_SESSION_ID_LENGTH = 128;
+var MAX_CLIENT_FIELD_LENGTH = 200;
+var BASE64URL_PATTERN2 = /^[A-Za-z0-9_-]+={0,2}$/;
+function encodeSessionId(payload) {
+  if (!payload || "string" != typeof payload.sessionId || 0 === payload.sessionId.length) throw new Error("encodeSessionId requires a non-empty `sessionId` (use newSessionId())");
+  const wire = {
+    sid: payload.sessionId
+  };
+  if ("string" == typeof payload.clientName && payload.clientName.length > 0) wire.cn = payload.clientName.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  if ("string" == typeof payload.clientVersion && payload.clientVersion.length > 0) wire.cv = payload.clientVersion.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  if ("string" == typeof payload.protocolVersion && payload.protocolVersion.length > 0) wire.pv = payload.protocolVersion.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  return utf8ToBase64Url(JSON.stringify(wire));
+}
+function decodeSessionId(value) {
+  if ("string" != typeof value || 0 === value.length || value.length > MAX_TOKEN_LENGTH) return null;
+  if (!BASE64URL_PATTERN2.test(value)) return null;
+  let parsed;
+  try {
+    parsed = JSON.parse(base64UrlToUtf8(value));
+  } catch {
+    return null;
+  }
+  if (!parsed || "object" != typeof parsed || Array.isArray(parsed)) return null;
+  const wire = parsed;
+  if ("string" != typeof wire.sid || 0 === wire.sid.length || wire.sid.length > MAX_SESSION_ID_LENGTH) return null;
+  const payload = {
+    sessionId: wire.sid
+  };
+  if ("string" == typeof wire.cn && wire.cn.length > 0) payload.clientName = wire.cn.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  if ("string" == typeof wire.cv && wire.cv.length > 0) payload.clientVersion = wire.cv.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  if ("string" == typeof wire.pv && wire.pv.length > 0) payload.protocolVersion = wire.pv.slice(0, MAX_CLIENT_FIELD_LENGTH);
+  return payload;
+}
+function readMcpSessionHeader(headers) {
+  return readHeaderValue(headers, MCP_SESSION_HEADER);
+}
+function writeSessionIdToTransport(transport, token) {
+  if (!transport || "object" != typeof transport) return false;
+  const outer = transport;
+  try {
+    outer.sessionId = token;
+  } catch {
+  }
+  if (outer.sessionId === token) return true;
+  const inner = outer._webStandardTransport;
+  if (inner && "object" == typeof inner) try {
+    inner.sessionId = token;
+  } catch {
+  }
+  return outer.sessionId === token;
+}
+function utf8ToBase64Url(input) {
+  if ("u" > typeof Buffer && "function" == typeof Buffer.from) return Buffer.from(input, "utf8").toString("base64url");
+  const bytes = new TextEncoder().encode(input);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function base64UrlToUtf8(input) {
+  const normalized = input.replace(/-/g, "+").replace(/_/g, "/").replace(/=+$/, "");
+  const padded = normalized + "=".repeat((4 - normalized.length % 4) % 4);
+  if ("u" > typeof Buffer && "function" == typeof Buffer.from) return Buffer.from(padded, "base64").toString("utf8");
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/session.mjs
+var MODERN_PROTOCOL_REVISION = "2026-07-28";
+var REVISION_SHAPE = /^\d{4}-\d{2}-\d{2}$/;
+var DRAFT_REVISION = "draft";
+function isModernEraRequest(request, extra, server) {
+  const requested = request.params?.protocolVersion;
+  const version4 = ("string" == typeof requested && requested.length > 0 ? requested : void 0) ?? resolveClientIdentity({
+    request,
+    extra,
+    server
+  })?.protocolVersion;
+  if (!version4) return false;
+  if (version4 === DRAFT_REVISION) return true;
+  return REVISION_SHAPE.test(version4) && version4 >= MODERN_PROTOCOL_REVISION;
+}
+function newSessionId() {
+  return newPrefixedId("ses");
+}
+function deriveSessionIdFromMCPSession(mcpSessionId) {
+  return deterministicPrefixedId("ses", mcpSessionId);
+}
+function deriveSessionIdFromConversation(conversationId) {
+  return deterministicPrefixedId("ses", conversationId);
+}
+function getSessionId(server, extra, conversationId) {
+  const data = getServerTrackingData(server);
+  if (!data) throw new Error("Server tracking data not found");
+  if (conversationId) {
+    applyTokenClientIdentity(data, extra);
+    return deriveSessionIdFromConversation(conversationId);
+  }
+  const carriedByRequest = readSessionIdFromRequest(data, extra);
+  const sessionId = carriedByRequest ?? getSessionIdFromMemory(data);
+  data.sessionId = sessionId;
+  data.lastActivity = /* @__PURE__ */ new Date();
+  setServerTrackingData(server, data);
+  return sessionId;
+}
+function applyTokenClientIdentity(data, extra) {
+  const token = decodeSessionId(readMcpSessionHeader(getRequestHeaders(extra)));
+  if (!token) return;
+  data.sessionInfo.clientName = token.clientName;
+  data.sessionInfo.clientVersion = token.clientVersion;
+  data.sessionInfo.protocolVersion = token.protocolVersion;
+  return token;
+}
+function readSessionIdFromRequest(data, extra) {
+  const token = applyTokenClientIdentity(data, extra);
+  if (token) {
+    data.sessionSource = "token";
+    return token.sessionId;
+  }
+  if (extra?.sessionId) {
+    data.sessionSource = "mcp";
+    return deriveSessionIdFromMCPSession(extra.sessionId);
+  }
+}
+function getSessionIdFromMemory(data) {
+  const timeoutMs = 60 * INACTIVITY_TIMEOUT_IN_MINUTES * 1e3;
+  const isStale = Date.now() - data.lastActivity.getTime() > timeoutMs;
+  if ("generated" === data.sessionSource && isStale) return newSessionId();
+  return data.sessionId;
+}
+function getSessionInfo(server, data, sessionId) {
+  let clientInfo;
+  clientInfo = data?.sessionInfo.clientName ? {
+    name: data.sessionInfo.clientName,
+    version: data.sessionInfo.clientVersion
+  } : server.getClientVersion();
+  const actorInfo = data?.identifiedSessions.get(sessionId ?? data.sessionId);
+  const sessionInfo = {
+    ipAddress: void 0,
+    sdkLanguage: "TypeScript",
+    sdkVersion: version2,
+    serverBuild: data?.options.serverBuild,
+    serverName: server._serverInfo?.name,
+    serverVersion: server._serverInfo?.version,
+    clientName: clientInfo?.name,
+    clientVersion: clientInfo?.version,
+    protocolVersion: data?.sessionInfo.protocolVersion,
+    identifyActorGivenId: actorInfo?.distinctId,
+    identifyActorData: actorInfo?.properties || {},
+    identifyActorGroups: actorInfo?.groups
+  };
+  if (!data) return sessionInfo;
+  data.sessionInfo = sessionInfo;
+  setServerTrackingData(server, data);
+  return {
+    ...sessionInfo
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/capture.mjs
+function captureEvent(server, eventInput, logger, requestAttribution) {
+  const data = getServerTrackingData(server);
+  if (!data) return void logger("Warning: Server tracking data not found. Event will not be published.");
+  const sink = data.sink;
+  if (!sink) return;
+  const sessionInfo = requestAttribution ?? getSessionInfo(server, data, eventInput.sessionId);
+  const duration3 = eventInput.duration || (eventInput.timestamp ? Date.now() - eventInput.timestamp.getTime() : void 0);
+  const fullEvent = {
+    id: eventInput.id || "",
+    sessionId: eventInput.sessionId || data.sessionId,
+    eventType: eventInput.eventType || MCPAnalyticsEventType.custom,
+    eventName: eventInput.eventName,
+    timestamp: eventInput.timestamp || /* @__PURE__ */ new Date(),
+    duration: duration3,
+    ipAddress: sessionInfo.ipAddress,
+    sdkLanguage: sessionInfo.sdkLanguage,
+    sdkVersion: sessionInfo.sdkVersion,
+    serverBuild: eventInput.serverBuild ?? sessionInfo.serverBuild,
+    serverName: sessionInfo.serverName,
+    serverVersion: sessionInfo.serverVersion,
+    clientName: eventInput.clientName ?? sessionInfo.clientName,
+    clientVersion: eventInput.clientVersion ?? sessionInfo.clientVersion,
+    clientUserAgent: eventInput.clientUserAgent,
+    vendorClient: eventInput.vendorClient,
+    identifyActorGivenId: sessionInfo.identifyActorGivenId,
+    identifyActorData: sessionInfo.identifyActorData,
+    groups: sessionInfo.identifyActorGroups,
+    resourceName: eventInput.resourceName,
+    protocolVersion: eventInput.protocolVersion ?? sessionInfo.protocolVersion,
+    toolCategory: eventInput.toolCategory,
+    toolDescription: eventInput.toolDescription,
+    listedToolNames: eventInput.listedToolNames,
+    parameters: eventInput.parameters,
+    response: eventInput.response,
+    userIntent: eventInput.userIntent,
+    userIntentSource: eventInput.userIntentSource,
+    llmModel: eventInput.llmModel,
+    llmModelSource: eventInput.llmModelSource,
+    isError: eventInput.isError,
+    error: eventInput.error,
+    errorType: eventInput.errorType,
+    conversationId: eventInput.conversationId,
+    properties: eventInput.properties
+  };
+  return sink.capture(fullEvent, {
+    enableExceptionAutocapture: data.options.enableExceptionAutocapture ?? true,
+    beforeSend: data.options.beforeSend
+  });
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/transport-identity.mjs
+var CLIENT_USER_AGENT_HEADER = "user-agent";
+var VENDOR_CLIENT_HEADER = "x-anthropic-client";
+function readTransportIdentity(extra) {
+  const headers = getRequestHeaders(extra);
+  if (!headers) return;
+  const result = {};
+  const clientUserAgent = readHeaderValue(headers, CLIENT_USER_AGENT_HEADER);
+  if (clientUserAgent) result.clientUserAgent = clientUserAgent;
+  const vendorClient = readHeaderValue(headers, VENDOR_CLIENT_HEADER);
+  if (vendorClient) result.vendorClient = vendorClient;
+  return result.clientUserAgent || result.vendorClient ? result : void 0;
+}
+function stampTransportIdentity(event, extra) {
+  const identity = readTransportIdentity(extra);
+  if (!identity) return;
+  if (identity.clientUserAgent) event.clientUserAgent = identity.clientUserAgent;
+  if (identity.vendorClient) event.vendorClient = identity.vendorClient;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/internal.mjs
+var BoundedCache = class {
+  constructor(maxSize = 1e3) {
+    this._cache = /* @__PURE__ */ new Map();
+    this._maxSize = maxSize;
+  }
+  get(key) {
+    const value = this._cache.get(key);
+    if (void 0 === value) return;
+    this._cache.delete(key);
+    this._cache.set(key, value);
+    return value;
+  }
+  set(key, value) {
+    this._cache.delete(key);
+    if (this._cache.size >= this._maxSize) {
+      const oldestKey = this._cache.keys().next().value;
+      if (void 0 !== oldestKey) this._cache.delete(oldestKey);
+    }
+    this._cache.set(key, value);
+  }
+  has(key) {
+    return this._cache.has(key);
+  }
+  size() {
+    return this._cache.size;
+  }
+};
+var IdentityCache = class extends BoundedCache {
+};
+var _serverTracking = /* @__PURE__ */ new WeakMap();
+function getServerTrackingData(server) {
+  return _serverTracking.get(server);
+}
+function setServerTrackingData(server, data) {
+  _serverTracking.set(server, data);
+}
+function areIdentitiesEqual(a, b) {
+  if (a.distinctId !== b.distinctId) return false;
+  if (JSON.stringify(a.groups ?? {}) !== JSON.stringify(b.groups ?? {})) return false;
+  const aProps = a.properties || {};
+  const bProps = b.properties || {};
+  const aKeys = Object.keys(aProps);
+  const bKeys = Object.keys(bProps);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (!(key in bProps)) return false;
+    if (JSON.stringify(aProps[key]) !== JSON.stringify(bProps[key])) return false;
+  }
+  return true;
+}
+function mergeIdentities(previous, next) {
+  if (!previous) return next;
+  return {
+    distinctId: next.distinctId,
+    properties: {
+      ...previous.properties || {},
+      ...next.properties || {}
+    },
+    groups: next.groups ?? previous.groups
+  };
+}
+async function handleIdentify(server, data, sessionId, request, requestAttribution, extra, sessionFromConversation = false) {
+  const identityBeforeRequest = data.identifiedSessions.get(sessionId);
+  const sessionSourceBeforeIdentify = data.sessionSource;
+  if (!data.options.identify) return identityBeforeRequest;
+  const identifyEvent = {
+    sessionId,
+    resourceName: getRequestResourceName(request),
+    eventType: MCPAnalyticsEventType.identify,
+    parameters: {
+      request,
+      extra
+    },
+    timestamp: /* @__PURE__ */ new Date()
+  };
+  stampClientIdentity(identifyEvent, request, extra, server);
+  stampTransportIdentity(identifyEvent, extra);
+  try {
+    const identityResult = "function" == typeof data.options.identify ? await data.options.identify(request, extra) : data.options.identify;
+    if (identityResult) {
+      const previousIdentity = data.identifiedSessions.get(sessionId);
+      const mergedIdentity = mergeIdentities(previousIdentity, identityResult);
+      const changed = void 0 !== previousIdentity && !areIdentitiesEqual(previousIdentity, mergedIdentity);
+      const firstSeen = void 0 === previousIdentity;
+      const announcedAtInitialize = !sessionFromConversation && "token" === sessionSourceBeforeIdentify && "initialize" !== request.method;
+      const shouldPublish = changed || firstSeen && !announcedAtInitialize;
+      data.identifiedSessions.set(sessionId, mergedIdentity);
+      if (shouldPublish) {
+        data.logger(`Identified session ${sessionId}`);
+        captureEvent(server, identifyEvent, data.logger, withIdentity(requestAttribution, mergedIdentity));
+      }
+      return mergedIdentity;
+    }
+    data.logger(`Warning: Supplied identify function returned null for session ${sessionId}`);
+  } catch (error2) {
+    data.logger(`Error: User supplied identify function threw an error while identifying session ${sessionId} - ${error2}`);
+  }
+  return identityBeforeRequest;
+}
+function withIdentity(sessionInfo, identity) {
+  return {
+    ...sessionInfo,
+    identifyActorGivenId: identity?.distinctId,
+    identifyActorData: identity?.properties || {},
+    identifyActorGroups: identity?.groups
+  };
+}
+async function resolveEventProperties(data, request, extra) {
+  if (!data.options.eventProperties) return null;
+  try {
+    return await data.options.eventProperties(request, extra) ?? null;
+  } catch (e) {
+    data.logger(`eventProperties callback error: ${e}`);
+    return null;
+  }
+}
+function getRequestResourceName(request) {
+  if (!request || "object" != typeof request || !("params" in request)) return "Unknown";
+  const params = request.params;
+  if (!params || "object" != typeof params) return "Unknown";
+  for (const key of [
+    "name",
+    "uri"
+  ]) {
+    const value = params[key];
+    if ("string" == typeof value) return value;
+  }
+  return "Unknown";
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/lib-identity.mjs
+function applyMcpLibIdentity(client) {
+  client.getLibraryId = () => POSTHOG_MCP_LIB_NAME;
+  client.getLibraryVersion = () => version2;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/server-build.mjs
+var MAX_SERVER_BUILD_LENGTH = 256;
+function validateServerBuild(serverBuild) {
+  if (void 0 === serverBuild) return;
+  if ("string" != typeof serverBuild || 0 === serverBuild.length) throw new TypeError("serverBuild must be a non-empty string.");
+  if (serverBuild.length > MAX_SERVER_BUILD_LENGTH) throw new RangeError(`serverBuild must not exceed ${MAX_SERVER_BUILD_LENGTH} characters.`);
+  return serverBuild;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/feedback.mjs
+var SEND_FEEDBACK_TOOL_NAME = "send_feedback";
+var FEEDBACK_TYPES = [
+  "missing_capability",
+  "issue",
+  "praise",
+  "other"
+];
+var SENTIMENTS = [
+  "positive",
+  "neutral",
+  "negative",
+  "mixed"
+];
+var MAX_FEEDBACK_TEXT_LENGTH = 2048;
+var MAX_FEEDBACK_TOOL_NAME_LENGTH = 256;
+var DEFAULT_FEEDBACK_DESCRIPTION = 'Send feedback about this server to its developers. Most important: report a missing capability whenever no available tool fits your task, even if you can work around it (feedback_type "missing_capability"). Also welcome: a tool that failed or confused you, an unhelpful error, or something that worked well. This records the feedback; it does not add or change tools. Do not include user PII or sensitive content.';
+var CORE_FEEDBACK_SCHEMA_PROPERTIES = {
+  feedback_type: {
+    type: "string",
+    enum: [
+      ...FEEDBACK_TYPES
+    ],
+    description: "What kind of feedback this is. Use 'missing_capability' when the tool you needed does not exist in the tool list - nothing failed, the capability is absent (this is the most valuable report; send it even if you found a workaround). Use 'issue' when an existing tool behaved badly: it failed, returned a confusing error, or its description or schema misled you. Use 'praise' when something worked notably well. Use 'other' for anything else."
+  },
+  summary: {
+    type: "string",
+    description: "One self-contained sentence. For 'missing_capability': the capability you needed, e.g. 'No tool to delete multiple cohorts in one call.' For 'issue': the tool and the problem, e.g. 'query-trends rejects relative date ranges with an unclear error.'"
+  },
+  details: {
+    type: "string",
+    description: "Optional longer context: what you tried, exact parameter values, the error text you saw, and any workaround you used. Omit when the summary says it all."
+  },
+  friction_points: {
+    type: "string",
+    description: "Optional: the specific moments that slowed you down, as short bullet-like sentences, quoting exact tool names, parameters, or error text."
+  },
+  suggested_improvement: {
+    type: "string",
+    description: "Optional: the concrete change that would have helped, e.g. the tool to add, the description to reword, or the error message to improve."
+  },
+  tool_name: {
+    type: "string",
+    description: "Optional: the existing tool this feedback is about (for 'issue' or 'praise'). Leave empty for 'missing_capability' - the point is that no tool fits."
+  },
+  sentiment: {
+    type: "string",
+    enum: [
+      ...SENTIMENTS
+    ],
+    description: "Optional: how the experience felt overall."
+  },
+  task_completed: {
+    type: "boolean",
+    description: "Optional: whether you still completed the user's task despite the problem."
+  }
+};
+var RESERVED_EXTRA_PROPERTY_KEYS = /* @__PURE__ */ new Set([
+  ...Object.keys(CORE_FEEDBACK_SCHEMA_PROPERTIES),
+  "type",
+  "tool",
+  "context",
+  "conversation_id",
+  "llm_model"
+]);
+function resolveCollectFeedbackOptions(config2) {
+  if (!config2) return;
+  return true === config2 ? {} : config2;
+}
+function getFeedbackToolDescriptor(options = {}) {
+  const extraProperties = options.extraProperties ?? {};
+  const extraRequired = options.extraRequired ?? [];
+  for (const key of Object.keys(extraProperties)) if (RESERVED_EXTRA_PROPERTY_KEYS.has(key)) throw new Error(`collectFeedback.extraProperties key "${key}" collides with a core or SDK-reserved send_feedback field. Rename it.`);
+  for (const key of extraRequired) if (!Object.prototype.hasOwnProperty.call(extraProperties, key)) throw new Error(`collectFeedback.extraRequired key "${key}" is not declared in extraProperties.`);
+  const copiedExtras = Object.keys(extraProperties).length > 0 ? JSON.parse(JSON.stringify(extraProperties)) : void 0;
+  return {
+    name: options.toolName ?? SEND_FEEDBACK_TOOL_NAME,
+    description: options.description ?? DEFAULT_FEEDBACK_DESCRIPTION,
+    inputSchema: {
+      type: "object",
+      properties: {
+        ...JSON.parse(JSON.stringify(CORE_FEEDBACK_SCHEMA_PROPERTIES)),
+        ...copiedExtras
+      },
+      required: [
+        "feedback_type",
+        "summary",
+        ...extraRequired
+      ]
+    },
+    annotations: {
+      title: "Send feedback",
+      readOnlyHint: true,
+      openWorldHint: true,
+      idempotentHint: true,
+      destructiveHint: false
+    }
+  };
+}
+function readString(value) {
+  return "string" == typeof value && value.trim() ? value : void 0;
+}
+function parseFeedbackType(value) {
+  return FEEDBACK_TYPES.includes(value) ? value : "other";
+}
+function parseSentiment(value) {
+  return SENTIMENTS.includes(value) ? value : void 0;
+}
+function matchesExtraSchema(value, schema) {
+  const type = Array.isArray(value) ? "array" : null === value ? "null" : typeof value;
+  if ("integer" === schema.type) {
+    if (!Number.isInteger(value)) return false;
+  } else if (schema.type !== type) return false;
+  return !Array.isArray(schema.enum) || schema.enum.includes(value);
+}
+function parseFeedbackReport(args, options = {}) {
+  const raw = args ?? {};
+  const extras = {};
+  for (const [key, schema] of Object.entries(options.extraProperties ?? {})) if (void 0 !== raw[key] && matchesExtraSchema(raw[key], schema)) extras[key] = raw[key];
+  return {
+    feedbackType: parseFeedbackType(raw.feedback_type),
+    summary: readString(raw.summary) ?? "",
+    sentiment: parseSentiment(raw.sentiment),
+    frictionPoints: readString(raw.friction_points),
+    suggestedImprovement: readString(raw.suggested_improvement),
+    details: readString(raw.details),
+    toolName: readString(raw.tool_name),
+    taskCompleted: "boolean" == typeof raw.task_completed ? raw.task_completed : void 0,
+    extras,
+    raw
+  };
+}
+function buildFeedbackIntent(report) {
+  return [
+    report.summary,
+    report.details
+  ].filter(Boolean).join("\n\n");
+}
+function truncateFeedbackText(value, maxLength) {
+  return value.length > maxLength ? value.slice(0, maxLength) + TRUNCATION_SUFFIX : value;
+}
+function captureFreeText(value) {
+  return truncateFeedbackText(sanitizeFreeText(value), MAX_FEEDBACK_TEXT_LENGTH);
+}
+function captureExtraValue(value) {
+  const sanitized = sanitizeFreeTextValue(value);
+  if ("string" == typeof sanitized) return truncateFeedbackText(sanitized, MAX_FEEDBACK_TEXT_LENGTH);
+  if (null == sanitized || "number" == typeof sanitized || "boolean" == typeof sanitized) return sanitized;
+  try {
+    return truncateFeedbackText(JSON.stringify(sanitized), MAX_FEEDBACK_TEXT_LENGTH);
+  } catch {
+    return;
+  }
+}
+function buildFeedbackEventProperties(report) {
+  const properties = {
+    [PostHogMCPAnalyticsProperty.FeedbackType]: report.feedbackType
+  };
+  if (report.summary) properties[PostHogMCPAnalyticsProperty.FeedbackSummary] = captureFreeText(report.summary);
+  if (report.sentiment) properties[PostHogMCPAnalyticsProperty.FeedbackSentiment] = report.sentiment;
+  if (report.frictionPoints) properties[PostHogMCPAnalyticsProperty.FeedbackFrictionPoints] = captureFreeText(report.frictionPoints);
+  if (report.suggestedImprovement) properties[PostHogMCPAnalyticsProperty.FeedbackSuggestedImprovement] = captureFreeText(report.suggestedImprovement);
+  if (report.details) properties[PostHogMCPAnalyticsProperty.FeedbackDetails] = captureFreeText(report.details);
+  if (report.toolName) properties[PostHogMCPAnalyticsProperty.FeedbackTool] = truncateFeedbackText(sanitizeFreeText(report.toolName), MAX_FEEDBACK_TOOL_NAME_LENGTH);
+  if (void 0 !== report.taskCompleted) properties[PostHogMCPAnalyticsProperty.FeedbackTaskCompleted] = report.taskCompleted;
+  for (const [key, value] of Object.entries(report.extras)) {
+    const captured = captureExtraValue(value);
+    if (void 0 !== captured) properties[`$mcp_feedback_${key}`] = captured;
+  }
+  return properties;
+}
+function sendFeedbackResult() {
+  return {
+    content: [
+      {
+        type: "text",
+        text: "Your feedback was recorded for the server's developers. No additional tools are available - continue with the tools already listed."
+      }
+    ]
+  };
+}
+async function handleFeedback(report, options = {}, logger = log) {
+  logger(`Agent feedback reported (${report.feedbackType})`);
+  if (options.onFeedback) try {
+    const reply = await options.onFeedback(report);
+    if ("string" == typeof reply && reply.trim()) return {
+      content: [
+        {
+          type: "text",
+          text: reply
+        }
+      ]
+    };
+  } catch {
+    logger("Warning: onFeedback handler threw; returning the default acknowledgement");
+  }
+  return sendFeedbackResult();
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/mcp-sdk-compat.mjs
+function getToolFunction(tool) {
+  if ("handler" in tool && "function" == typeof tool.handler) return tool.handler;
+  if ("callback" in tool && "function" == typeof tool.callback) return tool.callback;
+  throw new Error("Tool has neither callback nor handler property");
+}
+function getToolFunctionKey(tool) {
+  if ("handler" in tool && "function" == typeof tool.handler) return "handler";
+  return "callback";
+}
+function hasToolFunction(tool) {
+  if (!tool || "object" != typeof tool) return false;
+  const t = tool;
+  return "handler" in t && "function" == typeof t.handler || "callback" in t && "function" == typeof t.callback;
+}
+function createWrappedTool(originalTool, wrappedFunction) {
+  const key = getToolFunctionKey(originalTool);
+  return {
+    ...originalTool,
+    [key]: wrappedFunction
+  };
+}
+function isZ4Schema2(schema) {
+  if (!schema || "object" != typeof schema) return false;
+  return !!schema._zod;
+}
+function isZodTypeLike2(value) {
+  return !!value && "object" == typeof value && "parse" in value && "function" == typeof value.parse && "safeParse" in value && "function" == typeof value.safeParse;
+}
+function isZodRawShapeCompat2(schema) {
+  return !!schema && "object" == typeof schema && !isZodTypeLike2(schema) && Object.values(schema).some(isZodTypeLike2);
+}
+var MAX_UNWRAP_DEPTH = 8;
+function zodDef(schema) {
+  return isZ4Schema2(schema) ? schema._zod?.def : schema._def;
+}
+function unwrapInputSchema(schema) {
+  let current = schema;
+  for (let depth = 0; depth < MAX_UNWRAP_DEPTH && isZodTypeLike2(current); depth++) {
+    const def = zodDef(current);
+    const pipeInput = def?.in !== void 0 && zodDef(def.in)?.type === "transform" ? def.out : def?.in;
+    const inner = def?.schema ?? pipeInput ?? def?.innerType;
+    if (!inner) break;
+    current = inner;
+  }
+  return current;
+}
+function getObjectShape2(schema) {
+  if (!schema || "object" != typeof schema) return;
+  let rawShape;
+  if (isZ4Schema2(schema)) {
+    const v4Schema = schema;
+    rawShape = v4Schema._zod?.def?.shape;
+  } else {
+    const v3Schema = schema;
+    rawShape = v3Schema.shape ?? v3Schema._def?.shape;
+  }
+  if (!rawShape) return;
+  if ("function" == typeof rawShape) try {
+    return rawShape();
+  } catch {
+    return;
+  }
+  return rawShape;
+}
+function readRequestHandlerMethod(requestSchema) {
+  if ("string" == typeof requestSchema) return requestSchema;
+  const shape = getObjectShape2(requestSchema);
+  const method = shape?.method ? getLiteralValue2(shape.method) : void 0;
+  return "string" == typeof method ? method : void 0;
+}
+function getLiteralValue2(schema) {
+  if (!schema || "object" != typeof schema) return;
+  if (isZ4Schema2(schema)) {
+    const v4Schema = schema;
+    const def = v4Schema._zod?.def;
+    if (def?.value !== void 0) return def.value;
+    if (Array.isArray(def?.values) && def.values.length > 0) return def.values[0];
+  } else {
+    const v3Schema = schema;
+    const def = v3Schema._def;
+    if (def?.value !== void 0) return def.value;
+    if (Array.isArray(def?.values) && def.values.length > 0) return def.values[0];
+  }
+  const directValue = schema.value;
+  if (void 0 !== directValue) return directValue;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/output-instructions.mjs
+var MCP_INSTRUCTIONS_KEY = "_mcp_instructions";
+var INSTRUCTIONS_FIELD_DESCRIPTION = "Server-issued metadata for this conversation.";
+var CONVERSATION_ID_FIELD_DESCRIPTION = "The server-issued conversation identifier.";
+function canDeclareOutputInstructions(outputSchema) {
+  if (!outputSchema || "object" != typeof outputSchema) return false;
+  if (isSchemaObjectLike(outputSchema)) return false;
+  const schema = outputSchema;
+  if (schema.$ref || schema.oneOf || schema.allOf || schema.anyOf) return false;
+  const { properties } = schema;
+  if (void 0 !== properties && ("object" != typeof properties || null === properties || Array.isArray(properties))) return false;
+  return !properties || !Object.prototype.hasOwnProperty.call(properties, MCP_INSTRUCTIONS_KEY);
+}
+function isZodLike(entry) {
+  return !!entry && "object" == typeof entry && ("_def" in entry || "_zod" in entry || "~standard" in entry);
+}
+function looksLikeJsonSchema(candidate) {
+  if ("string" == typeof candidate.type || "string" == typeof candidate.$ref) return true;
+  if (Array.isArray(candidate.oneOf) || Array.isArray(candidate.allOf) || Array.isArray(candidate.anyOf)) return true;
+  const { properties } = candidate;
+  return !!properties && "object" == typeof properties && !isZodLike(properties);
+}
+function isSchemaObjectLike(value) {
+  const candidate = value;
+  if (isZodLike(candidate)) return true;
+  if (looksLikeJsonSchema(candidate)) return false;
+  return Object.values(candidate).some(isZodLike);
+}
+function addInstructionsToOutputSchema(tool, logger = log) {
+  const toolName = tool.name || "unknown";
+  const original = tool.outputSchema;
+  if (!original || "object" != typeof original) return tool;
+  if (!canDeclareOutputInstructions(original)) {
+    const schema = original;
+    logger(schema.properties && Object.prototype.hasOwnProperty.call(schema.properties, MCP_INSTRUCTIONS_KEY) ? `WARN: Tool "${toolName}" already declares '${MCP_INSTRUCTIONS_KEY}' in its output schema. Leaving it alone.` : `WARN: Tool "${toolName}" has a complex output schema (oneOf/allOf/anyOf/$ref). Skipping '${MCP_INSTRUCTIONS_KEY}' declaration; its session handle stays content-only.`);
+    return tool;
+  }
+  const modifiedTool = {
+    ...tool
+  };
+  const outputSchema = JSON.parse(JSON.stringify(original));
+  if (!outputSchema.properties) outputSchema.properties = {};
+  outputSchema.properties[MCP_INSTRUCTIONS_KEY] = {
+    type: "object",
+    description: INSTRUCTIONS_FIELD_DESCRIPTION,
+    properties: {
+      conversation_id: {
+        type: "string",
+        description: CONVERSATION_ID_FIELD_DESCRIPTION
+      }
+    }
+  };
+  modifiedTool.outputSchema = outputSchema;
+  return modifiedTool;
+}
+function addInstructionsToOutputSchemas(tools, logger = log) {
+  return tools.map((tool) => addInstructionsToOutputSchema(tool, logger));
+}
+function buildConversationInstructions(conversationId) {
+  return {
+    conversation_id: conversationId
+  };
+}
+function mirrorInstructionsIntoStructuredContent(result, conversationId) {
+  if (!result || "object" != typeof result) return result;
+  const structuredContent = result.structuredContent;
+  if (!structuredContent || "object" != typeof structuredContent || Array.isArray(structuredContent)) return result;
+  if (Object.prototype.hasOwnProperty.call(structuredContent, MCP_INSTRUCTIONS_KEY)) return result;
+  return {
+    ...result,
+    structuredContent: {
+      ...structuredContent,
+      [MCP_INSTRUCTIONS_KEY]: buildConversationInstructions(conversationId)
+    }
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/analytics-parameters.mjs
+var JSON_SCHEMA_KEYWORDS = [
+  "$defs",
+  "$ref",
+  "additionalProperties",
+  "allOf",
+  "anyOf",
+  "definitions",
+  "oneOf",
+  "properties",
+  "required",
+  "type"
+];
+function hasAnalyticsParameter(schema, parameterName) {
+  return !!schema?.properties && Object.prototype.hasOwnProperty.call(schema.properties, parameterName);
+}
+function canInjectAnalyticsParameter(schema, parameterName) {
+  return !hasAnalyticsParameter(schema, parameterName) && !schema?.$ref && !schema?.oneOf && !schema?.allOf && !schema?.anyOf;
+}
+function addAnalyticsParameterToTool(tool, parameterName, description, injectionLabel, logger = log) {
+  const modifiedTool = {
+    ...tool
+  };
+  const toolName = tool.name || "unknown";
+  const schema = modifiedTool.inputSchema;
+  if (!canInjectAnalyticsParameter(schema, parameterName)) {
+    logger(hasAnalyticsParameter(schema, parameterName) ? `WARN: Tool "${toolName}" already has '${parameterName}' parameter. Skipping ${injectionLabel} injection.` : `WARN: Tool "${toolName}" has complex schema (oneOf/allOf/anyOf/$ref). Skipping ${injectionLabel} injection.`);
+    return modifiedTool;
+  }
+  if (!modifiedTool.inputSchema) modifiedTool.inputSchema = {
+    type: "object",
+    properties: {},
+    required: []
+  };
+  modifiedTool.inputSchema = JSON.parse(JSON.stringify(modifiedTool.inputSchema));
+  const inputSchema = modifiedTool.inputSchema;
+  if (!inputSchema.properties) inputSchema.properties = {};
+  if (false === inputSchema.additionalProperties) inputSchema.additionalProperties = void 0;
+  inputSchema.properties[parameterName] = {
+    type: "string",
+    description
+  };
+  if (Array.isArray(inputSchema.required)) {
+    if (!inputSchema.required.includes(parameterName)) inputSchema.required.push(parameterName);
+  } else inputSchema.required = [
+    parameterName
+  ];
+  return modifiedTool;
+}
+function analyticsOwnsParameter(inputSchema, parameterName) {
+  if (!inputSchema || "object" != typeof inputSchema) return canInjectAnalyticsParameter(void 0, parameterName);
+  if (isZodRawShapeCompat2(inputSchema)) return canInjectAnalyticsParameter({
+    properties: inputSchema
+  }, parameterName);
+  const shape = getObjectShape2(inputSchema);
+  if (shape) return canInjectAnalyticsParameter({
+    properties: shape
+  }, parameterName);
+  const schema = inputSchema;
+  if (JSON_SCHEMA_KEYWORDS.some((keyword) => Object.prototype.hasOwnProperty.call(schema, keyword))) return canInjectAnalyticsParameter(schema, parameterName);
+  if ("_def" in schema || "_zod" in schema || "~standard" in schema) return canInjectAnalyticsParameter(void 0, parameterName);
+  return canInjectAnalyticsParameter(schema, parameterName);
+}
+function getAnalyticsParameterOwnership(inputSchema, outputSchema) {
+  return {
+    context: analyticsOwnsParameter(inputSchema, "context"),
+    conversationId: analyticsOwnsParameter(inputSchema, "conversation_id"),
+    llmModel: analyticsOwnsParameter(inputSchema, "llm_model"),
+    outputInstructions: canDeclareOutputInstructions(outputSchema)
+  };
+}
+function stripOwnedAnalyticsArguments(args, ownership) {
+  let cleanedArgs = args;
+  if (ownership.context && cleanedArgs && "object" == typeof cleanedArgs && "context" in cleanedArgs) {
+    const { context: _context, ...rest } = cleanedArgs;
+    cleanedArgs = rest;
+  }
+  if (ownership.conversationId && cleanedArgs && "object" == typeof cleanedArgs && "conversation_id" in cleanedArgs) {
+    const { conversation_id: _conversationId, ...rest } = cleanedArgs;
+    cleanedArgs = rest;
+  }
+  if (ownership.llmModel && cleanedArgs && "object" == typeof cleanedArgs && "llm_model" in cleanedArgs) {
+    const { llm_model: _llmModel, ...rest } = cleanedArgs;
+    cleanedArgs = rest;
+  }
+  return cleanedArgs;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/tools.mjs
+var GET_MORE_TOOLS_NAME = "get_more_tools";
+function resolveMissingCapabilityToolName(options) {
+  return options?.missingCapabilityToolName ?? GET_MORE_TOOLS_NAME;
+}
+function getReportMissingToolDescriptor(name = GET_MORE_TOOLS_NAME) {
+  return {
+    name,
+    description: "Check for additional tools whenever your task might benefit from specialized capabilities - even if existing tools could work as a fallback.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        context: {
+          type: "string",
+          description: "A description of your goal and what kind of tool would help accomplish it."
+        }
+      },
+      required: [
+        "context"
+      ]
+    },
+    annotations: {
+      title: "Get More Tools",
+      readOnlyHint: true,
+      openWorldHint: true,
+      idempotentHint: true,
+      destructiveHint: false
+    }
+  };
+}
+function getMoreToolsResult() {
+  return {
+    content: [
+      {
+        type: "text",
+        text: "Unfortunately, we have shown you the full tool list. We have noted your feedback and will work to improve the tool list in the future."
+      }
+    ]
+  };
+}
+function handleReportMissing(args, logger = log) {
+  logger(`Missing tool reported: ${JSON.stringify(args)}`);
+  return getMoreToolsResult();
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/context-parameters.mjs
+function isContextEnabled(context) {
+  return false !== context;
+}
+function getContextDescription(context) {
+  return "object" == typeof context ? context.description : void 0;
+}
+function addContextParameterToTool(tool, contextDescriptionOverride, logger = log) {
+  return addAnalyticsParameterToTool(tool, "context", contextDescriptionOverride || DEFAULT_CONTEXT_PARAMETER_DESCRIPTION, "context", logger);
+}
+function addContextParameterToTools(tools, contextDescriptionOverride, logger = log) {
+  return tools.map((tool) => addContextParameterToTool(tool, contextDescriptionOverride, logger));
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/model-parameters.mjs
+function isCaptureModelEnabled(captureModel) {
+  return void 0 === captureModel || true === captureModel || "object" == typeof captureModel && null !== captureModel;
+}
+function getModelDescription(captureModel) {
+  return "object" == typeof captureModel && null !== captureModel ? captureModel.description : void 0;
+}
+function addModelParameterToTool(tool, modelDescriptionOverride, logger = log) {
+  return addAnalyticsParameterToTool(tool, "llm_model", modelDescriptionOverride || DEFAULT_MODEL_PARAMETER_DESCRIPTION, "model", logger);
+}
+function addModelParameterToTools(tools, modelDescriptionOverride, logger = log) {
+  return tools.map((tool) => addModelParameterToTool(tool, modelDescriptionOverride, logger));
+}
+function getModelArgument(request) {
+  return normalizeModel(request.params?.arguments?.llm_model);
+}
+var CODEX_TURN_METADATA_KEY = "x-codex-turn-metadata";
+function resolveModel(request, allowSelfReported) {
+  const codexMetadata = request.params?._meta?.[CODEX_TURN_METADATA_KEY];
+  if (isRecord4(codexMetadata) && Object.prototype.hasOwnProperty.call(codexMetadata, "model")) {
+    const model = normalizeModel(codexMetadata.model);
+    if (model) return {
+      model,
+      source: "client_metadata"
+    };
+  }
+  if (allowSelfReported) {
+    const model = getModelArgument(request);
+    if (model) return {
+      model,
+      source: "self_reported"
+    };
+  }
+}
+function isRecord4(value) {
+  return "object" == typeof value && null !== value && !Array.isArray(value);
+}
+function normalizeModel(model) {
+  if ("string" != typeof model) return;
+  const trimmed = model.trim();
+  if (!trimmed || "unknown" === trimmed.toLowerCase()) return;
+  return trimmed;
+}
+function setEventModel(event, model, source = "self_reported") {
+  const normalizedModel = normalizeModel(model);
+  if (!normalizedModel) return;
+  event.llmModel = normalizedModel;
+  event.llmModelSource = source;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/conversation-id.mjs
+var CONVERSATION_ID_PARAM_NAME = "conversation_id";
+function addConversationIdToTool(tool, logger = log) {
+  const modifiedTool = {
+    ...tool
+  };
+  const toolName = tool.name || "unknown";
+  const schema = modifiedTool.inputSchema;
+  if (!canInjectAnalyticsParameter(schema, CONVERSATION_ID_PARAM_NAME)) {
+    logger(hasAnalyticsParameter(schema, CONVERSATION_ID_PARAM_NAME) ? `WARN: Tool "${toolName}" already has '${CONVERSATION_ID_PARAM_NAME}' parameter. Skipping conversation_id injection.` : `WARN: Tool "${toolName}" has complex schema (oneOf/allOf/anyOf/$ref). Skipping conversation_id injection.`);
+    return modifiedTool;
+  }
+  if (!modifiedTool.inputSchema) modifiedTool.inputSchema = {
+    type: "object",
+    properties: {},
+    required: []
+  };
+  modifiedTool.inputSchema = JSON.parse(JSON.stringify(modifiedTool.inputSchema));
+  const inputSchema = modifiedTool.inputSchema;
+  if (!inputSchema.properties) inputSchema.properties = {};
+  if (false === inputSchema.additionalProperties) inputSchema.additionalProperties = void 0;
+  inputSchema.properties[CONVERSATION_ID_PARAM_NAME] = {
+    type: "string",
+    description: DEFAULT_CONVERSATION_ID_DESCRIPTION
+  };
+  return modifiedTool;
+}
+function addConversationIdToTools(tools, logger = log) {
+  return tools.map((tool) => addConversationIdToTool(tool, logger));
+}
+var MINTED_CONVERSATION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function resolveConversationId(enabled, args) {
+  if (!enabled) return {
+    minted: false,
+    conversationId: void 0
+  };
+  const supplied = extractConversationId(args);
+  if (supplied && MINTED_CONVERSATION_ID.test(supplied)) return {
+    minted: false,
+    conversationId: supplied.toLowerCase()
+  };
+  return {
+    minted: true,
+    conversationId: uuidv7()
+  };
+}
+function canInjectConversationIdPromptBack(result) {
+  if (!(result && "object" == typeof result)) return false;
+  return Array.isArray(result.content);
+}
+function extractConversationId(args) {
+  if (!(args && "object" == typeof args)) return;
+  const value = args[CONVERSATION_ID_PARAM_NAME];
+  if ("string" != typeof value) return;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : void 0;
+}
+function buildConversationIdPromptBack(conversationId) {
+  return {
+    type: "text",
+    text: JSON.stringify({
+      conversation_id: conversationId
+    })
+  };
+}
+function injectConversationIdPromptBack(result, conversationId) {
+  if (!canInjectConversationIdPromptBack(result)) return result;
+  const resultObj = result;
+  return {
+    ...resultObj,
+    content: [
+      ...resultObj.content,
+      buildConversationIdPromptBack(conversationId)
+    ]
+  };
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/exceptions.mjs
+var errorPropertiesBuilder = new error_tracking_exports.ErrorPropertiesBuilder([
+  new error_tracking_exports.EventCoercer(),
+  new error_tracking_exports.ErrorCoercer(),
+  new error_tracking_exports.ObjectCoercer(),
+  new error_tracking_exports.StringCoercer(),
+  new error_tracking_exports.PrimitiveCoercer()
+], error_tracking_exports.createStackParser("node:javascript", error_tracking_exports.nodeStackLineParser));
+function captureException(error2) {
+  const normalized = isCallToolResult(error2) ? extractCallToolResultMessage(error2) : error2;
+  return errorPropertiesBuilder.buildFromUnknown(normalized);
+}
+function isCallToolResult(value) {
+  return null !== value && "object" == typeof value && "isError" in value && "content" in value && Array.isArray(value.content);
+}
+function isTextContentPart(value) {
+  if (null === value || "object" != typeof value) return false;
+  const contentPart = value;
+  return "text" === contentPart.type && "string" == typeof contentPart.text;
+}
+function extractCallToolResultMessage(result) {
+  return result.content.filter(isTextContentPart).map((contentPart) => contentPart.text).join(" ").trim() || "Unknown error";
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/intent.mjs
+function getContextArgument(request) {
+  const context = request.params?.arguments?.context;
+  return "string" == typeof context && context.trim() ? context : void 0;
+}
+function normalizeIntent(intent) {
+  if ("string" != typeof intent) return null;
+  const trimmed = intent.trim();
+  return trimmed ? trimmed : null;
+}
+async function runIntentFallback(data, request, extra) {
+  if (!data.options.intentFallback) return null;
+  try {
+    const intent = normalizeIntent(await data.options.intentFallback(request, extra));
+    return intent ? {
+      intent,
+      source: "inferred"
+    } : null;
+  } catch (error2) {
+    data.logger(`intentFallback callback error: ${error2}`);
+    return null;
+  }
+}
+async function resolveToolCallIntent(data, request, canCaptureContext, extra) {
+  const contextArgument = getContextArgument(request);
+  if (canCaptureContext && isContextEnabled(data.options.context) && contextArgument) return {
+    intent: contextArgument,
+    source: "context_parameter"
+  };
+  return await runIntentFallback(data, request, extra);
+}
+function setEventIntent(event, resolvedIntent) {
+  if (!resolvedIntent) return;
+  event.userIntent = resolvedIntent.intent;
+  event.userIntentSource = resolvedIntent.source;
+}
+function setExplicitContextIntent(event, context) {
+  const intent = normalizeIntent(context);
+  if (!intent) return;
+  event.userIntent = intent;
+  event.userIntentSource = "context_parameter";
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/tracing-helpers.mjs
+function isToolResultError(result) {
+  return !!result && "object" == typeof result && "isError" in result && true === result.isError;
+}
+async function applyResolvedMetadata(event, data, request, extra) {
+  const resolvedProperties = await resolveEventProperties(data, request, extra);
+  if (resolvedProperties) event.properties = resolvedProperties;
+}
+function getContextArgument2(request) {
+  const context = request.params?.arguments?.context;
+  return "string" == typeof context ? context : void 0;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/tool-input.mjs
+var MAX_INPUT_KEYS = 20;
+var MAX_KEY_LENGTH = 64;
+var ANALYTICS_KEYS = /* @__PURE__ */ new Set([
+  "context",
+  "llm_model",
+  "conversation_id"
+]);
+function isRecord5(value) {
+  return null !== value && "object" == typeof value && !Array.isArray(value);
+}
+function declaredProperties(schema) {
+  if (!isRecord5(schema)) return;
+  const properties = schema.properties;
+  if (isZodRawShapeCompat2(schema)) return schema;
+  return getObjectShape2(unwrapInputSchema(schema)) ?? (isRecord5(properties) ? properties : void 0);
+}
+var recordDeclaredOnly = (_key, { declared }) => declared;
+function shouldRecord(fn, key, declared) {
+  try {
+    return true === fn(key, {
+      declared
+    });
+  } catch {
+    return false;
+  }
+}
+function aliasNames(aliases) {
+  if (!isRecord5(aliases)) return [];
+  return Object.values(aliases).flatMap((names) => Array.isArray(names) ? names.filter((name) => "string" == typeof name) : []);
+}
+function describeAliasesUsed(aliases, input) {
+  if (!isRecord5(aliases)) return [];
+  const used = [];
+  for (const [canonical, names] of Object.entries(aliases)) {
+    if (!Array.isArray(names) || Object.prototype.hasOwnProperty.call(input, canonical)) continue;
+    const alias = names.find((name) => "string" == typeof name && Object.prototype.hasOwnProperty.call(input, name));
+    if (alias && alias.length <= MAX_KEY_LENGTH && canonical.length <= MAX_KEY_LENGTH) used.push(`${alias}:${canonical}`);
+  }
+  return used.sort().slice(0, MAX_INPUT_KEYS);
+}
+function getToolInputProperties(input, inputSchema, options) {
+  try {
+    if (!isRecord5(input)) return {};
+    const prototype = Object.getPrototypeOf(input);
+    if (null !== prototype && prototype !== Object.prototype) return {};
+    const properties = declaredProperties(inputSchema);
+    const known = /* @__PURE__ */ new Set([
+      ...Object.keys(properties ?? {}),
+      ...aliasNames(options?.inputAliases)
+    ]);
+    const keys = Object.keys(input).filter((key) => known.has(key) || !ANALYTICS_KEYS.has(key));
+    const record3 = options?.shouldRecordInputKey ?? recordDeclaredOnly;
+    const declared = [];
+    const undeclared = [];
+    let hasRedacted = false;
+    for (const key of keys) {
+      const isDeclared = known.has(key);
+      if (key.length <= MAX_KEY_LENGTH && shouldRecord(record3, key, isDeclared)) (isDeclared ? declared : undeclared).push(key);
+      else hasRedacted = true;
+    }
+    const visibleKeys = [
+      ...declared.sort(),
+      ...undeclared.sort()
+    ].slice(0, MAX_INPUT_KEYS);
+    if (hasRedacted && visibleKeys.length < MAX_INPUT_KEYS) visibleKeys.push("[redacted]");
+    const aliasesUsed = describeAliasesUsed(options?.inputAliases, input);
+    return {
+      [PostHogMCPAnalyticsProperty.InputKeys]: visibleKeys,
+      ...aliasesUsed.length > 0 ? {
+        [PostHogMCPAnalyticsProperty.InputAliasesUsed]: aliasesUsed
+      } : {}
+    };
+  } catch {
+    return {};
+  }
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/instrumentation.mjs
+function resolveToolSchemaSessionId(data, extra) {
+  const token = decodeSessionId(readMcpSessionHeader(getRequestHeaders(extra)));
+  if (token) return token.sessionId;
+  if (extra?.sessionId) return deriveSessionIdFromMCPSession(extra.sessionId);
+  return data.sessionId;
+}
+function resolveInputAliases(data, toolName) {
+  if (!toolName || !data.options.resolveInputAliases) return;
+  try {
+    return data.options.resolveInputAliases(toolName);
+  } catch (error2) {
+    data.logger(`Warning: resolveInputAliases failed for tool ${toolName} - ${error2}`);
+    return;
+  }
+}
+async function captureToolCall(params) {
+  const { server, data, request, extra, execute, parameterOwnership, inputSchema, eventType, explicitContextIntent, extraEventProperties, omitCapturedParameters, takeCapturedError } = params;
+  const resolvedEventType = eventType ?? MCPAnalyticsEventType.mcpToolsCall;
+  const isVirtualAnalyticsTool = resolvedEventType === MCPAnalyticsEventType.mcpMissingCapability || resolvedEventType === MCPAnalyticsEventType.mcpFeedback;
+  const ownership = getActiveAnalyticsParameterOwnership(data, request.params?.name, parameterOwnership, isVirtualAnalyticsTool);
+  const canCaptureContextIntent = ownership.read.context;
+  const conversation = resolveToolConversation(ownership.read.conversationId, request.params?.arguments, extra);
+  const downstreamRequest = cloneRequestWithoutOwnedAnalyticsArguments(request, ownership.strip);
+  const schemaSessionId = resolveToolSchemaSessionId(data, extra);
+  const startTime = /* @__PURE__ */ new Date();
+  const preparedEvent = await prepareToolCallEvent(server, data, request, downstreamRequest, extra, startTime, conversation, ownership, resolvedEventType, canCaptureContextIntent);
+  if (preparedEvent && resolvedEventType === MCPAnalyticsEventType.mcpToolsCall) {
+    const sessionSchemas = (preparedEvent.event.sessionId ? data.toolInputSchemas.get(preparedEvent.event.sessionId) : void 0) ?? data.toolInputSchemas.get(schemaSessionId);
+    const schema = inputSchema ?? sessionSchemas?.get(request.params?.name ?? "");
+    preparedEvent.event.properties = {
+      ...preparedEvent.event.properties,
+      ...getToolInputProperties(request.params?.arguments ?? {}, schema, {
+        shouldRecordInputKey: data.options.shouldRecordInputKey,
+        inputAliases: resolveInputAliases(data, request.params?.name)
+      })
+    };
+  }
+  if (preparedEvent && explicitContextIntent) setExplicitContextIntent(preparedEvent.event, explicitContextIntent);
+  if (preparedEvent && extraEventProperties) preparedEvent.event.properties = {
+    ...preparedEvent.event.properties,
+    ...extraEventProperties
+  };
+  if (preparedEvent && omitCapturedParameters) preparedEvent.event.parameters = void 0;
+  let result;
+  try {
+    result = await execute(downstreamRequest);
+  } catch (error2) {
+    publishFailedToolEvent(server, preparedEvent, error2, startTime, conversation, data.logger);
+    throw error2;
+  }
+  const finalResult = applyConversationInstructions(preparedEvent?.event ?? null, result, conversation, ownership);
+  publishSuccessfulToolEvent(server, preparedEvent, finalResult, startTime, data.logger, takeCapturedError, result);
+  return finalResult;
+}
+function resolveToolConversation(enabled, args, extra) {
+  const conversation = resolveConversationId(enabled, args);
+  if (!conversation.minted) return conversation;
+  const carriedSession = extra?.sessionId || decodeSessionId(readMcpSessionHeader(getRequestHeaders(extra)));
+  return carriedSession ? {
+    minted: false,
+    conversationId: void 0
+  } : conversation;
+}
+function getActiveAnalyticsParameterOwnership(data, toolName, override, isVirtualAnalyticsTool) {
+  const listed = toolName ? data.toolAnalyticsParameterOwnership.get(toolName) : void 0;
+  const ownership = override ?? listed;
+  const enabled = {
+    context: !isVirtualAnalyticsTool && isContextEnabled(data.options.context),
+    conversationId: true === data.options.enableConversationId,
+    llmModel: isCaptureModelEnabled(data.options.captureModel)
+  };
+  return {
+    strip: enabledArgumentOwnership(enabled, ownership, false),
+    read: enabledArgumentOwnership(enabled, ownership, true),
+    outputInstructions: enabled.conversationId && listed?.outputInstructions === true
+  };
+}
+function enabledArgumentOwnership(enabled, ownership, whenUnknown) {
+  const resolved = ownership ?? {
+    context: whenUnknown,
+    conversationId: whenUnknown,
+    llmModel: whenUnknown
+  };
+  return {
+    context: enabled.context && resolved.context,
+    conversationId: enabled.conversationId && resolved.conversationId,
+    llmModel: enabled.llmModel && resolved.llmModel
+  };
+}
+function cloneRequestWithoutOwnedAnalyticsArguments(request, ownership) {
+  const args = request.params?.arguments;
+  const cleanedArgs = stripOwnedAnalyticsArguments(args, ownership);
+  if (cleanedArgs === args || !request.params) return request;
+  return {
+    ...request,
+    params: {
+      ...request.params,
+      arguments: cleanedArgs
+    }
+  };
+}
+async function prepareToolCallEvent(server, data, request, downstreamRequest, extra, startTime, conversation, ownership, eventType, canCaptureContextIntent) {
+  try {
+    const sessionId = getSessionId(server, extra, conversation.conversationId);
+    const sessionInfo = getSessionInfo(server, data, sessionId);
+    const toolName = request.params?.name;
+    const event = {
+      sessionId,
+      conversationId: conversation.conversationId,
+      resourceName: toolName || "Unknown Tool Name",
+      parameters: buildCapturedMcpParameters(downstreamRequest),
+      eventType,
+      timestamp: startTime,
+      toolCategory: toolName ? data.toolCategories.get(toolName) : void 0,
+      toolDescription: toolName ? data.toolDescriptions.get(toolName) : void 0
+    };
+    stampClientIdentity(event, request, extra, server);
+    stampTransportIdentity(event, extra);
+    const identity = await handleIdentify(server, data, sessionId, request, sessionInfo, extra, !!conversation.conversationId);
+    const requestAttribution = withIdentity(sessionInfo, identity);
+    await applyResolvedMetadata(event, data, request, extra);
+    setEventIntent(event, await resolveToolCallIntent(data, request, canCaptureContextIntent, extra));
+    if (isCaptureModelEnabled(data.options.captureModel)) {
+      const resolvedModel = resolveModel(request, ownership.read.llmModel);
+      setEventModel(event, resolvedModel?.model, resolvedModel?.source);
+    }
+    return {
+      event,
+      requestAttribution
+    };
+  } catch (error2) {
+    data.logger(`Warning: PostHog MCP analytics instrumentation failed for tool ${request.params?.name}, the tool will still run - ${error2}`);
+    return null;
+  }
+}
+function applyConversationInstructions(event, result, conversation, ownership) {
+  const conversationId = conversation.conversationId;
+  if (!conversationId) return result;
+  let updated = result;
+  let delivered = false;
+  if (ownership.outputInstructions) {
+    const mirrored = mirrorInstructionsIntoStructuredContent(updated, conversationId);
+    delivered = mirrored !== updated;
+    updated = mirrored;
+  }
+  if (conversation.minted && canInjectConversationIdPromptBack(updated)) {
+    updated = injectConversationIdPromptBack(updated, conversationId);
+    delivered = true;
+  }
+  if (!delivered && conversation.minted && event) event.conversationId = void 0;
+  return updated;
+}
+function publishSuccessfulToolEvent(server, preparedEvent, result, startTime, logger, takeCapturedError, resultBeforeInstructions) {
+  if (!preparedEvent) return;
+  const { event, requestAttribution } = preparedEvent;
+  try {
+    if (isToolResultError(result)) {
+      event.isError = true;
+      const capturedError = takeCapturedError?.();
+      event.error = captureException(capturedError ?? resultBeforeInstructions ?? result);
+    } else event.isError = false;
+    event.response = result;
+    event.duration = Date.now() - startTime.getTime();
+    captureEvent(server, event, logger, requestAttribution);
+  } catch (error2) {
+    logger(`Warning: PostHog MCP analytics failed to publish tool event - ${error2}`);
+  }
+}
+function publishFailedToolEvent(server, preparedEvent, error2, startTime, conversation, logger) {
+  if (!preparedEvent) return;
+  const { event, requestAttribution } = preparedEvent;
+  try {
+    if (conversation.minted) event.conversationId = void 0;
+    event.isError = true;
+    event.error = captureException(error2);
+    event.duration = Date.now() - startTime.getTime();
+    captureEvent(server, event, logger, requestAttribution);
+  } catch (publishError) {
+    logger(`Warning: PostHog MCP analytics failed to publish failed tool event - ${publishError}`);
+  }
+}
+function publishResourceEvent(server, preparedEvent, startTime, params, outcome) {
+  if (!preparedEvent) return;
+  const { event, requestAttribution } = preparedEvent;
+  try {
+    if ("error" in outcome) {
+      event.isError = true;
+      event.error = captureException(outcome.error);
+    } else {
+      event.isError = false;
+      if (params.eventType === MCPAnalyticsEventType.mcpResourcesList) event.response = outcome.result;
+    }
+    event.duration = Date.now() - startTime.getTime();
+    captureEvent(server, event, params.logger, requestAttribution);
+  } catch (error2) {
+    params.logger(`Warning: PostHog MCP analytics failed to publish ${params.request.method} analytics - ${error2}`);
+  }
+}
+function traceResourceRequest(eventType, logger) {
+  return (server, originalHandler, request, extra) => captureResourceRequest({
+    server,
+    originalHandler,
+    request,
+    extra,
+    eventType,
+    logger
+  });
+}
+async function captureResourceRequest(params) {
+  const { server, originalHandler, request, extra, eventType, logger } = params;
+  const data = getServerTrackingData(server);
+  if (!data) {
+    logger("Warning: PostHog MCP analytics is unable to find server tracking data. Please ensure you have called instrument(server, options) before using resources.");
+    return await originalHandler(request, extra);
+  }
+  const startTime = /* @__PURE__ */ new Date();
+  let preparedEvent = null;
+  try {
+    const sessionId = getSessionId(server, extra);
+    const sessionInfo = getSessionInfo(server, data, sessionId);
+    const event = {
+      sessionId,
+      eventType,
+      parameters: buildCapturedMcpParameters(request),
+      resourceName: eventType === MCPAnalyticsEventType.mcpResourcesRead ? request.params?.uri : void 0,
+      timestamp: startTime
+    };
+    stampClientIdentity(event, request, extra, server);
+    stampTransportIdentity(event, extra);
+    const identity = await handleIdentify(server, data, sessionId, request, sessionInfo, extra);
+    await applyResolvedMetadata(event, data, request, extra);
+    preparedEvent = {
+      event,
+      requestAttribution: withIdentity(sessionInfo, identity)
+    };
+  } catch (error2) {
+    logger(`Warning: PostHog MCP analytics could not prepare ${request.method} analytics - ${error2}`);
+  }
+  let result;
+  try {
+    result = await originalHandler(request, extra);
+  } catch (error2) {
+    publishResourceEvent(server, preparedEvent, startTime, params, {
+      error: error2
+    });
+    throw error2;
+  }
+  publishResourceEvent(server, preparedEvent, startTime, params, {
+    result
+  });
+  return result;
+}
+var originalRequestHandlers = /* @__PURE__ */ new WeakMap();
+function rememberOriginalRequestHandler(server, handlerName, originalHandler) {
+  let handlers = originalRequestHandlers.get(server);
+  if (!handlers) {
+    handlers = /* @__PURE__ */ new Map();
+    originalRequestHandlers.set(server, handlers);
+  }
+  handlers.set(handlerName, originalHandler);
+}
+function registerFallbackRequestHandler(server, handlerName, fallbackHandler, patch) {
+  rememberOriginalRequestHandler(server, handlerName, fallbackHandler);
+  server._requestHandlers.set(handlerName, (request, extra) => patch(server, fallbackHandler, request, extra));
+}
+function patchRequestHandlers(server, patches) {
+  for (const [handlerName, patch] of Object.entries(patches)) {
+    const originalHandler = server._requestHandlers.get(handlerName);
+    if (originalHandler) {
+      rememberOriginalRequestHandler(server, handlerName, originalHandler);
+      server._requestHandlers.set(handlerName, (request, extra) => patch(server, originalHandler, request, extra));
+    }
+  }
+  const originalSetRequestHandler = server.setRequestHandler.bind(server);
+  server.setRequestHandler = (...args) => {
+    const handlerName = readRequestHandlerMethod(args[0]);
+    const patch = void 0 !== handlerName && Object.prototype.hasOwnProperty.call(patches, handlerName) ? patches[handlerName] : void 0;
+    if (void 0 === handlerName || !patch) return originalSetRequestHandler(...args);
+    const result = originalSetRequestHandler(...args);
+    const registeredHandler = server._requestHandlers.get(handlerName);
+    if (registeredHandler) {
+      rememberOriginalRequestHandler(server, handlerName, registeredHandler);
+      server._requestHandlers.set(handlerName, (request, extra) => patch(server, registeredHandler, request, extra));
+    }
+    return result;
+  };
+}
+async function isToolAdvertised(server, toolName, extra, logger) {
+  const listHandler = originalRequestHandlers.get(server)?.get("tools/list");
+  if (!listHandler || !server._requestHandlers.has("tools/list")) return;
+  try {
+    const response = await listHandler({
+      method: "tools/list",
+      params: {}
+    }, extra);
+    if (!response || !Array.isArray(response.tools)) return;
+    return response.tools.some((tool) => tool?.name === toolName);
+  } catch (error2) {
+    logger(`Warning: PostHog MCP analytics could not determine whether "${toolName}" is advertised; delegating to the server - ${error2}`);
+    return;
+  }
+}
+async function handleListToolsRequest(server, originalListToolsHandler, request, extra, logger) {
+  const data = getServerTrackingData(server);
+  const startTime = /* @__PURE__ */ new Date();
+  const sessionId = getSessionId(server, extra);
+  const sessionInfo = getSessionInfo(server, data, sessionId);
+  const event = {
+    sessionId,
+    parameters: buildCapturedMcpParameters(request),
+    eventType: MCPAnalyticsEventType.mcpToolsList,
+    timestamp: startTime
+  };
+  stampClientIdentity(event, request, extra, server);
+  stampTransportIdentity(event, extra);
+  const identity = data ? await handleIdentify(server, data, sessionId, request, sessionInfo, extra) : void 0;
+  const requestAttribution = withIdentity(sessionInfo, identity);
+  if (data) await applyResolvedMetadata(event, data, request, extra);
+  const response = await getTracedToolsList(server, originalListToolsHandler, request, extra, event, logger, requestAttribution);
+  const tools = response.tools;
+  if (!data) {
+    logger("Warning: PostHog MCP analytics is unable to find server tracking data. Please ensure you have called instrument(server, options) before using tool calls.");
+    return response;
+  }
+  if (0 === tools.length) {
+    data.logger("Warning: No tools found in the original list. This is likely due to the tools not being registered before PostHog MCP analytics.instrument().");
+    event.error = captureException("No tools were sent to MCP client.");
+    event.isError = true;
+    event.duration = Date.now() - startTime.getTime();
+    captureEvent(server, event, data.logger, requestAttribution);
+    return response;
+  }
+  event.response = toolsListEnvelope(response);
+  event.listedToolNames = collectListedToolNames(tools);
+  event.isError = false;
+  event.duration = Date.now() - startTime.getTime();
+  captureEvent(server, event, data.logger, requestAttribution);
+  return response;
+}
+function cacheToolAnalyticsParameterOwnership(cache, tools) {
+  for (const tool of tools) if (tool?.name) cache.set(tool.name, getAnalyticsParameterOwnership(tool.inputSchema, tool.outputSchema));
+}
+function collectListedToolNames(tools) {
+  if (!tools || 0 === tools.length) return;
+  const names = tools.map((tool) => tool?.name).filter((name) => "string" == typeof name);
+  return names.length > 0 ? names : void 0;
+}
+function toolsListEnvelope(response) {
+  const { tools: _tools, ...envelope } = response;
+  return Object.keys(envelope).length > 0 ? envelope : void 0;
+}
+async function getTracedToolsList(server, originalListToolsHandler, request, extra, event, logger, requestAttribution) {
+  try {
+    const data = getServerTrackingData(server);
+    const originalResponse = await originalListToolsHandler(request, extra);
+    let tools = [
+      ...originalResponse.tools || []
+    ];
+    if (data) {
+      cacheToolAnalyticsParameterOwnership(data.toolAnalyticsParameterOwnership, tools);
+      if (event.sessionId) {
+        const sessionSchemas = data.toolInputSchemas.get(event.sessionId) ?? /* @__PURE__ */ new Map();
+        for (const tool of tools) if (tool?.name) sessionSchemas.set(tool.name, tool.inputSchema);
+        data.toolInputSchemas.set(event.sessionId, sessionSchemas);
+      }
+    }
+    if (data && isContextEnabled(data.options.context)) tools = addContextParameterToTools(tools, getContextDescription(data.options.context), data.logger);
+    if (data) {
+      const isFirstPage = request.params?.cursor == null;
+      const missingToolName = resolveMissingCapabilityToolName(data.options);
+      if (data.options.reportMissing) {
+        const alreadyPresent = tools.some((tool) => tool?.name === missingToolName);
+        if (isFirstPage && alreadyPresent) data.logger(`Warning: Cannot inject missing-capability tool "${missingToolName}" because a real tool already uses that name. The real tool will not be intercepted. To keep missing-capability reports, rename the SDK's tool with the missingCapabilityToolName option.`);
+        else if (isFirstPage) {
+          const virtualTool = getReportMissingToolDescriptor(missingToolName);
+          tools.push(virtualTool);
+          cacheToolAnalyticsParameterOwnership(data.toolAnalyticsParameterOwnership, [
+            virtualTool
+          ]);
+        } else if (alreadyPresent) data.logger(`Warning: A real tool "${missingToolName}" on a later tools/list page is shadowed by the SDK's missing-capability tool. Its calls will be intercepted. Rename the SDK's tool with the missingCapabilityToolName option to keep both.`);
+      }
+      const feedbackOptions = resolveCollectFeedbackOptions(data.options.collectFeedback);
+      if (feedbackOptions) {
+        const feedbackToolName = feedbackOptions.toolName ?? SEND_FEEDBACK_TOOL_NAME;
+        const alreadyPresent = tools.some((tool) => tool?.name === feedbackToolName);
+        if (isFirstPage && alreadyPresent) data.logger(`Warning: Cannot inject agent-feedback tool "${feedbackToolName}" because a real tool already uses that name. The real tool will not be intercepted. To collect feedback alongside it, rename the SDK's tool with collectFeedback: { toolName: "..." }.`);
+        else if (isFirstPage) {
+          const virtualTool = getFeedbackToolDescriptor(feedbackOptions);
+          tools.push(virtualTool);
+          cacheToolAnalyticsParameterOwnership(data.toolAnalyticsParameterOwnership, [
+            virtualTool
+          ]);
+        } else if (alreadyPresent) data.logger(`Warning: A real tool "${feedbackToolName}" on a later tools/list page is shadowed by the SDK's agent-feedback tool. Its calls will be intercepted. Rename the SDK's tool with collectFeedback: { toolName: "..." } to keep both.`);
+      }
+      if (isCaptureModelEnabled(data.options.captureModel)) tools = addModelParameterToTools(tools, getModelDescription(data.options.captureModel), data.logger);
+      if (data.options.enableConversationId) {
+        tools = addConversationIdToTools(tools, data.logger);
+        tools = addInstructionsToOutputSchemas(tools, data.logger);
+      }
+    }
+    if (data) {
+      cacheToolDescriptions(data.toolDescriptions, tools);
+      cacheToolCategories(data.toolCategories, tools);
+    }
+    return {
+      ...originalResponse,
+      tools
+    };
+  } catch (error2) {
+    logger(`Warning: Original list tools handler failed, this suggests an error PostHog MCP analytics did not cause - ${error2}`);
+    event.error = captureException(error2);
+    event.isError = true;
+    event.duration = event.timestamp ? Date.now() - event.timestamp.getTime() : 0;
+    captureEvent(server, event, logger, requestAttribution);
+    throw error2;
+  }
+}
+function cacheToolDescriptions(cache, tools) {
+  if (!tools) return;
+  for (const tool of tools) if (tool?.name && "string" == typeof tool.description) cache.set(tool.name, tool.description);
+}
+function readToolMetaCategory(meta) {
+  const category = meta?.category;
+  return "string" == typeof category && category.length > 0 ? category : void 0;
+}
+function cacheToolCategories(cache, tools) {
+  if (!tools) return;
+  for (const tool of tools) {
+    const category = tool?.name ? readToolMetaCategory(tool._meta) : void 0;
+    if (category) cache.set(tool.name, category);
+  }
+}
+function mintStatelessSessionOnInitialize(server, data, request, extra) {
+  try {
+    const headers = getRequestHeaders(extra);
+    if (!headers) return;
+    if (isModernEraRequest(request, extra, server)) return;
+    if (readMcpSessionHeader(headers)) return;
+    const transport = server.transport;
+    if (!transport || extra?.sessionId || transport.sessionId) return;
+    const sessionId = newSessionId();
+    const clientInfo = readInitializeClientInfo(request);
+    const requestedProtocolVersion = readProtocolVersion(void 0, request);
+    const token = encodeSessionId({
+      sessionId,
+      clientName: clientInfo?.name,
+      clientVersion: clientInfo?.version,
+      protocolVersion: requestedProtocolVersion
+    });
+    if (!writeSessionIdToTransport(transport, token)) return;
+    data.sessionId = sessionId;
+    data.sessionSource = "token";
+    data.sessionInfo.clientName = clientInfo?.name;
+    data.sessionInfo.clientVersion = clientInfo?.version;
+    data.sessionInfo.protocolVersion = requestedProtocolVersion;
+    data.lastActivity = /* @__PURE__ */ new Date();
+    setServerTrackingData(server, data);
+    return sessionId;
+  } catch (error2) {
+    data.logger(`Warning: PostHog MCP analytics failed to mint a stateless session id - ${error2}`);
+    return;
+  }
+}
+function upgradeMintedTokenToNegotiated(server, mintedSessionId, sessionInfo, negotiatedProtocolVersion, logger) {
+  try {
+    const transport = server.transport;
+    if (!transport) return;
+    const token = encodeSessionId({
+      sessionId: mintedSessionId,
+      clientName: sessionInfo.clientName,
+      clientVersion: sessionInfo.clientVersion,
+      protocolVersion: negotiatedProtocolVersion
+    });
+    writeSessionIdToTransport(transport, token);
+  } catch (error2) {
+    logger(`Warning: PostHog MCP analytics failed to upgrade the stateless session token - ${error2}`);
+  }
+}
+function readInitializeClientInfo(request) {
+  const clientInfo = request.params?.clientInfo;
+  if (!clientInfo || "object" != typeof clientInfo) return;
+  const { name, version: version4 } = clientInfo;
+  return {
+    name: "string" == typeof name ? name : void 0,
+    version: "string" == typeof version4 ? version4 : void 0
+  };
+}
+async function handleInitializeRequest(server, originalInitializeHandler, request, extra, logger) {
+  const data = getServerTrackingData(server);
+  if (!data) {
+    logger("Warning: PostHog MCP analytics is unable to find server tracking data. Please ensure you have called instrument(server, options) before using tool calls.");
+    return await originalInitializeHandler(request, extra);
+  }
+  const mintedSessionId = mintStatelessSessionOnInitialize(server, data, request, extra);
+  const sessionId = getSessionId(server, extra);
+  const sessionInfo = getSessionInfo(server, data, sessionId);
+  const initializeClientInfo = readInitializeClientInfo(request);
+  const requestSessionInfo = {
+    ...sessionInfo,
+    clientName: initializeClientInfo?.name ?? sessionInfo.clientName,
+    clientVersion: initializeClientInfo?.version ?? sessionInfo.clientVersion
+  };
+  const event = {
+    sessionId,
+    resourceName: request.params?.name || "Unknown Tool Name",
+    eventType: MCPAnalyticsEventType.mcpInitialize,
+    parameters: buildCapturedMcpParameters(request),
+    timestamp: /* @__PURE__ */ new Date()
+  };
+  stampClientIdentity(event, request, extra, server);
+  if (initializeClientInfo?.name) event.clientName = initializeClientInfo.name;
+  if (initializeClientInfo?.version) event.clientVersion = initializeClientInfo.version;
+  stampTransportIdentity(event, extra);
+  const identity = await handleIdentify(server, data, sessionId, request, requestSessionInfo, extra);
+  const requestAttribution = withIdentity(requestSessionInfo, identity);
+  await applyResolvedMetadata(event, data, request, extra);
+  const result = await originalInitializeHandler(request, extra);
+  event.response = result;
+  const negotiatedProtocolVersion = readProtocolVersion(result, request);
+  event.protocolVersion = negotiatedProtocolVersion;
+  if (data.sessionId === sessionId) {
+    data.sessionInfo = {
+      ...data.sessionInfo,
+      protocolVersion: negotiatedProtocolVersion
+    };
+    setServerTrackingData(server, data);
+  }
+  if (mintedSessionId) upgradeMintedTokenToNegotiated(server, mintedSessionId, requestSessionInfo, negotiatedProtocolVersion, data.logger);
+  captureEvent(server, event, data.logger, {
+    ...requestAttribution,
+    protocolVersion: negotiatedProtocolVersion
+  });
+  return result;
+}
+function readProtocolVersion(result, request) {
+  const negotiated = result?.protocolVersion;
+  if ("string" == typeof negotiated && negotiated.length > 0) return negotiated;
+  const requested = request.params?.protocolVersion;
+  return "string" == typeof requested && requested.length > 0 ? requested : void 0;
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/instrument-lowlevel.mjs
+function instrumentLowLevelServer(server, logger) {
+  try {
+    const hadCallToolHandler = server._requestHandlers.has("tools/call");
+    const traceToolCall = (server2, originalHandler, request, extra) => handleToolCallRequest(server2, originalHandler, request, extra, logger);
+    const handlers = {
+      initialize: (server2, originalHandler, request, extra) => handleInitializeRequest(server2, originalHandler, request, extra, logger),
+      "tools/list": (server2, originalHandler, request, extra) => handleListToolsRequest(server2, originalHandler, request, extra, logger),
+      "tools/call": traceToolCall,
+      "resources/list": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesList, logger),
+      "resources/templates/list": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesList, logger),
+      "resources/read": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesRead, logger)
+    };
+    patchRequestHandlers(server, handlers);
+    if (!hadCallToolHandler) registerFallbackRequestHandler(server, "tools/call", unknownToolHandler, traceToolCall);
+  } catch (error2) {
+    logger(`Warning: Failed to setup tool call instrumentation - ${error2}`);
+    throw error2;
+  }
+}
+async function unknownToolHandler(request) {
+  throw new Error(`Unknown tool: ${request.params?.name || "unknown"}`);
+}
+async function handleToolCallRequest(server, originalCallToolHandler, request, extra, logger) {
+  const data = getServerTrackingData(server);
+  if (!data) {
+    logger("Warning: PostHog MCP analytics is unable to find server tracking data. Please ensure you have called instrument(server, options) before using tool calls.");
+    return await originalCallToolHandler?.(request, extra);
+  }
+  const toolName = request.params?.name;
+  const isMissingCapabilityCandidate = data.options.reportMissing && toolName === resolveMissingCapabilityToolName(data.options);
+  if (isMissingCapabilityCandidate && await isToolAdvertised(server, toolName, extra, data.logger) === false) {
+    const context = getContextArgument2(request) || "";
+    return await captureToolCall({
+      server,
+      data,
+      request,
+      extra,
+      eventType: MCPAnalyticsEventType.mcpMissingCapability,
+      explicitContextIntent: context,
+      parameterOwnership: getAnalyticsParameterOwnership(getReportMissingToolDescriptor(toolName).inputSchema),
+      execute: async () => handleReportMissing({
+        context
+      }, data.logger)
+    });
+  }
+  const feedbackOptions = resolveCollectFeedbackOptions(data.options.collectFeedback);
+  const isFeedbackCandidate = void 0 !== feedbackOptions && toolName === (feedbackOptions.toolName ?? SEND_FEEDBACK_TOOL_NAME);
+  if (isFeedbackCandidate && await isToolAdvertised(server, toolName, extra, data.logger) === false) {
+    const report = parseFeedbackReport(request.params?.arguments, feedbackOptions);
+    return await captureToolCall({
+      server,
+      data,
+      request,
+      extra,
+      eventType: MCPAnalyticsEventType.mcpFeedback,
+      explicitContextIntent: buildFeedbackIntent(report),
+      omitCapturedParameters: true,
+      extraEventProperties: buildFeedbackEventProperties(report),
+      parameterOwnership: getAnalyticsParameterOwnership(getFeedbackToolDescriptor(feedbackOptions).inputSchema),
+      execute: async () => handleFeedback(report, feedbackOptions, data.logger)
+    });
+  }
+  return await captureToolCall({
+    server,
+    data,
+    request,
+    extra,
+    execute: (downstreamRequest) => runOriginalToolHandler(originalCallToolHandler, downstreamRequest, extra)
+  });
+}
+function runOriginalToolHandler(handler, request, extra) {
+  if (!handler) throw new Error(`Unknown tool: ${request.params?.name || "unknown"}`);
+  return handler(request, extra);
+}
+
+// ../../node_modules/@posthog/mcp/dist/extensions/instrument-highlevel.mjs
+var wrappedCallbacks = /* @__PURE__ */ new WeakMap();
+var MCP_ANALYTICS_PROCESSED = /* @__PURE__ */ Symbol("__posthog_mcp_analytics_processed__");
+function isCallbackUpdate(value) {
+  return !!value && "object" == typeof value && "callback" in value && "function" == typeof value.callback;
+}
+function addTracingToToolRegistry(tools, server, logger) {
+  return Object.fromEntries(Object.entries(tools).map(([name, tool]) => [
+    name,
+    addTracingToToolCallbackInternal(tool, name, server, () => tool.inputSchema, logger)
+  ]));
+}
+function setupListenerToRegisteredTools(server, logger) {
+  try {
+    const data = getServerTrackingData(server.server);
+    if (!data) return void logger("Warning: Cannot setup listener - no tracking data found");
+    const handler = {
+      set(target, property, value) {
+        try {
+          if ("string" == typeof property && value && "object" == typeof value && hasToolFunction(value)) {
+            if ("string" == typeof value.description) data.toolDescriptions.set(property, value.description);
+            if (value[MCP_ANALYTICS_PROCESSED]) {
+              logger(`Tool ${String(property)} already processed, skipping proxy wrapping`);
+              return Reflect.set(target, property, value);
+            }
+            if (wrappedCallbacks.has(getToolFunction(value))) {
+              logger(`Tool ${String(property)} callback already wrapped, skipping proxy wrapping`);
+              return Reflect.set(target, property, value);
+            }
+            const getCurrentInputSchema = () => value.inputSchema;
+            const nextValue = addTracingToToolCallbackInternal(value, property, server, getCurrentInputSchema, logger);
+            if ("function" == typeof nextValue.update) {
+              const originalUpdate = nextValue.update;
+              nextValue.update = function(...updateArgs) {
+                if (updateArgs[0]) {
+                  const updateObj = updateArgs[0];
+                  if (isCallbackUpdate(updateObj)) {
+                    const wrappedTool = addTracingToToolCallbackInternal({
+                      callback: updateObj.callback
+                    }, property, server, getCurrentInputSchema, logger);
+                    updateObj.callback = getToolFunction(wrappedTool);
+                  }
+                }
+                return originalUpdate.apply(this, updateArgs);
+              };
+            }
+            return Reflect.set(target, property, nextValue);
+          }
+          return Reflect.set(target, property, value);
+        } catch (error2) {
+          logger(`Warning: Error in proxy set handler for tool ${String(property)} - ${error2}`);
+          return Reflect.set(target, property, value);
+        }
+      },
+      get(target, property) {
+        return Reflect.get(target, property);
+      },
+      deleteProperty(target, property) {
+        return Reflect.deleteProperty(target, property);
+      },
+      has(target, property) {
+        return Reflect.has(target, property);
+      }
+    };
+    const originalTools = server._registeredTools || {};
+    server._registeredTools = new Proxy(originalTools, handler);
+    logger("Successfully set up listener for new tool registrations");
+  } catch (error2) {
+    logger(`Warning: Failed to setup listener for registered tools - ${error2}`);
+  }
+}
+function addTracingToToolCallbackInternal(tool, toolName, server, getCurrentInputSchema, logger) {
+  const originalCallback = getToolFunction(tool);
+  const options = getServerTrackingData(server.server)?.options;
+  if (wrappedCallbacks.has(originalCallback)) {
+    logger(`Tool ${toolName} callback already wrapped, skipping re-wrap`);
+    return tool;
+  }
+  if (tool[MCP_ANALYTICS_PROCESSED]) {
+    logger(`Tool ${toolName} already processed, skipping re-wrap`);
+    return tool;
+  }
+  const wrappedCallback = async (...params) => {
+    let args;
+    let extra;
+    if (2 === params.length) {
+      args = params[0];
+      extra = params[1];
+    } else {
+      args = void 0;
+      extra = params[0];
+    }
+    const inputSchema = getCurrentInputSchema();
+    const cleanedArgs = stripOwnedAnalyticsArguments(args, {
+      context: isContextEnabled(options?.context) && analyticsOwnsParameter(inputSchema, "context"),
+      conversationId: options?.enableConversationId === true && analyticsOwnsParameter(inputSchema, "conversation_id"),
+      llmModel: isCaptureModelEnabled(options?.captureModel) && analyticsOwnsParameter(inputSchema, "llm_model")
+    });
+    try {
+      if (void 0 === cleanedArgs) {
+        const handler2 = originalCallback;
+        return await handler2(extra);
+      }
+      const handler = originalCallback;
+      return await handler(cleanedArgs, extra);
+    } catch (error2) {
+      if (error2 instanceof Error) extra.__mcp_analytics_error = error2;
+      throw error2;
+    }
+  };
+  wrappedCallbacks.set(originalCallback, true);
+  wrappedCallbacks.set(wrappedCallback, true);
+  const wrappedTool = createWrappedTool(tool, wrappedCallback);
+  wrappedTool[MCP_ANALYTICS_PROCESSED] = true;
+  return wrappedTool;
+}
+async function handleToolCallRequest2(highLevelServer, server, originalCallToolHandler, request, extra, logger) {
+  const data = getServerTrackingData(server);
+  if (!data) {
+    logger("Warning: PostHog MCP analytics is unable to find server tracking data. Please ensure you have called instrument(server, options) before using tool calls.");
+    return await originalCallToolHandler(request, extra);
+  }
+  const toolName = request.params?.name;
+  const isMissingCapabilityCandidate = data.options.reportMissing && toolName === resolveMissingCapabilityToolName(data.options);
+  if (isMissingCapabilityCandidate && await isToolAdvertised(server, toolName, extra, data.logger) === false) {
+    const context = getContextArgument2(request) || "";
+    return await captureToolCall({
+      server,
+      data,
+      request,
+      extra,
+      eventType: MCPAnalyticsEventType.mcpMissingCapability,
+      explicitContextIntent: context,
+      parameterOwnership: getAnalyticsParameterOwnership(getReportMissingToolDescriptor(toolName).inputSchema),
+      execute: async () => handleReportMissing({
+        context
+      }, data.logger)
+    });
+  }
+  const feedbackOptions = resolveCollectFeedbackOptions(data.options.collectFeedback);
+  const isFeedbackCandidate = void 0 !== feedbackOptions && toolName === (feedbackOptions.toolName ?? SEND_FEEDBACK_TOOL_NAME);
+  if (isFeedbackCandidate && await isToolAdvertised(server, toolName, extra, data.logger) === false) {
+    const report = parseFeedbackReport(request.params?.arguments, feedbackOptions);
+    return await captureToolCall({
+      server,
+      data,
+      request,
+      extra,
+      eventType: MCPAnalyticsEventType.mcpFeedback,
+      explicitContextIntent: buildFeedbackIntent(report),
+      omitCapturedParameters: true,
+      extraEventProperties: buildFeedbackEventProperties(report),
+      parameterOwnership: getAnalyticsParameterOwnership(getFeedbackToolDescriptor(feedbackOptions).inputSchema),
+      execute: async () => handleFeedback(report, feedbackOptions, data.logger)
+    });
+  }
+  const registeredTool = toolName ? highLevelServer._registeredTools[toolName] : void 0;
+  return await captureToolCall({
+    server,
+    data,
+    request,
+    extra,
+    execute: (downstreamRequest) => originalCallToolHandler(downstreamRequest, extra),
+    parameterOwnership: registeredTool ? getAnalyticsParameterOwnership(registeredTool.inputSchema, registeredTool.outputSchema) : void 0,
+    inputSchema: registeredTool?.inputSchema,
+    takeCapturedError: () => {
+      const captured = extra?.__mcp_analytics_error;
+      if (extra) extra.__mcp_analytics_error = void 0;
+      return captured;
+    }
+  });
+}
+function instrumentHighLevelServer(server, logger) {
+  try {
+    const lowLevelServer = server.server;
+    const mcpAnalyticsData = getServerTrackingData(lowLevelServer);
+    const handlers = {
+      initialize: (trackedServer, originalHandler, request, extra) => handleInitializeRequest(trackedServer, originalHandler, request, extra, logger),
+      "tools/list": (trackedServer, originalHandler, request, extra) => handleListToolsRequest(trackedServer, originalHandler, request, extra, logger),
+      "tools/call": (trackedServer, originalHandler, request, extra) => handleToolCallRequest2(server, trackedServer, originalHandler, request, extra, logger),
+      "resources/list": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesList, logger),
+      "resources/templates/list": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesList, logger),
+      "resources/read": traceResourceRequest(MCPAnalyticsEventType.mcpResourcesRead, logger)
+    };
+    patchRequestHandlers(lowLevelServer, handlers);
+    server._registeredTools = addTracingToToolRegistry(server._registeredTools, server, logger);
+    if (mcpAnalyticsData) {
+      seedToolDescriptionsFromRegistry(mcpAnalyticsData.toolDescriptions, server._registeredTools);
+      seedToolCategoriesFromRegistry(mcpAnalyticsData.toolCategories, server._registeredTools);
+    }
+    setupListenerToRegisteredTools(server, logger);
+  } catch (error2) {
+    logger(`Warning: Failed to setup tool call instrumentation - ${error2}`);
+  }
+}
+function seedToolDescriptionsFromRegistry(cache, tools) {
+  for (const [name, tool] of Object.entries(tools)) if ("string" == typeof tool?.description) cache.set(name, tool.description);
+}
+function seedToolCategoriesFromRegistry(cache, tools) {
+  for (const [name, tool] of Object.entries(tools)) {
+    const category = readToolMetaCategory(tool?._meta);
+    if (category) cache.set(name, category);
+  }
+}
+
+// ../../node_modules/posthog-node/dist/extensions/error-tracking/modifiers/module.node.mjs
+var import_path = require("path");
+function createModulerModifier() {
+  const getModuleFromFileName = createGetModuleFromFilename();
+  return async (frames) => {
+    for (const frame of frames) frame.module = getModuleFromFileName(frame.filename);
+    return frames;
+  };
+}
+function createGetModuleFromFilename(basePath = process.argv[1] ? (0, import_path.dirname)(process.argv[1]) : process.cwd(), isWindows = "\\" === import_path.sep) {
+  const normalizedBase = isWindows ? normalizeWindowsPath(basePath) : basePath;
+  return (filename) => {
+    if (!filename) return;
+    const normalizedFilename = isWindows ? normalizeWindowsPath(filename) : filename;
+    let { dir, base: file, ext } = import_path.posix.parse(normalizedFilename);
+    if (".js" === ext || ".mjs" === ext || ".cjs" === ext) file = file.slice(0, -1 * ext.length);
+    const decodedFile = decodeURIComponent(file);
+    if (!dir) dir = ".";
+    const n = dir.lastIndexOf("/node_modules");
+    if (n > -1) return `${dir.slice(n + 14).replace(/\//g, ".")}:${decodedFile}`;
+    if (dir.startsWith(normalizedBase)) {
+      const moduleName = dir.slice(normalizedBase.length + 1).replace(/\//g, ".");
+      return moduleName ? `${moduleName}:${decodedFile}` : decodedFile;
+    }
+    return decodedFile;
+  };
+}
+function normalizeWindowsPath(path6) {
+  return path6.replace(/^[A-Z]:/, "").replace(/\\/g, "/");
+}
+
+// ../../node_modules/posthog-node/dist/extensions/error-tracking/modifiers/context-lines.node.mjs
+var import_node_fs4 = require("node:fs");
+var import_promises = require("node:fs/promises");
+var import_node_path4 = require("node:path");
+var import_node_readline = require("node:readline");
+var LRU_FILE_CONTENTS_CACHE = new error_tracking_exports.ReduceableCache(25);
+var LRU_FILE_CONTENTS_FS_READ_FAILED = new error_tracking_exports.ReduceableCache(20);
+var DEFAULT_LINES_OF_CONTEXT = 7;
+var MAX_CONTEXTLINES_COLNO = 1e3;
+var MAX_CONTEXTLINES_LINENO = 1e4;
+var MAX_CONTEXTLINES_FILE_SIZE = 10485760;
+async function addSourceContext(frames, openSourceFile = import_promises.open, logger) {
+  const filesToLines = {};
+  let basePath;
+  try {
+    basePath = process.cwd();
+  } catch {
+  }
+  for (let i = frames.length - 1; i >= 0; i--) {
+    const frame = frames[i];
+    const filename = frame?.filename;
+    if (!frame || "string" != typeof filename || "number" != typeof frame.lineno || shouldSkipContextLinesForFile(filename) || shouldSkipContextLinesForFrame(frame)) continue;
+    if (!(0, import_node_path4.isAbsolute)(filename) && void 0 === basePath) continue;
+    const filesToLinesOutput = filesToLines[filename];
+    if (!filesToLinesOutput) filesToLines[filename] = [];
+    filesToLines[filename].push(frame.lineno);
+  }
+  const files = Object.keys(filesToLines);
+  if (0 == files.length) return frames;
+  const readlinePromises = [];
+  for (const file of files) {
+    const cacheKey = makeSourceCacheKey(file, basePath);
+    if (void 0 === cacheKey) continue;
+    if (LRU_FILE_CONTENTS_FS_READ_FAILED.get(cacheKey)) continue;
+    const filesToLineRanges = filesToLines[file];
+    if (!filesToLineRanges) continue;
+    filesToLineRanges.sort((a, b) => a - b);
+    const ranges = makeLineReaderRanges(filesToLineRanges);
+    if (ranges.every((r) => rangeExistsInContentCache(cacheKey, r))) continue;
+    const cache = emplace(LRU_FILE_CONTENTS_CACHE, cacheKey, {});
+    readlinePromises.push(getContextLinesFromFile(file, ranges, cache, cacheKey, openSourceFile, logger));
+  }
+  await Promise.all(readlinePromises).catch(() => {
+  });
+  if (frames && frames.length > 0) addSourceContextToFrames(frames, LRU_FILE_CONTENTS_CACHE, basePath);
+  LRU_FILE_CONTENTS_CACHE.reduce();
+  return frames;
+}
+async function openRegularSourceFile(path6, openSourceFile, logger) {
+  let fileHandle;
+  let isValid2 = false;
+  try {
+    fileHandle = await openSourceFile(path6, import_node_fs4.constants.O_RDONLY | import_node_fs4.constants.O_NONBLOCK);
+    const fileStat = await fileHandle.stat();
+    if (!fileStat.isFile()) return;
+    if (fileStat.size > MAX_CONTEXTLINES_FILE_SIZE) return void logger?.debug(`Skipping source context for oversized file ${path6}: ${fileStat.size} bytes exceeds ${MAX_CONTEXTLINES_FILE_SIZE}`);
+    isValid2 = true;
+    return fileHandle;
+  } catch {
+    return;
+  } finally {
+    if (fileHandle && !isValid2) await fileHandle.close().catch(() => {
+    });
+  }
+}
+async function getContextLinesFromFile(path6, ranges, output, cacheKey, openSourceFile, logger) {
+  const fileHandle = await openRegularSourceFile(path6, openSourceFile, logger);
+  if (void 0 === fileHandle) return void LRU_FILE_CONTENTS_FS_READ_FAILED.set(cacheKey, 1);
+  const openedFileHandle = fileHandle;
+  return new Promise((resolve2) => {
+    let finished = false;
+    function destroyStreamAndResolve(stream2) {
+      if (finished) return;
+      finished = true;
+      stream2?.destroy();
+      openedFileHandle.close().then(resolve2, resolve2);
+    }
+    let stream;
+    try {
+      stream = openedFileHandle.createReadStream({
+        autoClose: false,
+        start: 0,
+        end: MAX_CONTEXTLINES_FILE_SIZE - 1
+      });
+    } catch {
+      LRU_FILE_CONTENTS_FS_READ_FAILED.set(cacheKey, 1);
+      destroyStreamAndResolve();
+      return;
+    }
+    let lineReaded;
+    try {
+      lineReaded = (0, import_node_readline.createInterface)({
+        input: stream
+      });
+    } catch {
+      LRU_FILE_CONTENTS_FS_READ_FAILED.set(cacheKey, 1);
+      destroyStreamAndResolve(stream);
+      return;
+    }
+    let lineNumber = 0;
+    let currentRangeIndex = 0;
+    const range = ranges[currentRangeIndex];
+    if (void 0 === range) return void destroyStreamAndResolve(stream);
+    let rangeStart = range[0];
+    let rangeEnd = range[1];
+    function onStreamError() {
+      LRU_FILE_CONTENTS_FS_READ_FAILED.set(cacheKey, 1);
+      lineReaded.close();
+      lineReaded.removeAllListeners();
+      destroyStreamAndResolve(stream);
+    }
+    stream.on("error", onStreamError);
+    lineReaded.on("error", onStreamError);
+    lineReaded.on("close", () => destroyStreamAndResolve(stream));
+    lineReaded.on("line", (line) => {
+      lineNumber++;
+      if (lineNumber < rangeStart) return;
+      output[lineNumber] = snipLine(line, 0);
+      if (lineNumber >= rangeEnd) {
+        if (currentRangeIndex === ranges.length - 1) {
+          lineReaded.close();
+          lineReaded.removeAllListeners();
+          return;
+        }
+        currentRangeIndex++;
+        const range2 = ranges[currentRangeIndex];
+        if (void 0 === range2) {
+          lineReaded.close();
+          lineReaded.removeAllListeners();
+          return;
+        }
+        rangeStart = range2[0];
+        rangeEnd = range2[1];
+      }
+    });
+  });
+}
+function addSourceContextToFrames(frames, cache, basePath) {
+  for (const frame of frames) if (frame.filename && void 0 === frame.context_line && "number" == typeof frame.lineno) {
+    const cacheKey = makeSourceCacheKey(frame.filename, basePath);
+    const contents = void 0 === cacheKey ? void 0 : cache.get(cacheKey);
+    if (void 0 === contents) continue;
+    addContextToFrame(frame.lineno, frame, contents);
+  }
+}
+function addContextToFrame(lineno, frame, contents) {
+  if (void 0 === frame.lineno || void 0 === contents) return;
+  frame.pre_context = [];
+  for (let i = makeRangeStart(lineno); i < lineno; i++) {
+    const line = contents[i];
+    if (void 0 === line) return void clearLineContext(frame);
+    frame.pre_context.push(line);
+  }
+  if (void 0 === contents[lineno]) return void clearLineContext(frame);
+  frame.context_line = contents[lineno];
+  const end = makeRangeEnd(lineno);
+  frame.post_context = [];
+  for (let i = lineno + 1; i <= end; i++) {
+    const line = contents[i];
+    if (void 0 === line) break;
+    frame.post_context.push(line);
+  }
+}
+function clearLineContext(frame) {
+  delete frame.pre_context;
+  delete frame.context_line;
+  delete frame.post_context;
+}
+function shouldSkipContextLinesForFile(path6) {
+  return path6.startsWith("node:") || path6.endsWith(".min.js") || path6.endsWith(".min.cjs") || path6.endsWith(".min.mjs") || path6.startsWith("data:");
+}
+function shouldSkipContextLinesForFrame(frame) {
+  if (void 0 !== frame.lineno && frame.lineno > MAX_CONTEXTLINES_LINENO) return true;
+  if (void 0 !== frame.colno && frame.colno > MAX_CONTEXTLINES_COLNO) return true;
+  return false;
+}
+function makeSourceCacheKey(path6, basePath) {
+  if ((0, import_node_path4.isAbsolute)(path6)) return JSON.stringify([
+    null,
+    path6
+  ]);
+  return void 0 === basePath ? void 0 : JSON.stringify([
+    basePath,
+    path6
+  ]);
+}
+function rangeExistsInContentCache(cacheKey, range) {
+  const contents = LRU_FILE_CONTENTS_CACHE.get(cacheKey);
+  if (void 0 === contents) return false;
+  for (let i = range[0]; i <= range[1]; i++) if (void 0 === contents[i]) return false;
+  return true;
+}
+function makeLineReaderRanges(lines) {
+  if (!lines.length) return [];
+  let i = 0;
+  const line = lines[0];
+  if ("number" != typeof line) return [];
+  let current = makeContextRange(line);
+  const out = [];
+  while (true) {
+    if (i === lines.length - 1) {
+      out.push(current);
+      break;
+    }
+    const next = lines[i + 1];
+    if ("number" != typeof next) break;
+    if (next <= current[1]) current[1] = next + DEFAULT_LINES_OF_CONTEXT;
+    else {
+      out.push(current);
+      current = makeContextRange(next);
+    }
+    i++;
+  }
+  return out;
+}
+function makeContextRange(line) {
+  return [
+    makeRangeStart(line),
+    makeRangeEnd(line)
+  ];
+}
+function makeRangeStart(line) {
+  return Math.max(1, line - DEFAULT_LINES_OF_CONTEXT);
+}
+function makeRangeEnd(line) {
+  return line + DEFAULT_LINES_OF_CONTEXT;
+}
+function emplace(map, key, contents) {
+  const value = map.get(key);
+  if (void 0 === value) {
+    map.set(key, contents);
+    return contents;
+  }
+  return value;
+}
+function snipLine(line, colno) {
+  let newLine = line;
+  const lineLength = newLine.length;
+  if (lineLength <= 150) return newLine;
+  if (colno > lineLength) colno = lineLength;
+  let start = Math.max(colno - 60, 0);
+  if (start < 5) start = 0;
+  let end = Math.min(start + 140, lineLength);
+  if (end > lineLength - 5) end = lineLength;
+  if (end === lineLength) start = Math.max(end - 140, 0);
+  newLine = newLine.slice(start, end);
+  if (start > 0) newLine = `...${newLine}`;
+  if (end < lineLength) newLine += "...";
+  return newLine;
+}
+
+// ../../node_modules/posthog-node/dist/extensions/error-tracking/modifiers/relative-path.node.mjs
+var import_path2 = require("path");
+function createRelativePathModifier(basePath = process.cwd()) {
+  const isWindows = "\\" === import_path2.sep;
+  const toUnix = (p) => isWindows ? p.replace(/\\/g, "/") : p;
+  const normalizedBase = toUnix(basePath);
+  return async (frames) => {
+    for (const frame of frames) if (!(!frame.filename || frame.filename.startsWith("node:") || frame.filename.startsWith("data:"))) {
+      if ((0, import_path2.isAbsolute)(frame.filename)) frame.filename = toUnix((0, import_path2.relative)(normalizedBase, toUnix(frame.filename)));
+    }
+    return frames;
+  };
+}
+
+// ../../node_modules/posthog-node/dist/version.mjs
+var version3 = "5.55.0";
+
+// ../../node_modules/posthog-node/dist/types.mjs
+var FeatureFlagError2 = {
+  ERRORS_WHILE_COMPUTING: "errors_while_computing_flags",
+  FLAG_MISSING: "flag_missing",
+  QUOTA_LIMITED: "quota_limited",
+  UNKNOWN_ERROR: "unknown_error"
+};
+
+// ../../node_modules/posthog-node/dist/feature-flag-evaluations.mjs
+var FeatureFlagEvaluations = class _FeatureFlagEvaluations {
+  constructor(init) {
+    this._host = init.host;
+    this._distinctId = init.distinctId;
+    this._groups = init.groups;
+    this._disableGeoip = init.disableGeoip;
+    this._flags = init.flags;
+    this._requestId = init.requestId;
+    this._evaluatedAt = init.evaluatedAt;
+    this._flagDefinitionsLoadedAt = init.flagDefinitionsLoadedAt;
+    this._errorsWhileComputing = init.errorsWhileComputing ?? false;
+    this._quotaLimited = init.quotaLimited ?? false;
+    this._accessed = init.accessed ?? /* @__PURE__ */ new Set();
+    this._isSlice = init.isSlice ?? false;
+  }
+  isEnabled(key, options = {}) {
+    const flag = this._flags[key];
+    this._recordAccess(key);
+    return flag?.enabled ?? options.defaultValue ?? false;
+  }
+  getFlag(key) {
+    const flag = this._flags[key];
+    this._recordAccess(key);
+    if (!flag) return;
+    if (!flag.enabled) return false;
+    return flag.variant ?? true;
+  }
+  getFlagPayload(key) {
+    return this._flags[key]?.payload;
+  }
+  onlyAccessed() {
+    const filtered = {};
+    for (const key of this._accessed) {
+      const flag = this._flags[key];
+      if (flag) filtered[key] = flag;
+    }
+    return this._cloneWith(filtered);
+  }
+  only(keys) {
+    const filtered = {};
+    const missing = [];
+    for (const key of keys) {
+      const flag = this._flags[key];
+      if (flag) filtered[key] = flag;
+      else missing.push(key);
+    }
+    if (missing.length > 0) this._host.logWarning(`FeatureFlagEvaluations.only() was called with flag keys that are not in the evaluation set and will be dropped: ${missing.join(", ")}`);
+    return this._cloneWith(filtered);
+  }
+  get keys() {
+    return Object.keys(this._flags);
+  }
+  _getEventProperties() {
+    const properties = {};
+    const activeFlags = [];
+    for (const [key, flag] of Object.entries(this._flags)) {
+      const value = false === flag.enabled ? false : flag.variant ?? true;
+      properties[`$feature/${key}`] = value;
+      if (flag.enabled) activeFlags.push(key);
+    }
+    if (activeFlags.length > 0) {
+      activeFlags.sort();
+      properties["$active_feature_flags"] = activeFlags;
+    }
+    return properties;
+  }
+  _cloneWith(flags) {
+    return new _FeatureFlagEvaluations({
+      host: this._host,
+      distinctId: this._distinctId,
+      groups: this._groups,
+      disableGeoip: this._disableGeoip,
+      flags,
+      requestId: this._requestId,
+      evaluatedAt: this._evaluatedAt,
+      flagDefinitionsLoadedAt: this._flagDefinitionsLoadedAt,
+      errorsWhileComputing: this._errorsWhileComputing,
+      quotaLimited: this._quotaLimited,
+      accessed: new Set(this._accessed),
+      isSlice: true
+    });
+  }
+  _recordAccess(key) {
+    this._accessed.add(key);
+    if ("" === this._distinctId) return;
+    if (this._isSlice && !(key in this._flags)) return;
+    const flag = this._flags[key];
+    const response = void 0 === flag ? void 0 : false === flag.enabled ? false : flag.variant ?? true;
+    const properties = {
+      $feature_flag: key,
+      $feature_flag_response: response,
+      $feature_flag_id: flag?.id,
+      $feature_flag_version: flag?.version,
+      $feature_flag_reason: flag?.reason,
+      locally_evaluated: flag?.locallyEvaluated ?? false,
+      [`$feature/${key}`]: response,
+      $feature_flag_request_id: this._requestId,
+      $feature_flag_evaluated_at: flag?.locallyEvaluated ? Date.now() : this._evaluatedAt
+    };
+    if (flag?.hasExperiment !== void 0) properties.$feature_flag_has_experiment = flag.hasExperiment;
+    if (flag?.locallyEvaluated && void 0 !== this._flagDefinitionsLoadedAt) properties.$feature_flag_definitions_loaded_at = this._flagDefinitionsLoadedAt;
+    const errors = [];
+    if (this._errorsWhileComputing) errors.push(FeatureFlagError2.ERRORS_WHILE_COMPUTING);
+    if (this._quotaLimited) errors.push(FeatureFlagError2.QUOTA_LIMITED);
+    if (void 0 === flag) errors.push(FeatureFlagError2.FLAG_MISSING);
+    if (errors.length > 0) properties.$feature_flag_error = errors.join(",");
+    this._host.captureFlagCalledEventIfNeeded({
+      distinctId: this._distinctId,
+      key,
+      response,
+      groups: this._groups,
+      disableGeoip: this._disableGeoip,
+      properties
+    });
+  }
+};
+
+// ../../node_modules/posthog-node/dist/extensions/feature-flags/feature-flags.mjs
+var SIXTY_SECONDS = 6e4;
+function normalizeEvaluationRuntime(value) {
+  return "client" === value || "server" === value ? value : "all";
+}
+function evaluationRuntimesMatch(a, b) {
+  return a === b || "all" === a || "all" === b;
+}
+var ClientError = class _ClientError extends Error {
+  constructor(message) {
+    super();
+    Error.captureStackTrace(this, this.constructor);
+    this.name = "ClientError";
+    this.message = message;
+    Object.setPrototypeOf(this, _ClientError.prototype);
+  }
+};
+function setCustomErrorPrototype(error2, constructor) {
+  error2.name = constructor.name;
+  Error.captureStackTrace(error2, constructor);
+  Object.setPrototypeOf(error2, constructor.prototype);
+}
+var RequiresServerEvaluation = class _RequiresServerEvaluation extends Error {
+  constructor(message) {
+    super(message);
+    setCustomErrorPrototype(this, _RequiresServerEvaluation);
+  }
+};
+var FeatureFlagsPoller = class {
+  constructor({ pollingInterval, personalApiKey, projectApiKey, timeout, host, customHeaders, ...options }) {
+    this.debugMode = false;
+    this.shouldBeginExponentialBackoff = false;
+    this.backOffCount = 0;
+    this.pollerStopped = false;
+    this.filteredOutFlagKeys = /* @__PURE__ */ new Set();
+    this.pollingInterval = pollingInterval;
+    this.personalApiKey = personalApiKey;
+    this.featureFlags = [];
+    this.featureFlagsByKey = {};
+    this.groupTypeMapping = {};
+    this.cohorts = {};
+    this.loadedSuccessfullyOnce = false;
+    this.timeout = timeout;
+    this.projectApiKey = projectApiKey;
+    this.host = host;
+    this.poller = void 0;
+    this.fetch = options.fetch || fetch;
+    this.onError = options.onError;
+    this.customHeaders = customHeaders;
+    this.onLoad = options.onLoad;
+    this.onMinimalFlagCalledEvents = options.onMinimalFlagCalledEvents;
+    this.cacheProvider = options.cacheProvider;
+    this.strictLocalEvaluation = options.strictLocalEvaluation ?? false;
+    this.evaluationContexts = options.evaluationContexts;
+    this.loadFeatureFlags();
+  }
+  debug(enabled = true) {
+    this.debugMode = enabled;
+  }
+  logMsgIfDebug(fn) {
+    if (this.debugMode) fn();
+  }
+  withEvaluationSnapshot(context) {
+    if (context.definitions) return context;
+    return {
+      ...context,
+      evaluationCache: {},
+      definitions: {
+        featureFlagsByKey: this.featureFlagsByKey,
+        groupTypeMapping: this.groupTypeMapping,
+        cohorts: this.cohorts,
+        filteredOutFlagKeys: this.filteredOutFlagKeys,
+        propertyMatchingVersion: this.propertyMatchingVersion
+      }
+    };
+  }
+  createEvaluationContext(distinctId, groups = {}, personProperties = {}, groupProperties = {}, evaluationCache = {}) {
+    return {
+      distinctId,
+      groups,
+      personProperties,
+      groupProperties,
+      evaluationCache
+    };
+  }
+  async getFeatureFlag(key, distinctId, groups = {}, personProperties = {}, groupProperties = {}) {
+    await this.loadFeatureFlags();
+    let response;
+    let featureFlag;
+    if (!this.loadedSuccessfullyOnce) return response;
+    featureFlag = this.featureFlagsByKey[key];
+    if (void 0 !== featureFlag) {
+      const evaluationContext = this.createEvaluationContext(distinctId, groups, personProperties, groupProperties);
+      try {
+        const result = await this.computeFlagAndPayloadLocally(featureFlag, evaluationContext);
+        response = result.value;
+        this.logMsgIfDebug(() => console.debug(`Successfully computed flag locally: ${key} -> ${response}`));
+      } catch (e) {
+        if (e instanceof RequiresServerEvaluation || e instanceof InconclusiveMatchError) this.logMsgIfDebug(() => console.debug(`${e.name} when computing flag locally: ${key}: ${e.message}`));
+        else if (e instanceof Error) this.onError?.(new Error(`Error computing flag locally: ${key}: ${e}`));
+      }
+    }
+    return response;
+  }
+  async getAllFlagsAndPayloads(evaluationContext, flagKeysToExplicitlyEvaluate) {
+    await this.loadFeatureFlags();
+    const response = {};
+    const payloads = {};
+    let fallbackToFlags = 0 == this.featureFlags.length;
+    const flagsToEvaluate = flagKeysToExplicitlyEvaluate ? flagKeysToExplicitlyEvaluate.map((key) => this.featureFlagsByKey[key]).filter(Boolean) : this.featureFlags;
+    const sharedEvaluationContext = this.withEvaluationSnapshot({
+      ...evaluationContext,
+      definitions: void 0
+    });
+    await Promise.all(flagsToEvaluate.map(async (flag) => {
+      try {
+        const { value: matchValue, payload: matchPayload } = await this.computeFlagAndPayloadLocally(flag, sharedEvaluationContext, {
+          skipLoadCheck: true
+        });
+        response[flag.key] = matchValue;
+        if (matchPayload) payloads[flag.key] = matchPayload;
+      } catch (e) {
+        if (e instanceof RequiresServerEvaluation || e instanceof InconclusiveMatchError) this.logMsgIfDebug(() => console.debug(`${e.name} when computing flag locally: ${flag.key}: ${e.message}`));
+        else if (e instanceof Error) this.onError?.(new Error(`Error computing flag locally: ${flag.key}: ${e}`));
+        fallbackToFlags = true;
+      }
+    }));
+    return {
+      response,
+      payloads,
+      fallbackToFlags
+    };
+  }
+  async computeFlagAndPayloadLocally(flag, evaluationContext, options = {}) {
+    const { matchValue, skipLoadCheck = false } = options;
+    if (this.loadedSuccessfullyOnce) evaluationContext = this.withEvaluationSnapshot(evaluationContext);
+    if (!skipLoadCheck) await this.loadFeatureFlags();
+    if (!this.loadedSuccessfullyOnce) return {
+      value: false,
+      payload: null
+    };
+    evaluationContext = this.withEvaluationSnapshot(evaluationContext);
+    flag = evaluationContext.definitions.featureFlagsByKey[flag.key] ?? flag;
+    let flagValue;
+    flagValue = void 0 !== matchValue ? matchValue : await this.computeFlagValueLocally(flag, evaluationContext);
+    const payload = resolveFeatureFlagPayload(flag.filters?.payloads, flagValue);
+    return {
+      value: flagValue,
+      payload
+    };
+  }
+  async computeFlagValueLocally(flag, evaluationContext) {
+    const { distinctId, groups, personProperties, groupProperties } = evaluationContext;
+    if (!flag.active) return false;
+    if (flag.ensure_experience_continuity) throw new InconclusiveMatchError("Flag has experience continuity enabled");
+    const flagFilters = flag.filters || {};
+    const aggregation_group_type_index = flagFilters.aggregation_group_type_index;
+    if (void 0 != aggregation_group_type_index) {
+      const groupName = evaluationContext.definitions.groupTypeMapping[String(aggregation_group_type_index)];
+      if (!groupName) {
+        this.logMsgIfDebug(() => console.warn(`[FEATURE FLAGS] Unknown group type index ${aggregation_group_type_index} for feature flag ${flag.key}`));
+        throw new InconclusiveMatchError("Flag has unknown group type index");
+      }
+      if (!(groupName in groups)) {
+        this.logMsgIfDebug(() => console.warn(`[FEATURE FLAGS] Can't compute group feature flag: ${flag.key} without group names passed in`));
+        return false;
+      }
+      if ("device_id" === flag.bucketing_identifier && (personProperties?.$device_id === void 0 || personProperties?.$device_id === null || personProperties?.$device_id === "")) this.logMsgIfDebug(() => console.warn(`[FEATURE FLAGS] Ignoring bucketing_identifier for group flag: ${flag.key}`));
+      const focusedGroupProperties = groupProperties[groupName];
+      return await this.matchFeatureFlagProperties(flag, groups[groupName], focusedGroupProperties, evaluationContext);
+    }
+    {
+      const bucketingValue = this.getBucketingValueForFlag(flag, distinctId, personProperties);
+      if (void 0 === bucketingValue) {
+        this.logMsgIfDebug(() => console.warn(`[FEATURE FLAGS] Can't compute feature flag: ${flag.key} without $device_id, falling back to server evaluation`));
+        throw new InconclusiveMatchError(`Can't compute feature flag: ${flag.key} without $device_id`);
+      }
+      return await this.matchFeatureFlagProperties(flag, bucketingValue, personProperties, evaluationContext);
+    }
+  }
+  getBucketingValueForFlag(flag, distinctId, properties) {
+    if (flag.filters?.aggregation_group_type_index != void 0) return distinctId;
+    if ("device_id" === flag.bucketing_identifier) {
+      const deviceId = properties?.$device_id;
+      if (null == deviceId || "" === deviceId) return;
+      return deviceId;
+    }
+    return distinctId;
+  }
+  async evaluateFlagDependency(property, properties, evaluationContext) {
+    const { evaluationCache } = evaluationContext;
+    const targetFlagKey = property.key;
+    if (!evaluationContext.definitions.featureFlagsByKey) throw new InconclusiveMatchError("Feature flags not available for dependency evaluation");
+    if (!("dependency_chain" in property)) throw new InconclusiveMatchError(`Flag dependency property for '${targetFlagKey}' is missing required 'dependency_chain' field`);
+    const dependencyChain = property.dependency_chain;
+    if (!Array.isArray(dependencyChain)) throw new InconclusiveMatchError(`Flag dependency property for '${targetFlagKey}' has an invalid 'dependency_chain' (expected array, got ${typeof dependencyChain})`);
+    if (0 === dependencyChain.length) throw new InconclusiveMatchError(`Circular dependency detected for flag '${targetFlagKey}' (empty dependency chain)`);
+    for (const depFlagKey of dependencyChain) {
+      if (!(depFlagKey in evaluationCache)) {
+        const depFlag = evaluationContext.definitions.featureFlagsByKey[depFlagKey];
+        if (depFlag) if (depFlag.active) try {
+          const depResult = await this.computeFlagValueLocally(depFlag, evaluationContext);
+          evaluationCache[depFlagKey] = depResult;
+        } catch (error2) {
+          throw new InconclusiveMatchError(`Error evaluating flag dependency '${depFlagKey}' for flag '${targetFlagKey}': ${error2}`);
+        }
+        else evaluationCache[depFlagKey] = false;
+        else if (evaluationContext.definitions.filteredOutFlagKeys.has(depFlagKey)) evaluationCache[depFlagKey] = false;
+        else throw new InconclusiveMatchError(`Missing flag dependency '${depFlagKey}' for flag '${targetFlagKey}'`);
+      }
+      const cachedResult = evaluationCache[depFlagKey];
+      if (null == cachedResult) throw new InconclusiveMatchError(`Dependency '${depFlagKey}' could not be evaluated`);
+    }
+    const targetFlagValue = evaluationCache[targetFlagKey];
+    return this.flagEvaluatesToExpectedValue(property.value, targetFlagValue);
+  }
+  flagEvaluatesToExpectedValue(expectedValue, flagValue) {
+    if ("boolean" == typeof expectedValue) return expectedValue === flagValue || "string" == typeof flagValue && "" !== flagValue && true === expectedValue;
+    if ("string" == typeof expectedValue) return flagValue === expectedValue;
+    return false;
+  }
+  async matchFeatureFlagProperties(flag, bucketingValue, properties, evaluationContext) {
+    evaluationContext = this.withEvaluationSnapshot(evaluationContext);
+    const flagFilters = flag.filters || {};
+    const holdoutVariant = await getHoldoutVariant(flagFilters.holdout, bucketingValue);
+    if (void 0 !== holdoutVariant) return holdoutVariant;
+    const flagConditions = flagFilters.groups || [];
+    const flagAggregation = flagFilters.aggregation_group_type_index;
+    const earlyExitEnabled = flagFilters.early_exit ?? false;
+    const { groups, groupProperties } = evaluationContext;
+    let isInconclusive = false;
+    let result;
+    for (const condition of flagConditions) try {
+      const conditionAggregation = void 0 !== condition.aggregation_group_type_index ? condition.aggregation_group_type_index : flagAggregation;
+      let effectiveProperties = properties;
+      let effectiveBucketingValue = bucketingValue;
+      if (conditionAggregation !== flagAggregation) {
+        if (null != conditionAggregation) {
+          const groupName = evaluationContext.definitions.groupTypeMapping[String(conditionAggregation)];
+          if (!groupName || !(groupName in groups)) {
+            this.logMsgIfDebug(() => console.debug(`[FEATURE FLAGS] Skipping group condition for flag '${flag.key}': group type index ${conditionAggregation} not available`));
+            continue;
+          }
+          if (!(groupName in groupProperties)) {
+            isInconclusive = true;
+            continue;
+          }
+          effectiveProperties = groupProperties[groupName];
+          effectiveBucketingValue = groups[groupName];
+        }
+      }
+      const matchResult = await this.isConditionMatch(flag, effectiveBucketingValue, condition, effectiveProperties, evaluationContext);
+      if ("match" === matchResult) {
+        const variantOverride = condition.variant;
+        const flagVariants = flagFilters.multivariate?.variants || [];
+        result = variantOverride && flagVariants.some((variant) => variant.key === variantOverride) ? variantOverride : await this.getMatchingVariant(flag, effectiveBucketingValue) || true;
+        break;
+      }
+      if (earlyExitEnabled && "out_of_rollout_bound" === matchResult) {
+        if (isInconclusive) break;
+        return false;
+      }
+    } catch (e) {
+      if (e instanceof RequiresServerEvaluation) throw e;
+      if (e instanceof InconclusiveMatchError) isInconclusive = true;
+      else throw e;
+    }
+    if (void 0 !== result) return result;
+    if (isInconclusive) throw new InconclusiveMatchError("Can't determine if feature flag is enabled or not with given properties");
+    return false;
+  }
+  async isConditionMatch(flag, bucketingValue, condition, properties, evaluationContext) {
+    evaluationContext = this.withEvaluationSnapshot(evaluationContext);
+    const definitions = evaluationContext.definitions;
+    const rolloutPercentage = condition.rollout_percentage;
+    const warnFunction = (msg) => {
+      this.logMsgIfDebug(() => console.warn(msg));
+    };
+    if ((condition.properties || []).length > 0) {
+      for (const prop of condition.properties) {
+        const propertyType = prop.type;
+        let matches = false;
+        if ("cohort" === propertyType) {
+          const inCohort = await matchCohort(prop, properties, definitions.cohorts, this.debugMode, (depProp) => this.evaluateFlagDependency(depProp, properties, evaluationContext), definitions.propertyMatchingVersion);
+          matches = "not_in" === prop.operator ? !inCohort : inCohort;
+        } else matches = "flag" === propertyType ? await this.evaluateFlagDependency(prop, properties, evaluationContext) : matchProperty(prop, properties, warnFunction, definitions.propertyMatchingVersion);
+        if (!matches) return "no_match";
+      }
+      if (void 0 == rolloutPercentage) return "match";
+    }
+    if (void 0 != rolloutPercentage && await getFeatureFlagHash(flag.key, bucketingValue) > rolloutPercentage / 100) return "out_of_rollout_bound";
+    return "match";
+  }
+  async getMatchingVariant(flag, bucketingValue) {
+    return getFeatureFlagVariant(flag.key, bucketingValue, flag.filters?.multivariate?.variants || []);
+  }
+  variantLookupTable(flag) {
+    return getFeatureFlagVariantLookupTable(flag.filters?.multivariate?.variants || []);
+  }
+  filterFlagsByEvaluationContexts(flags) {
+    if (!this.evaluationContexts || 0 === this.evaluationContexts.length) return flags;
+    const contexts = new Set(this.evaluationContexts);
+    return flags.filter((flag) => {
+      const tags = flag.evaluation_contexts ?? flag.evaluation_tags;
+      if (!tags || 0 === tags.length) return true;
+      return tags.some((tag) => contexts.has(tag));
+    });
+  }
+  getEvaluationRuntimeForFlag(key) {
+    const flag = this.featureFlagsByKey[key];
+    return flag ? normalizeEvaluationRuntime(flag.evaluation_runtime) : void 0;
+  }
+  getFlagKeysByEvaluationRuntime(runtime) {
+    return this.featureFlags.filter((flag) => evaluationRuntimesMatch(normalizeEvaluationRuntime(flag.evaluation_runtime), runtime)).map((flag) => flag.key);
+  }
+  updateFlagState(flagData) {
+    const flags = this.filterFlagsByEvaluationContexts(flagData.flags);
+    this.featureFlags = flags;
+    this.featureFlagsByKey = flags.reduce((acc, curr) => (acc[curr.key] = curr, acc), {});
+    const keptKeys = new Set(flags.map((flag) => flag.key));
+    this.filteredOutFlagKeys = new Set(flagData.flags.filter((flag) => !keptKeys.has(flag.key)).map((flag) => flag.key));
+    this.groupTypeMapping = flagData.group_type_mapping ?? flagData.groupTypeMapping ?? {};
+    this.cohorts = flagData.cohorts;
+    this.propertyMatchingVersion = flagData.property_matching_version ?? flagData.propertyMatchingVersion;
+    this.loadedSuccessfullyOnce = true;
+    this.onMinimalFlagCalledEvents?.((flagData.minimal_flag_called_events ?? flagData.minimalFlagCalledEvents) === true);
+  }
+  warnAboutExperienceContinuityFlags(flags) {
+    if (this.strictLocalEvaluation) return;
+    const experienceContinuityFlags = flags.filter((f) => f.ensure_experience_continuity);
+    if (experienceContinuityFlags.length > 0) console.warn(`[PostHog] You are using local evaluation but ${experienceContinuityFlags.length} flag(s) have experience continuity enabled: ${experienceContinuityFlags.map((f) => f.key).join(", ")}. Experience continuity is incompatible with local evaluation and will cause a server request on every flag evaluation, negating local evaluation cost savings. To avoid server requests and unexpected costs, either disable experience continuity on these flags in PostHog, use strictLocalEvaluation: true in client init, or pass onlyEvaluateLocally: true per flag call (flags that cannot be evaluated locally will return undefined).`);
+  }
+  async loadFromCache(debugMessage) {
+    if (!this.cacheProvider) return false;
+    try {
+      const cached2 = await this.cacheProvider.getFlagDefinitions();
+      if (cached2) {
+        this.updateFlagState(cached2);
+        this.logMsgIfDebug(() => console.debug(`[FEATURE FLAGS] ${debugMessage} (${cached2.flags.length} flags)`));
+        this.onLoad?.(this.featureFlags.length);
+        this.warnAboutExperienceContinuityFlags(this.featureFlags);
+        return true;
+      }
+      return false;
+    } catch (err) {
+      this.onError?.(new Error(`Failed to load from cache: ${err}`));
+      return false;
+    }
+  }
+  async loadFeatureFlags(forceReload = false) {
+    if (this.loadedSuccessfullyOnce && !forceReload) return;
+    if (!forceReload && this.nextFetchAllowedAt && Date.now() < this.nextFetchAllowedAt) return void this.logMsgIfDebug(() => console.debug("[FEATURE FLAGS] Skipping fetch, in backoff period"));
+    if (!this.loadingPromise) this.loadingPromise = this._loadFeatureFlags().catch((err) => this.logMsgIfDebug(() => console.debug(`[FEATURE FLAGS] Failed to load feature flags: ${err}`))).finally(() => {
+      this.loadingPromise = void 0;
+    });
+    return this.loadingPromise;
+  }
+  isLocalEvaluationReady() {
+    return (this.loadedSuccessfullyOnce ?? false) && (this.featureFlags?.length ?? 0) > 0;
+  }
+  getFlagDefinitionsLoadedAt() {
+    return this.flagDefinitionsLoadedAt;
+  }
+  getPollingInterval() {
+    const interval = this.pollingInterval ?? 3e4;
+    if (!this.shouldBeginExponentialBackoff) return interval;
+    return Math.min(SIXTY_SECONDS, interval * 2 ** this.backOffCount);
+  }
+  beginBackoff() {
+    this.shouldBeginExponentialBackoff = true;
+    this.backOffCount += 1;
+    this.nextFetchAllowedAt = Date.now() + this.getPollingInterval();
+  }
+  clearBackoff() {
+    this.shouldBeginExponentialBackoff = false;
+    this.backOffCount = 0;
+    this.nextFetchAllowedAt = void 0;
+  }
+  async _loadFeatureFlags() {
+    if (this.poller) {
+      clearTimeout(this.poller);
+      this.poller = void 0;
+    }
+    try {
+      let shouldFetch = true;
+      if (this.cacheProvider) try {
+        shouldFetch = await this.cacheProvider.shouldFetchFlagDefinitions();
+      } catch (err) {
+        this.onError?.(new Error(`Error in shouldFetchFlagDefinitions: ${err}`));
+      }
+      if (!shouldFetch) {
+        const loaded = await this.loadFromCache("Loaded flags from cache (skipped fetch)");
+        if (loaded) return;
+        if (this.loadedSuccessfullyOnce) return;
+      }
+      const res = await this._requestFeatureFlagDefinitions();
+      if (!res) return;
+      switch (res.status) {
+        case 304:
+          this.logMsgIfDebug(() => console.debug("[FEATURE FLAGS] Flags not modified (304), using cached data"));
+          this.flagsEtag = res.headers?.get("ETag") ?? this.flagsEtag;
+          this.loadedSuccessfullyOnce = true;
+          this.clearBackoff();
+          return;
+        case 401:
+          this.beginBackoff();
+          throw new ClientError(`Your project key or secret key is invalid. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://posthog.com/docs/api#rate-limiting`);
+        case 402:
+          console.warn("[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://posthog.com/docs/billing/limits-alerts");
+          this.featureFlags = [];
+          this.featureFlagsByKey = {};
+          this.filteredOutFlagKeys = /* @__PURE__ */ new Set();
+          this.groupTypeMapping = {};
+          this.cohorts = {};
+          this.propertyMatchingVersion = void 0;
+          this.onMinimalFlagCalledEvents?.(false);
+          return;
+        case 403:
+          this.beginBackoff();
+          throw new ClientError(`Your secret key does not have permission to fetch feature flag definitions for local evaluation. Setting next polling interval to ${this.getPollingInterval()}ms. Are you sure you're using the correct secret and Project API key pair? More information: https://posthog.com/docs/api/overview`);
+        case 429:
+          this.beginBackoff();
+          throw new ClientError(`You are being rate limited. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://posthog.com/docs/api#rate-limiting`);
+        case 200: {
+          const responseJson = await res.json() ?? {};
+          if (!("flags" in responseJson)) return void this.onError?.(new Error(`Invalid response when getting feature flags: ${JSON.stringify(responseJson)}`));
+          this.flagsEtag = res.headers?.get("ETag") ?? void 0;
+          const groupTypeMapping = responseJson.group_type_mapping || {};
+          const minimalFlagCalledEvents = true === responseJson.minimal_flag_called_events;
+          const flagData = {
+            flags: responseJson.flags ?? [],
+            group_type_mapping: groupTypeMapping,
+            cohorts: responseJson.cohorts || {},
+            minimal_flag_called_events: minimalFlagCalledEvents,
+            property_matching_version: responseJson.property_matching_version,
+            propertyMatchingVersion: responseJson.property_matching_version,
+            groupTypeMapping,
+            minimalFlagCalledEvents
+          };
+          this.updateFlagState(flagData);
+          this.flagDefinitionsLoadedAt = Date.now();
+          this.clearBackoff();
+          if (this.cacheProvider && shouldFetch) try {
+            await this.cacheProvider.onFlagDefinitionsReceived(flagData);
+          } catch (err) {
+            this.onError?.(new Error(`Failed to store in cache: ${err}`));
+          }
+          this.onLoad?.(this.featureFlags.length);
+          this.warnAboutExperienceContinuityFlags(this.featureFlags);
+          break;
+        }
+        default:
+          return;
+      }
+    } catch (err) {
+      if (err instanceof ClientError) this.onError?.(err);
+    } finally {
+      if (!this.pollerStopped && null !== this.pollingInterval) this.poller = setTimeout(() => this.loadFeatureFlags(true), this.getPollingInterval());
+    }
+  }
+  getPersonalApiKeyRequestOptions(method = "GET", etag) {
+    const headers = {
+      ...this.customHeaders,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.personalApiKey}`
+    };
+    if (etag) headers["If-None-Match"] = etag;
+    return {
+      method,
+      headers
+    };
+  }
+  async _requestFeatureFlagDefinitions() {
+    const url = `${this.host}/flags/definitions?token=${this.projectApiKey}&send_cohorts`;
+    const options = this.getPersonalApiKeyRequestOptions("GET", this.flagsEtag);
+    let abortTimeout = null;
+    if (this.timeout && "number" == typeof this.timeout) {
+      const controller = new AbortController();
+      abortTimeout = safeSetTimeout(() => {
+        controller.abort();
+      }, this.timeout);
+      options.signal = controller.signal;
+    }
+    const clearAbortTimeout = () => clearTimeout(abortTimeout);
+    try {
+      const fetch1 = this.fetch;
+      const res = await fetch1(url, options);
+      if (200 !== res.status) {
+        clearAbortTimeout();
+        return res;
+      }
+      return {
+        status: res.status,
+        headers: res.headers,
+        body: res.body,
+        text: async () => {
+          try {
+            return await res.text();
+          } finally {
+            clearAbortTimeout();
+          }
+        },
+        json: async () => {
+          try {
+            return await res.json();
+          } finally {
+            clearAbortTimeout();
+          }
+        }
+      };
+    } catch (err) {
+      clearAbortTimeout();
+      throw err;
+    }
+  }
+  async stopPoller(timeoutMs = 3e4) {
+    this.pollerStopped = true;
+    clearTimeout(this.poller);
+    this.poller = void 0;
+    if (this.cacheProvider) try {
+      const shutdownResult = this.cacheProvider.shutdown();
+      if (shutdownResult instanceof Promise) await raceWithTimeout(shutdownResult, timeoutMs, () => {
+        throw new Error(`Cache shutdown timeout after ${timeoutMs}ms`);
+      });
+    } catch (err) {
+      this.onError?.(new Error(`Error during cache shutdown: ${err}`));
+    }
+  }
+};
+function matchProperty(property, propertyValues, warnFunction, propertyMatchingVersion) {
+  return matchFeatureFlagProperty(property, propertyValues, {
+    warnFunction,
+    propertyMatchingVersion
+  });
+}
+function checkCohortExists(cohortId, cohortProperties) {
+  if (!(cohortId in cohortProperties)) throw new RequiresServerEvaluation(`cohort ${cohortId} not found in local cohorts - likely a static cohort that requires server evaluation`);
+}
+async function matchCohort(property, propertyValues, cohortProperties, debugMode = false, flagDependencyEvaluator, propertyMatchingVersion) {
+  const cohortId = String(property.value);
+  checkCohortExists(cohortId, cohortProperties);
+  const propertyGroup = cohortProperties[cohortId];
+  return matchPropertyGroup(propertyGroup, propertyValues, cohortProperties, debugMode, flagDependencyEvaluator, propertyMatchingVersion);
+}
+async function matchPropertyGroup(propertyGroup, propertyValues, cohortProperties, debugMode = false, flagDependencyEvaluator, propertyMatchingVersion) {
+  if (!propertyGroup) return true;
+  const propertyGroupType = propertyGroup.type;
+  const properties = propertyGroup.values;
+  if (!properties || 0 === properties.length) return true;
+  let errorMatchingLocally = false;
+  if ("values" in properties[0]) {
+    for (const prop of properties) try {
+      const matches = await matchPropertyGroup(prop, propertyValues, cohortProperties, debugMode, flagDependencyEvaluator, propertyMatchingVersion);
+      if ("AND" === propertyGroupType) {
+        if (!matches) return false;
+      } else if (matches) return true;
+    } catch (err) {
+      if (err instanceof RequiresServerEvaluation) throw err;
+      if (err instanceof InconclusiveMatchError) {
+        if (debugMode) console.debug(`Failed to compute property ${prop} locally: ${err}`);
+        errorMatchingLocally = true;
+      } else throw err;
+    }
+    if (errorMatchingLocally) throw new InconclusiveMatchError("Can't match cohort without a given cohort property value");
+    return "AND" === propertyGroupType;
+  }
+  for (const prop of properties) try {
+    let matches;
+    if ("cohort" === prop.type) matches = await matchCohort(prop, propertyValues, cohortProperties, debugMode, flagDependencyEvaluator, propertyMatchingVersion);
+    else if ("flag" === prop.type) {
+      if (!flagDependencyEvaluator) throw new InconclusiveMatchError(`Flag dependency '${prop.key || "unknown"}' cannot be evaluated without a flag dependency evaluator`);
+      matches = await flagDependencyEvaluator(prop);
+    } else matches = matchProperty(prop, propertyValues, void 0, propertyMatchingVersion);
+    const negation = prop.negation || false;
+    if ("AND" === propertyGroupType) {
+      if (!matches && !negation) return false;
+      if (matches && negation) return false;
+    } else {
+      if (matches && !negation) return true;
+      if (!matches && negation) return true;
+    }
+  } catch (err) {
+    if (err instanceof RequiresServerEvaluation) throw err;
+    if (err instanceof InconclusiveMatchError) {
+      if (debugMode) console.debug(`Failed to compute property ${prop} locally: ${err}`);
+      errorMatchingLocally = true;
+    } else throw err;
+  }
+  if (errorMatchingLocally) throw new InconclusiveMatchError("can't match cohort without a given cohort property value");
+  return "AND" === propertyGroupType;
+}
+
+// ../../node_modules/posthog-node/dist/extensions/error-tracking/autocapture.mjs
+var UNHANDLED_REJECTION_OPTION_NAMES = [
+  "--unhandled-rejections",
+  "--unhandled_rejections"
+];
+var UNHANDLED_REJECTION_MODES = /* @__PURE__ */ new Set([
+  "throw",
+  "strict",
+  "warn",
+  "warn-with-error-code",
+  "none"
+]);
+var STARTUP_EXEC_ARGV = [
+  ...globalThis.process?.execArgv ?? []
+];
+var STARTUP_NODE_OPTIONS = globalThis.process?.env?.NODE_OPTIONS;
+function splitNodeOptions(nodeOptions) {
+  const args = [];
+  let current = "";
+  let isInString = false;
+  for (let index = 0; index < nodeOptions.length; index++) {
+    const character = nodeOptions[index];
+    if ("\\" === character && isInString && index + 1 < nodeOptions.length) current += nodeOptions[++index];
+    else if (" " !== character || isInString) if ('"' === character) isInString = !isInString;
+    else current += character;
+    else if (current) {
+      args.push(current);
+      current = "";
+    }
+  }
+  if (current) args.push(current);
+  return args;
+}
+function findUnhandledRejectionMode(args) {
+  let mode;
+  for (let index = 0; index < args.length; index++) {
+    const argument = args[index];
+    const optionName = UNHANDLED_REJECTION_OPTION_NAMES.find((name) => argument === name || argument.startsWith(`${name}=`));
+    if (!optionName) continue;
+    const value = argument === optionName ? args[++index] : argument.slice(optionName.length + 1);
+    if (UNHANDLED_REJECTION_MODES.has(value)) mode = value;
+  }
+  return mode;
+}
+function getUnhandledRejectionMode(execArgv = STARTUP_EXEC_ARGV, nodeOptions = STARTUP_NODE_OPTIONS) {
+  return findUnhandledRejectionMode(execArgv) ?? findUnhandledRejectionMode(splitNodeOptions(nodeOptions ?? "")) ?? "throw";
+}
+var STARTUP_UNHANDLED_REJECTION_MODE = getUnhandledRejectionMode();
+function captureUncaughtException(captureFn, error2, origin) {
+  captureFn(error2, {
+    mechanism: {
+      type: "unhandledRejection" === origin ? "onunhandledrejection" : "onuncaughtexception",
+      handled: false
+    }
+  });
+}
+function makeUncaughtExceptionHandler(captureFn, onFatalFn) {
+  let calledFatalError = false;
+  return Object.assign((error2, origin) => {
+    const userProvidedListenersCount = global.process.listeners("uncaughtException").filter((listener) => "domainUncaughtExceptionClear" !== listener.name && true !== listener._posthogErrorHandler).length;
+    captureUncaughtException(captureFn, error2, origin);
+    if (!calledFatalError && 0 === userProvidedListenersCount) {
+      calledFatalError = true;
+      onFatalFn(error2);
+    }
+  }, {
+    _posthogErrorHandler: true
+  });
+}
+function addUncaughtExceptionListener(captureFn, onFatalFn, mode = STARTUP_UNHANDLED_REJECTION_MODE) {
+  const process3 = globalThis.process;
+  if (!process3) return;
+  if ("strict" === mode) return void process3.on("uncaughtExceptionMonitor", (error2, origin) => captureUncaughtException(captureFn, error2, origin));
+  process3.on("uncaughtException", makeUncaughtExceptionHandler(captureFn, onFatalFn));
+}
+function addUnhandledRejectionListener(captureFn, mode = STARTUP_UNHANDLED_REJECTION_MODE) {
+  const process3 = globalThis.process;
+  if (!process3 || "throw" === mode || "strict" === mode || "warn-with-error-code" === mode) return;
+  process3.on("unhandledRejection", (reason) => {
+    captureFn(reason, {
+      mechanism: {
+        type: "onunhandledrejection",
+        handled: false
+      }
+    });
+  });
+}
+
+// ../../node_modules/posthog-node/dist/extensions/error-tracking/index.mjs
+var SHUTDOWN_TIMEOUT = 2e3;
+var error_tracking_ErrorTracking = class _error_tracking_ErrorTracking {
+  constructor(client, options, _logger) {
+    this.client = client;
+    this._exceptionAutocaptureEnabled = options.enableExceptionAutocapture || false;
+    this._logger = _logger;
+    this._rateLimiter = new BucketedRateLimiter({
+      ...resolveExceptionRateLimiterConfig(options),
+      refillInterval: 1e4,
+      _logger: this._logger
+    });
+    this.startAutocaptureIfEnabled();
+  }
+  static isPreviouslyCapturedError(x) {
+    return isObject2(x) && "__posthog_previously_captured_error" in x && true === x.__posthog_previously_captured_error;
+  }
+  static async buildEventMessage(builder, error2, hint, distinctId, additionalProperties) {
+    const properties = {
+      ...additionalProperties
+    };
+    const exceptionProperties = builder.buildFromUnknown(error2, hint);
+    exceptionProperties.$exception_list = await builder.modifyFrames(exceptionProperties.$exception_list);
+    const injectedReleaseId = error_tracking_exports.getInjectedReleaseId();
+    if (injectedReleaseId) properties.$release_id = injectedReleaseId;
+    return {
+      event: "$exception",
+      distinctId,
+      properties: {
+        ...exceptionProperties,
+        ...properties
+      },
+      _originatedFromCaptureException: true
+    };
+  }
+  startAutocaptureIfEnabled() {
+    if (this.isEnabled()) {
+      addUncaughtExceptionListener(this.onException.bind(this), this.onFatalError.bind(this));
+      addUnhandledRejectionListener(this.onException.bind(this));
+    }
+  }
+  onException(exception, hint) {
+    this.client.addPendingPromise((async () => {
+      if (!_error_tracking_ErrorTracking.isPreviouslyCapturedError(exception)) {
+        const eventMessage = await _error_tracking_ErrorTracking.buildEventMessage(this.client.getErrorPropertiesBuilder(), exception, hint);
+        const exceptionProperties = eventMessage.properties;
+        const exceptionType = exceptionProperties?.$exception_list[0]?.type ?? "Exception";
+        const isRateLimited = this._rateLimiter.consumeRateLimit(exceptionType);
+        if (isRateLimited) return void this._logger.info("Skipping exception capture because of client rate limiting.", {
+          exception: exceptionType
+        });
+        return this.client._capturePreparedEvent(eventMessage, false);
+      }
+    })());
+  }
+  async onFatalError(exception) {
+    console.error(exception);
+    await this.client.shutdown(SHUTDOWN_TIMEOUT);
+    globalThis.process.exit(1);
+  }
+  isEnabled() {
+    return !this.client.isDisabled && this._exceptionAutocaptureEnabled;
+  }
+  shutdown() {
+    this._rateLimiter.stop();
+  }
+};
+var error_tracking_default = error_tracking_ErrorTracking;
+
+// ../../node_modules/posthog-node/dist/storage-memory.mjs
+var PostHogMemoryStorage = class {
+  getProperty(key) {
+    return this._memoryStorage[key];
+  }
+  setProperty(key, value) {
+    this._memoryStorage[key] = null !== value ? value : void 0;
+  }
+  constructor() {
+    this._memoryStorage = {};
+  }
+};
+
+// ../../node_modules/posthog-node/dist/capture-v1/config.mjs
+function isCaptureMode(value) {
+  return "v0" === value || "v1" === value;
+}
+function resolveCaptureMode() {
+  const envMode = "u" > typeof process ? process.env?.POSTHOG_CAPTURE_MODE : void 0;
+  return isCaptureMode(envMode) ? envMode : "v0";
+}
+
+// ../../node_modules/posthog-node/dist/capture-v1/routing.mjs
+var AI_EVENT_PREFIX = "$ai_";
+var ANALYTICS_ROUTE = "analytics";
+var AI_ROUTE = "ai";
+function isLegacyOnlyEvent(message) {
+  return "string" == typeof message.event && message.event.startsWith(AI_EVENT_PREFIX);
+}
+
+// ../../node_modules/posthog-node/dist/capture-v1/errors.mjs
+var CaptureV1Error = class _CaptureV1Error extends Error {
+  constructor({ requestId, drops, retryExhausted, cause }) {
+    super(_CaptureV1Error.buildMessage(requestId, drops, retryExhausted, cause)), this.name = "CaptureV1Error";
+    this.requestId = requestId;
+    this.drops = drops;
+    this.retryExhausted = retryExhausted;
+    this.cause = cause;
+  }
+  static buildMessage(requestId, drops, retryExhausted, cause) {
+    let message = `Capture V1 batch ${requestId} did not fully deliver: ${drops.length} dropped, ${retryExhausted.length} undelivered`;
+    if (cause instanceof Error) message += ` (${cause.message})`;
+    return message;
+  }
+};
+
+// ../../node_modules/posthog-node/dist/capture-v1/transform.mjs
+function coerceBool(value) {
+  if ("boolean" == typeof value) return value;
+  if ("number" == typeof value) return 0 !== value;
+  if ("string" == typeof value) {
+    const normalized = value.trim().toLowerCase();
+    if ("true" === normalized || "1" === normalized) return true;
+    if ("false" === normalized || "0" === normalized) return false;
+  }
+}
+function coerceString(value) {
+  return "string" == typeof value ? value : void 0;
+}
+var OPTION_SENTINELS = [
+  {
+    property: "$cookieless_mode",
+    optionKey: "cookieless_mode",
+    coerce: coerceBool
+  },
+  {
+    property: "$ignore_sent_at",
+    optionKey: "disable_skew_correction",
+    coerce: coerceBool
+  },
+  {
+    property: "$process_person_profile",
+    optionKey: "process_person_profile",
+    coerce: coerceBool
+  },
+  {
+    property: "$product_tour_id",
+    optionKey: "product_tour_id",
+    coerce: coerceString
+  }
+];
+var TOPLEVEL_SENTINELS = [
+  {
+    property: "$session_id",
+    field: "session_id"
+  },
+  {
+    property: "$window_id",
+    field: "window_id"
+  }
+];
+function isRecord6(value) {
+  return "object" == typeof value && null !== value && !Array.isArray(value);
+}
+function toRfc3339(timestamp) {
+  if ("string" == typeof timestamp) {
+    const asDate2 = new Date(timestamp);
+    if (Number.isNaN(asDate2.getTime())) return (/* @__PURE__ */ new Date()).toISOString();
+    const normalized = asDate2.toISOString();
+    const fractionalSeconds = timestamp.match(/\.(\d+)(?:Z|[+-]\d{2}:?\d{2})?$/i)?.[1];
+    return fractionalSeconds && fractionalSeconds.length > 3 ? normalized.replace(/\.\d{3}Z$/, `.${fractionalSeconds}Z`) : normalized;
+  }
+  if (timestamp instanceof Date) return Number.isNaN(timestamp.getTime()) ? (/* @__PURE__ */ new Date()).toISOString() : timestamp.toISOString();
+  const asDate = null == timestamp ? /* @__PURE__ */ new Date() : new Date(timestamp);
+  return Number.isNaN(asDate.getTime()) ? (/* @__PURE__ */ new Date()).toISOString() : asDate.toISOString();
+}
+function relocateInto(properties, key, value) {
+  if (void 0 !== value && !(key in properties)) properties[key] = value;
+}
+function buildV1Event(message) {
+  const sourceProperties = isRecord6(message.properties) ? message.properties : {};
+  const properties = {
+    ...sourceProperties
+  };
+  const options = {};
+  for (const { property, optionKey, coerce: coerce2 } of OPTION_SENTINELS) if (property in properties) {
+    const coerced = coerce2(properties[property]);
+    if (void 0 !== coerced) options[optionKey] = coerced;
+    delete properties[property];
+  }
+  const topLevel = {};
+  for (const { property, field } of TOPLEVEL_SENTINELS) if (property in properties) {
+    const value = properties[property];
+    if ("string" == typeof value) topLevel[field] = value;
+    delete properties[property];
+  }
+  delete properties.$lib;
+  delete properties.$lib_version;
+  relocateInto(properties, "$set", message.$set);
+  relocateInto(properties, "$set_once", message.$set_once);
+  return {
+    event: String(message.event ?? ""),
+    uuid: String(message.uuid ?? ""),
+    distinct_id: String(message.distinct_id ?? ""),
+    timestamp: toRfc3339(message.timestamp),
+    ...topLevel,
+    options,
+    properties
+  };
+}
+function buildV1Batch(messages, { createdAt, historicalMigration }) {
+  const batch = {
+    created_at: createdAt,
+    batch: messages.map(buildV1Event)
+  };
+  if (historicalMigration) batch.historical_migration = true;
+  return batch;
+}
+
+// ../../node_modules/posthog-node/dist/capture-v1/sender.mjs
+var V1_ANALYTICS_PATH = "/i/v1/analytics/events";
+var DEFAULT_MAX_BACKOFF_MS = 3e4;
+var RETRYABLE_STATUSES = /* @__PURE__ */ new Set([
+  408,
+  500,
+  502,
+  503,
+  504
+]);
+var V1CaptureSender = class {
+  constructor(config2, hooks) {
+    this.config = config2;
+    this.maxBackoffMs = config2.maxBackoffMs ?? DEFAULT_MAX_BACKOFF_MS;
+    this.fetchFn = hooks.fetch;
+    this.onError = hooks.onError;
+    this.now = hooks.now ?? Date.now;
+    this.sleep = hooks.sleep ?? ((ms) => new Promise((resolve2) => safeSetTimeout(resolve2, ms)));
+    this.generateRequestId = hooks.generateRequestId ?? uuidv7;
+    this.compress = hooks.compress ?? gzipCompress;
+  }
+  async sendV1Batch(messages) {
+    if (0 === messages.length) return;
+    const requestId = this.generateRequestId();
+    const createdAt = new Date(this.now()).toISOString();
+    const { batch } = buildV1Batch(messages, {
+      createdAt,
+      historicalMigration: this.config.historicalMigration
+    });
+    const url = `${this.config.host}${V1_ANALYTICS_PATH}`;
+    const drops = [];
+    let pending = batch;
+    const maxAttempts = Math.max(1, this.config.maxAttempts);
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const isLastAttempt = attempt === maxAttempts;
+      const payload = safeJsonStringify({
+        created_at: createdAt,
+        ...this.config.historicalMigration ? {
+          historical_migration: true
+        } : {},
+        batch: pending
+      });
+      let captureAttempt;
+      let retryDelayMs;
+      try {
+        captureAttempt = await this.sendOnce(url, payload, attempt, requestId);
+        const { response, signal } = captureAttempt;
+        const { status } = response;
+        if (status < 200 || status >= 300) if (!isLastAttempt && RETRYABLE_STATUSES.has(status)) {
+          const retryAfterMs = this.parseRetryAfter(response);
+          await captureAttempt.waitFor(captureAttempt.cancelBody()).catch(() => {
+          });
+          retryDelayMs = this.backoffDelay(attempt, retryAfterMs);
+        } else {
+          const httpError = await this.buildHttpError(response, status, captureAttempt.waitFor);
+          return this.surfaceBatchFailure(requestId, drops, pending, httpError);
+        }
+        else {
+          let parsed;
+          try {
+            parsed = await captureAttempt.waitFor(this.parseResponse(response));
+          } catch (error2) {
+            if (signal.aborted) throw error2;
+            return this.surfaceBatchFailure(requestId, drops, pending, new Error(`Capture V1 returned an unparseable ${status} response body`));
+          }
+          const retryable = this.classify(pending, parsed, drops);
+          if (0 === retryable.length) return this.surfacePartialDrops(requestId, drops);
+          if (isLastAttempt) return void this.onError(new CaptureV1Error({
+            requestId,
+            drops,
+            retryExhausted: retryable.map((event) => event.uuid)
+          }));
+          pending = retryable;
+          const retryAfterMs = this.parseRetryAfter(response);
+          retryDelayMs = this.backoffDelay(attempt, retryAfterMs);
+        }
+      } catch (transportError) {
+        if (captureAttempt && !captureAttempt.signal.aborted) throw transportError;
+        if (isLastAttempt) return this.surfaceBatchFailure(requestId, drops, pending, transportError);
+        retryDelayMs = this.backoffDelay(attempt);
+      } finally {
+        captureAttempt?.cleanup();
+      }
+      if (void 0 !== retryDelayMs) await this.sleep(retryDelayMs);
+    }
+  }
+  async sendOnce(url, payload, attempt, requestId) {
+    const headers = this.buildHeaders(attempt, requestId);
+    let body = payload;
+    if (this.config.compressionEnabled) {
+      const compressed = await this.compress(payload, this.config.isDebug);
+      if (null !== compressed) {
+        body = compressed;
+        headers["Content-Encoding"] = "gzip";
+      }
+    }
+    const controller = new AbortController();
+    let timeoutPhase = "waiting for response headers";
+    let timer;
+    const deadline = new Promise((_resolve, reject) => {
+      timer = safeSetTimeout(() => {
+        const timeoutError = new Error(`Capture V1 request timed out ${timeoutPhase} after ${this.config.requestTimeoutMs}ms`);
+        timeoutError.name = "AbortError";
+        reject(timeoutError);
+        controller.abort(timeoutError);
+      }, this.config.requestTimeoutMs);
+    });
+    try {
+      const fetchPromise = this.fetchFn(url, {
+        method: "POST",
+        headers,
+        body,
+        signal: controller.signal
+      });
+      let responseAccepted = false;
+      fetchPromise.then((lateResponse) => {
+        if (controller.signal.aborted && !responseAccepted) this.cancelBody(lateResponse);
+      }).catch(() => {
+      });
+      const response = await Promise.race([
+        fetchPromise,
+        deadline
+      ]);
+      responseAccepted = true;
+      timeoutPhase = "while reading the response body";
+      let cleanedUp = false;
+      let cancellation;
+      const cancelBody = () => cancellation ??= this.cancelBody(response);
+      return {
+        response,
+        signal: controller.signal,
+        waitFor: (operation) => Promise.race([
+          operation,
+          deadline
+        ]),
+        cancelBody,
+        cleanup: () => {
+          if (cleanedUp) return;
+          cleanedUp = true;
+          clearTimeout(timer);
+          if (controller.signal.aborted) cancelBody();
+        }
+      };
+    } catch (error2) {
+      clearTimeout(timer);
+      throw error2;
+    }
+  }
+  buildHeaders(attempt, requestId) {
+    const sdkInfo = `${this.config.libraryId}/${this.config.libraryVersion}`;
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.config.apiKey}`,
+      "PostHog-Sdk-Info": sdkInfo,
+      "PostHog-Attempt": String(attempt),
+      "PostHog-Request-Id": requestId,
+      "PostHog-Request-Timestamp": new Date(this.now()).toISOString()
+    };
+    if (this.config.userAgent) headers["User-Agent"] = this.config.userAgent;
+    return headers;
+  }
+  classify(pending, parsed, drops) {
+    const results = parsed.results ?? {};
+    const retryable = [];
+    for (const event of pending) {
+      const result = results[event.uuid];
+      if (result) {
+        if ("drop" === result.result) drops.push({
+          uuid: event.uuid,
+          details: result.details ?? void 0
+        });
+        else if ("retry" === result.result) retryable.push(event);
+      }
+    }
+    return retryable;
+  }
+  backoffDelay(attempt, retryAfterMs) {
+    const exponential = Math.min(this.config.initialRetryDelayMs * 2 ** (attempt - 1), this.maxBackoffMs);
+    if (void 0 === retryAfterMs) return exponential;
+    return Math.max(exponential, Math.min(retryAfterMs, this.maxBackoffMs));
+  }
+  parseRetryAfter(response) {
+    const raw = response.headers?.get("Retry-After");
+    if (!raw) return;
+    const trimmed = raw.trim();
+    if (/^\d+$/.test(trimmed)) {
+      const seconds = parseInt(trimmed, 10);
+      return Number.isFinite(seconds) && seconds > 0 ? 1e3 * seconds : void 0;
+    }
+    const dateMs = Date.parse(trimmed);
+    if (Number.isNaN(dateMs)) return;
+    const delta = dateMs - this.now();
+    return delta > 0 ? delta : void 0;
+  }
+  async parseResponse(response) {
+    const text = await response.text();
+    const parsed = JSON.parse(text);
+    if ("object" != typeof parsed || null === parsed || Array.isArray(parsed)) throw new Error("unexpected response shape");
+    const results = parsed.results;
+    if (void 0 !== results && ("object" != typeof results || null === results || Array.isArray(results))) throw new Error("unexpected results shape");
+    return {
+      results: results ?? {}
+    };
+  }
+  async buildHttpError(response, status, waitFor) {
+    let bodyText = "";
+    try {
+      bodyText = (await waitFor(response.text())).slice(0, 512);
+    } catch {
+    }
+    const suffix = bodyText ? `: ${bodyText}` : "";
+    return new Error(`Capture V1 request failed with HTTP ${status}${suffix}`);
+  }
+  surfaceBatchFailure(requestId, drops, pending, cause) {
+    this.onError(new CaptureV1Error({
+      requestId,
+      drops,
+      retryExhausted: pending.map((event) => event.uuid),
+      cause
+    }));
+  }
+  surfacePartialDrops(requestId, drops) {
+    if (drops.length > 0) this.onError(new CaptureV1Error({
+      requestId,
+      drops,
+      retryExhausted: []
+    }));
+  }
+  async cancelBody(response) {
+    try {
+      await response.body?.cancel();
+    } catch {
+    }
+  }
+};
+
+// ../../node_modules/posthog-node/dist/ai-capture/routing.mjs
+var AI_CAPTURE_ROUTE = "ai-capture";
+var AI_CAPTURE_ENDPOINT_PATH = "/i/v0/ai/batch/";
+var AI_MAX_EVENT_BYTES = 8388608;
+var AI_BATCH_TARGET_BYTES = 5242880;
+
+// ../../node_modules/posthog-node/dist/ai-capture/batching.mjs
+var encoder = new TextEncoder();
+function eventByteSize(message) {
+  return encoder.encode(safeJsonStringify(message)).length;
+}
+function partitionAiBatch(messages, maxEventBytes = AI_MAX_EVENT_BYTES, targetBatchBytes = AI_BATCH_TARGET_BYTES) {
+  const batches = [];
+  const dropped = [];
+  let current = [];
+  let currentBytes = 0;
+  for (const message of messages) {
+    if (void 0 === message) continue;
+    const bytes = eventByteSize(message);
+    if (bytes > maxEventBytes) {
+      dropped.push({
+        event: "string" == typeof message.event ? message.event : "unknown",
+        bytes
+      });
+      continue;
+    }
+    if (current.length > 0 && currentBytes + bytes > targetBatchBytes) {
+      batches.push(current);
+      current = [];
+      currentBytes = 0;
+    }
+    current.push(message);
+    currentBytes += bytes;
+  }
+  if (current.length > 0) batches.push(current);
+  return {
+    batches,
+    dropped
+  };
+}
+
+// ../../node_modules/posthog-node/dist/client.mjs
+var MINIMUM_POLLING_INTERVAL = 100;
+var THIRTY_SECONDS = 3e4;
+var MAX_CACHE_SIZE = 5e4;
+var WAITUNTIL_DEBOUNCE_MS = 50;
+var WAITUNTIL_MAX_WAIT_MS = 500;
+var DEFAULT_NODE_HOST = "https://us.i.posthog.com";
+var _emittedDeprecations = /* @__PURE__ */ new Set();
+function emitDeprecationWarningOnce(id, message) {
+  if (_emittedDeprecations.has(id)) return;
+  _emittedDeprecations.add(id);
+  console.warn(`[PostHog] ${message}`);
+}
+function normalizeApiKey(value) {
+  return "string" == typeof value ? value.trim() : "";
+}
+function normalizePersonalApiKey(value) {
+  const normalizedValue = "string" == typeof value ? value.trim() : "";
+  return normalizedValue || void 0;
+}
+function normalizeHost(value) {
+  const normalizedValue = "string" == typeof value ? value.trim() : "";
+  return normalizedValue || DEFAULT_NODE_HOST;
+}
+function normalizeUnsetPersonProperties(value) {
+  const propertyNames = Array.isArray(value) ? value : [
+    value
+  ];
+  return propertyNames.filter((propertyName) => "string" == typeof propertyName && propertyName.trim().length > 0);
+}
+function buildFlagEventProperties(flagValues) {
+  if (!flagValues) return {};
+  const additionalProperties = {};
+  for (const [feature, variant] of Object.entries(flagValues)) additionalProperties[`$feature/${feature}`] = variant;
+  const activeFlags = Object.keys(flagValues).filter((flag) => false !== flagValues[flag]).sort();
+  if (activeFlags.length > 0) additionalProperties["$active_feature_flags"] = activeFlags;
+  return additionalProperties;
+}
+var PostHogBackendClient = class extends PostHogCoreStateless {
+  constructor(apiKey, options = {}) {
+    const normalizedApiKey = normalizeApiKey(apiKey);
+    const normalizedOptions = {
+      ...options,
+      maxQueueSize: options.maxQueueSize ?? 1e4,
+      flushInterval: options.flushInterval ?? 5e3,
+      host: normalizeHost(options.host),
+      personalApiKey: normalizePersonalApiKey(options.secretKey ?? options.personalApiKey)
+    };
+    super(normalizedApiKey, normalizedOptions), this._memoryStorage = new PostHogMemoryStorage(), this._aiCaptureRouteActive = false, this._minimalFlagCalledEvents = false;
+    this.options = normalizedOptions;
+    this.captureMode = resolveCaptureMode();
+    this.enableFullAiCapture = true === normalizedOptions.enableFullAiCapture;
+    this.context = this.initializeContext();
+    this.options.featureFlagsPollingInterval = "number" == typeof normalizedOptions.featureFlagsPollingInterval ? Math.max(normalizedOptions.featureFlagsPollingInterval, MINIMUM_POLLING_INTERVAL) : null === normalizedOptions.featureFlagsPollingInterval ? null : THIRTY_SECONDS;
+    if ("number" == typeof normalizedOptions.waitUntilDebounceMs) this.options.waitUntilDebounceMs = Math.max(normalizedOptions.waitUntilDebounceMs, 0);
+    if ("number" == typeof normalizedOptions.waitUntilMaxWaitMs) this.options.waitUntilMaxWaitMs = Math.max(normalizedOptions.waitUntilMaxWaitMs, 0);
+    if (!this.disabled && normalizedOptions.personalApiKey) {
+      if (normalizedOptions.personalApiKey.includes("phc_")) throw new Error('Your Personal API key is invalid. These keys are prefixed with "phx_" and can be created in PostHog project settings.');
+      const shouldEnableLocalEvaluation = false !== normalizedOptions.enableLocalEvaluation;
+      if (shouldEnableLocalEvaluation) this.featureFlagsPoller = new FeatureFlagsPoller({
+        pollingInterval: this.options.featureFlagsPollingInterval,
+        personalApiKey: normalizedOptions.personalApiKey,
+        projectApiKey: normalizedApiKey,
+        timeout: normalizedOptions.requestTimeout ?? 1e4,
+        host: this.host,
+        fetch: normalizedOptions.fetch,
+        onError: (err) => {
+          this._events.emit("error", err);
+        },
+        onLoad: (count) => {
+          this._events.emit("localEvaluationFlagsLoaded", count);
+        },
+        onMinimalFlagCalledEvents: (enabled) => {
+          this._minimalFlagCalledEvents = enabled;
+        },
+        customHeaders: this.getCustomHeaders(),
+        cacheProvider: normalizedOptions.flagDefinitionCacheProvider,
+        strictLocalEvaluation: normalizedOptions.strictLocalEvaluation,
+        evaluationContexts: normalizedOptions.evaluationContexts ?? normalizedOptions.evaluationEnvironments
+      });
+    }
+    this.errorTracking = new error_tracking_default(this, normalizedOptions, this._logger);
+    this.distinctIdHasSentFlagCalls = {};
+    this.maxCacheSize = normalizedOptions.maxCacheSize || MAX_CACHE_SIZE;
+  }
+  enqueue(type, message, options, explicitRoute) {
+    super.enqueue(type, message, options, explicitRoute);
+    this.scheduleDebouncedFlush();
+  }
+  _flushEventsAndSpans(skipThrottledSpans = false) {
+    const events = this.flushWithPendingPromises();
+    if (!this._traces || skipThrottledSpans && this._traces.throttled) return events;
+    return allSettled([
+      events,
+      this._traces.flush().catch(() => {
+      })
+    ]).then(([eventsResult]) => {
+      if ("rejected" === eventsResult.status) throw eventsResult.reason;
+    });
+  }
+  flushAutomatic() {
+    return this._flushKeepingRuntimeAlive(true);
+  }
+  async flush() {
+    return this._flushKeepingRuntimeAlive(false);
+  }
+  _flushKeepingRuntimeAlive(skipThrottledSpans) {
+    const flushPromise = this._flushEventsAndSpans(skipThrottledSpans);
+    const waitUntil = this.options.waitUntil;
+    if (waitUntil && !this._waitUntilCycle) try {
+      waitUntil(flushPromise.catch(() => {
+      }));
+    } catch {
+    }
+    return flushPromise;
+  }
+  scheduleDebouncedFlush() {
+    const waitUntil = this.options.waitUntil;
+    if (!waitUntil) return;
+    if (this.disabled || this.optedOut) return;
+    if (!this._waitUntilCycle) {
+      let resolve2;
+      const promise = new Promise((r) => {
+        resolve2 = r;
+      });
+      try {
+        waitUntil(promise);
+      } catch {
+        return;
+      }
+      this._waitUntilCycle = {
+        resolve: resolve2,
+        startedAt: Date.now(),
+        timer: void 0
+      };
+    }
+    const elapsed = Date.now() - this._waitUntilCycle.startedAt;
+    const maxWaitMs = this.options.waitUntilMaxWaitMs ?? WAITUNTIL_MAX_WAIT_MS;
+    const flushNow = elapsed >= maxWaitMs;
+    if (void 0 !== this._waitUntilCycle.timer) clearTimeout(this._waitUntilCycle.timer);
+    if (flushNow) return void this.resolveWaitUntilFlush();
+    const debounceMs = this.options.waitUntilDebounceMs ?? WAITUNTIL_DEBOUNCE_MS;
+    this._waitUntilCycle.timer = safeSetTimeout(() => {
+      this.resolveWaitUntilFlush();
+    }, debounceMs);
+  }
+  _consumeWaitUntilCycle() {
+    const cycle = this._waitUntilCycle;
+    if (cycle) {
+      clearTimeout(cycle.timer);
+      this._waitUntilCycle = void 0;
+    }
+    return cycle?.resolve;
+  }
+  async resolveWaitUntilFlush() {
+    const resolve2 = this._consumeWaitUntilCycle();
+    try {
+      await this._flushEventsAndSpans();
+    } catch {
+    } finally {
+      resolve2?.();
+    }
+  }
+  getPersistedProperty(key) {
+    return this._memoryStorage.getProperty(key);
+  }
+  setPersistedProperty(key, value) {
+    return this._memoryStorage.setProperty(key, value);
+  }
+  fetch(url, options) {
+    return this.options.fetch ? this.options.fetch(url, options) : fetch(url, options);
+  }
+  getQueueRouteKey(message) {
+    return "v1" === this.captureMode && isLegacyOnlyEvent(message) ? AI_ROUTE : ANALYTICS_ROUTE;
+  }
+  persistedQueueKeyForRoute(route) {
+    if (route === AI_CAPTURE_ROUTE) return types_PostHogPersistedProperty.AiCaptureQueue;
+    return route === AI_ROUTE ? types_PostHogPersistedProperty.AiQueue : types_PostHogPersistedProperty.Queue;
+  }
+  getActiveQueueRoutes() {
+    const routes = "v1" === this.captureMode ? [
+      ANALYTICS_ROUTE,
+      AI_ROUTE
+    ] : [
+      ANALYTICS_ROUTE
+    ];
+    if (this._aiCaptureRouteActive) routes.push(AI_CAPTURE_ROUTE);
+    return routes;
+  }
+  getBatchEndpointPath(route) {
+    return route === AI_CAPTURE_ROUTE ? AI_CAPTURE_ENDPOINT_PATH : super.getBatchEndpointPath(route);
+  }
+  async sendBatch(batchMessages, retryOptions, route = ANALYTICS_ROUTE) {
+    if (route === AI_CAPTURE_ROUTE) return this.sendAiCaptureBatch(batchMessages, retryOptions);
+    if ("v1" !== this.captureMode || route === AI_ROUTE) return super.sendBatch(batchMessages, retryOptions, route);
+    const v1Events = batchMessages.filter((message) => void 0 !== message);
+    await this.getV1Sender().sendV1Batch(v1Events);
+  }
+  async sendAiCaptureBatch(batchMessages, retryOptions) {
+    const { batches, dropped } = partitionAiBatch(batchMessages);
+    for (const { event, bytes } of dropped) {
+      const message = `Event ${event} (${bytes} bytes) exceeds the ${AI_MAX_EVENT_BYTES / 1048576}MiB limit for ${AI_CAPTURE_ENDPOINT_PATH}, dropping.`;
+      this._logger.error(message);
+      this._events.emit("error", new Error(message));
+    }
+    for (const batch of batches) await this.sendAiSubBatch(batch, retryOptions);
+  }
+  async sendAiSubBatch(batch, retryOptions) {
+    try {
+      await super.sendBatch(batch, retryOptions, AI_CAPTURE_ROUTE);
+    } catch (err) {
+      if (!isPostHogFetchContentTooLargeError(err)) throw err;
+      if (1 === batch.length) {
+        const [event] = batch;
+        const eventName = "string" == typeof event.event ? event.event : "unknown";
+        const message = `Event ${eventName} (${eventByteSize(event)} bytes) was rejected with 413 by ${AI_CAPTURE_ENDPOINT_PATH} on its own, dropping.`;
+        this._logger.error(message);
+        this._events.emit("error", new Error(message));
+        return;
+      }
+      const mid = Math.ceil(batch.length / 2);
+      await this.sendAiSubBatch(batch.slice(0, mid), retryOptions);
+      await this.sendAiSubBatch(batch.slice(mid), retryOptions);
+    }
+  }
+  getV1Sender() {
+    if (!this._v1Sender) this._v1Sender = new V1CaptureSender({
+      host: this.host,
+      apiKey: this.apiKey,
+      libraryId: this.getLibraryId(),
+      libraryVersion: this.getLibraryVersion(),
+      userAgent: this.getCustomUserAgent() || void 0,
+      historicalMigration: this.historicalMigration,
+      compressionEnabled: !this.disableCompression,
+      requestTimeoutMs: this.requestTimeout,
+      maxAttempts: (this.options.fetchRetryCount ?? 3) + 1,
+      initialRetryDelayMs: this.options.fetchRetryDelay ?? 3e3,
+      isDebug: this.isDebug
+    }, {
+      fetch: (url, fetchOptions) => this.fetch(url, fetchOptions),
+      onError: (error2) => this._events.emit("error", error2),
+      compress: (payload) => this.compressPayload(payload)
+    });
+    return this._v1Sender;
+  }
+  getLibraryVersion() {
+    return version3;
+  }
+  get metrics() {
+    if (!this._metrics) this._metrics = new PostHogMetrics(this, resolveMetricsConfig(this.options.metrics), this._logger);
+    return this._metrics;
+  }
+  initializeSpanContextManager() {
+    return new SyncSpanContextManager();
+  }
+  hostResourceAttributes() {
+    return {};
+  }
+  get _spanContextManager() {
+    if (!this._spanContext) this._spanContext = this.initializeSpanContextManager();
+    return this._spanContext;
+  }
+  get _tracesPipeline() {
+    if (!this.options.traces) return;
+    if (!this._traces) this._traces = new PostHogTraces(this, resolveTracesConfig(this.options.traces, this.hostResourceAttributes(), this._logger), this._logger, () => this._tracingContext(), this._spanContextManager, () => this.scheduleDebouncedFlush());
+    return this._traces;
+  }
+  _tracingContext() {
+    const context = this.context?.get();
+    return {
+      distinctId: context?.distinctId,
+      sessionId: context?.sessionId
+    };
+  }
+  startSpan(name, options) {
+    return this._tracesPipeline?.startSpan(name, options) ?? inertSpan(options, this._spanContextManager.active());
+  }
+  withSpan(name, optionsOrFn, maybeFn) {
+    const options = "function" == typeof optionsOrFn ? void 0 : optionsOrFn;
+    const fn = "function" == typeof optionsOrFn ? optionsOrFn : maybeFn;
+    const pipeline = this._tracesPipeline;
+    if (!pipeline) return runWithActiveSpan(this._spanContextManager, inertSpan(options, this._spanContextManager.active()), fn);
+    return options ? pipeline.withSpan(name, options, fn) : pipeline.withSpan(name, fn);
+  }
+  getActiveSpan() {
+    return this._spanContextManager.active() ?? null;
+  }
+  getCustomUserAgent() {
+    return `${this.getLibraryId()}/${this.getLibraryVersion()}`;
+  }
+  getEvaluationRuntime() {
+    return "server";
+  }
+  getCommonEventProperties() {
+    const commonProperties = super.getCommonEventProperties();
+    if (this.options.isServer ?? true) commonProperties.$is_server = true;
+    return commonProperties;
+  }
+  enable() {
+    return super.optIn();
+  }
+  disable() {
+    return super.optOut();
+  }
+  debug(enabled = true) {
+    super.debug(enabled);
+    this.featureFlagsPoller?.debug(enabled);
+  }
+  _warnIfInvalidCapture(props, stringArgumentWarning, exceptionCaptureWarning) {
+    if ("string" == typeof props) this._logger.warn(stringArgumentWarning);
+    if ("$exception" === props.event && !props._originatedFromCaptureException) this._logger.warn(exceptionCaptureWarning);
+  }
+  _sendPreparedEvent(type, props, immediate, prepareOptions, explicitRoute) {
+    return this.addPendingPromise(this._prepareEventMessage(props, prepareOptions).then(({ distinctId, event, properties, options }) => {
+      const captureOptions = {
+        timestamp: options.timestamp,
+        disableGeoip: options.disableGeoip,
+        uuid: options.uuid
+      };
+      const message = {
+        distinctId,
+        event,
+        properties: {
+          ...properties,
+          ...this.getCommonEventProperties()
+        }
+      };
+      return immediate ? this.sendImmediate(type, message, captureOptions, explicitRoute) : this.enqueue(type, message, captureOptions, explicitRoute);
+    }).catch((err) => {
+      if (err) console.error(err);
+    }));
+  }
+  _capturePreparedEvent(props, immediate) {
+    return this._sendPreparedEvent("capture", props, immediate);
+  }
+  capture(props) {
+    this._warnIfInvalidCapture(props, "Called capture() with a string as the first argument when an object was expected.", "Using `posthog.capture('$exception')` is unreliable because it does not attach required metadata. Use `posthog.captureException(error)` instead, which attaches required metadata automatically.");
+    this._capturePreparedEvent(props, false);
+  }
+  async captureImmediate(props) {
+    this._warnIfInvalidCapture(props, "Called captureImmediate() with a string as the first argument when an object was expected.", "Capturing a `$exception` event via `posthog.captureImmediate('$exception')` is unreliable because it does not attach required metadata. Use `posthog.captureExceptionImmediate(error)` instead, which attaches this metadata by default.");
+    return this._capturePreparedEvent(props, true);
+  }
+  captureAi(props) {
+    if (this.disabled) return;
+    const uuid2 = getEventUuid(props.uuid, uuidv7);
+    this._sendPreparedAiEvent({
+      ...props,
+      uuid: uuid2
+    }, false);
+    return uuid2;
+  }
+  async captureAiImmediate(props) {
+    if (this.disabled) return;
+    const uuid2 = getEventUuid(props.uuid, uuidv7);
+    await this._sendPreparedAiEvent({
+      ...props,
+      uuid: uuid2
+    }, true);
+    return uuid2;
+  }
+  _sendPreparedAiEvent(props, immediate) {
+    if ("string" == typeof props?.event && !props.event.startsWith("$ai_")) this._logger.debug(`captureAi called with non-AI event ${props.event}; routing it to the AI endpoint anyway.`);
+    this._aiCaptureRouteActive = true;
+    return this._sendPreparedEvent("capture", props, immediate, void 0, AI_CAPTURE_ROUTE);
+  }
+  identify({ distinctId, properties = {}, disableGeoip }) {
+    const { $set, $set_once, $anon_distinct_id, ...rest } = properties;
+    const setProps = $set || rest;
+    const setOnceProps = $set_once || {};
+    const eventProperties = {
+      $set: setProps,
+      $set_once: setOnceProps,
+      $anon_distinct_id: $anon_distinct_id ?? void 0
+    };
+    this._sendPreparedEvent("identify", {
+      distinctId,
+      event: "$identify",
+      properties: eventProperties,
+      disableGeoip
+    }, false, {
+      includeContextProperties: false
+    });
+  }
+  async identifyImmediate({ distinctId, properties = {}, disableGeoip }) {
+    const { $set, $set_once, $anon_distinct_id, ...rest } = properties;
+    const setProps = $set || rest;
+    const setOnceProps = $set_once || {};
+    const eventProperties = {
+      $set: setProps,
+      $set_once: setOnceProps,
+      $anon_distinct_id: $anon_distinct_id ?? void 0
+    };
+    await this._sendPreparedEvent("identify", {
+      distinctId,
+      event: "$identify",
+      properties: eventProperties,
+      disableGeoip
+    }, true, {
+      includeContextProperties: false
+    });
+  }
+  setPersonProperties({ distinctId, properties = {}, propertiesOnce = {} }) {
+    if (0 === Object.keys(properties).length && 0 === Object.keys(propertiesOnce).length) return;
+    const eventProperties = {};
+    if (Object.keys(properties).length > 0) eventProperties.$set = properties;
+    if (Object.keys(propertiesOnce).length > 0) eventProperties.$set_once = propertiesOnce;
+    this.capture({
+      distinctId,
+      event: "$set",
+      properties: eventProperties
+    });
+  }
+  unsetPersonProperties({ distinctId, properties }) {
+    const propertyNames = normalizeUnsetPersonProperties(properties);
+    if (0 === propertyNames.length) return;
+    this.capture({
+      distinctId,
+      event: "$set",
+      properties: {
+        $unset: propertyNames
+      }
+    });
+  }
+  alias(data) {
+    this._sendPreparedEvent("alias", {
+      distinctId: data.distinctId,
+      event: "$create_alias",
+      properties: {
+        distinct_id: data.distinctId,
+        alias: data.alias
+      },
+      disableGeoip: data.disableGeoip
+    }, false, {
+      includeContextProperties: false
+    });
+  }
+  async aliasImmediate(data) {
+    await this._sendPreparedEvent("alias", {
+      distinctId: data.distinctId,
+      event: "$create_alias",
+      properties: {
+        distinct_id: data.distinctId,
+        alias: data.alias
+      },
+      disableGeoip: data.disableGeoip
+    }, true, {
+      includeContextProperties: false
+    });
+  }
+  isLocalEvaluationReady() {
+    return this.featureFlagsPoller?.isLocalEvaluationReady() ?? false;
+  }
+  getFeatureFlagEvaluationRuntime(key) {
+    return this.featureFlagsPoller?.getEvaluationRuntimeForFlag(key);
+  }
+  getFeatureFlagKeysByEvaluationRuntime(evaluationRuntime) {
+    return this.featureFlagsPoller?.getFlagKeysByEvaluationRuntime(evaluationRuntime) ?? [];
+  }
+  async waitForLocalEvaluationReady(timeoutMs = THIRTY_SECONDS) {
+    if (this.isLocalEvaluationReady()) return true;
+    if (void 0 === this.featureFlagsPoller) return false;
+    return new Promise((resolve2) => {
+      const timeout = setTimeout(() => {
+        cleanup();
+        resolve2(false);
+      }, timeoutMs);
+      const cleanup = this._events.on("localEvaluationFlagsLoaded", (count) => {
+        clearTimeout(timeout);
+        cleanup();
+        resolve2(count > 0);
+      });
+    });
+  }
+  _resolveDistinctId(distinctIdOrOptions, options) {
+    if ("string" == typeof distinctIdOrOptions) return {
+      distinctId: distinctIdOrOptions,
+      options
+    };
+    return {
+      distinctId: this.context?.get()?.distinctId,
+      options: distinctIdOrOptions
+    };
+  }
+  async _getFeatureFlagResult(key, distinctId, options = {}, matchValue) {
+    if (this.disabled) return void this._logger.warn("The client is disabled");
+    const sendFeatureFlagEvents = options.sendFeatureFlagEvents ?? true;
+    if (void 0 !== this._flagOverrides && key in this._flagOverrides) {
+      const overrideValue = this._flagOverrides[key];
+      if (void 0 === overrideValue) return;
+      const overridePayload = this._payloadOverrides?.[key];
+      return {
+        key,
+        enabled: false !== overrideValue,
+        variant: "string" == typeof overrideValue ? overrideValue : void 0,
+        payload: overridePayload
+      };
+    }
+    const { groups, disableGeoip } = options;
+    let { onlyEvaluateLocally, personProperties, groupProperties } = options;
+    const adjustedProperties = this.addLocalPersonAndGroupProperties(distinctId, groups, personProperties, groupProperties);
+    personProperties = adjustedProperties.allPersonProperties;
+    groupProperties = adjustedProperties.allGroupProperties;
+    const evaluationContext = this.createFeatureFlagEvaluationContext(distinctId, groups, this.personPropertiesForLocalEvaluation(distinctId, personProperties), groupProperties);
+    if (void 0 == onlyEvaluateLocally) onlyEvaluateLocally = this.options.strictLocalEvaluation ?? false;
+    let result;
+    let flagWasLocallyEvaluated = false;
+    let requestId;
+    let evaluatedAt;
+    let featureFlagError;
+    let flagId;
+    let flagVersion;
+    let flagReason;
+    let flagHasExperiment;
+    const localEvaluationEnabled = void 0 !== this.featureFlagsPoller;
+    if (localEvaluationEnabled) {
+      await this.featureFlagsPoller?.loadFeatureFlags();
+      const flag = this.featureFlagsPoller?.featureFlagsByKey[key];
+      if (flag) try {
+        const localResult = await this.featureFlagsPoller?.computeFlagAndPayloadLocally(flag, evaluationContext, {
+          matchValue
+        });
+        if (localResult) {
+          flagWasLocallyEvaluated = true;
+          const value = localResult.value;
+          flagId = flag.id;
+          flagReason = "Evaluated locally";
+          flagHasExperiment = flag.has_experiment;
+          result = {
+            key,
+            enabled: false !== value,
+            variant: "string" == typeof value ? value : void 0,
+            payload: localResult.payload ?? void 0,
+            reason: flagReason,
+            reasonCode: false === flag.active ? "flag_disabled" : void 0
+          };
+        }
+      } catch (e) {
+        if (e instanceof RequiresServerEvaluation || e instanceof InconclusiveMatchError) this._logger?.info(`${e.name} when computing flag locally: ${key}: ${e.message}`);
+        else throw e;
+      }
+    }
+    if (!flagWasLocallyEvaluated && !onlyEvaluateLocally) {
+      const flagsResponse = await super.getFeatureFlagDetailsStateless(evaluationContext.distinctId, evaluationContext.groups, personProperties, groupProperties, disableGeoip, [
+        key
+      ]);
+      if (void 0 === flagsResponse) featureFlagError = FeatureFlagError2.UNKNOWN_ERROR;
+      else {
+        this._minimalFlagCalledEvents = true === flagsResponse.minimalFlagCalledEvents;
+        requestId = flagsResponse.requestId;
+        evaluatedAt = flagsResponse.evaluatedAt;
+        const errors = [];
+        if (flagsResponse.errorsWhileComputingFlags) errors.push(FeatureFlagError2.ERRORS_WHILE_COMPUTING);
+        if (flagsResponse.quotaLimited?.includes("feature_flags")) errors.push(FeatureFlagError2.QUOTA_LIMITED);
+        const flagDetail = flagsResponse.flags[key];
+        if (void 0 === flagDetail) errors.push(FeatureFlagError2.FLAG_MISSING);
+        else {
+          flagId = flagDetail.metadata?.id;
+          flagVersion = flagDetail.metadata?.version;
+          flagReason = flagDetail.reason?.description ?? flagDetail.reason?.code;
+          flagHasExperiment = flagDetail.metadata?.has_experiment;
+          let parsedPayload;
+          if (flagDetail.metadata?.payload !== void 0) try {
+            parsedPayload = JSON.parse(flagDetail.metadata.payload);
+          } catch {
+            parsedPayload = flagDetail.metadata.payload;
+          }
+          result = {
+            key,
+            enabled: flagDetail.enabled,
+            variant: flagDetail.variant ?? void 0,
+            payload: parsedPayload,
+            reason: flagReason,
+            reasonCode: flagDetail.reason?.code
+          };
+        }
+        if (errors.length > 0) featureFlagError = errors.join(",");
+      }
+    }
+    if (sendFeatureFlagEvents) {
+      const response = void 0 === result ? void 0 : false === result.enabled ? false : result.variant ?? true;
+      const properties = {
+        $feature_flag: key,
+        $feature_flag_response: response,
+        $feature_flag_id: flagId,
+        $feature_flag_version: flagVersion,
+        $feature_flag_reason: flagReason,
+        locally_evaluated: flagWasLocallyEvaluated,
+        [`$feature/${key}`]: response,
+        $feature_flag_request_id: requestId,
+        $feature_flag_evaluated_at: flagWasLocallyEvaluated ? Date.now() : evaluatedAt
+      };
+      if (void 0 !== flagHasExperiment) properties.$feature_flag_has_experiment = flagHasExperiment;
+      if (flagWasLocallyEvaluated && this.featureFlagsPoller) {
+        const flagDefinitionsLoadedAt = this.featureFlagsPoller.getFlagDefinitionsLoadedAt();
+        if (void 0 !== flagDefinitionsLoadedAt) properties.$feature_flag_definitions_loaded_at = flagDefinitionsLoadedAt;
+      }
+      if (featureFlagError) properties.$feature_flag_error = featureFlagError;
+      this._captureFlagCalledEventIfNeeded({
+        distinctId,
+        key,
+        response,
+        groups,
+        disableGeoip,
+        properties
+      });
+    }
+    if (void 0 !== result && void 0 !== this._payloadOverrides && key in this._payloadOverrides) result = {
+      ...result,
+      payload: this._payloadOverrides[key]
+    };
+    return result;
+  }
+  async getFeatureFlag(key, distinctId, options) {
+    emitDeprecationWarningOnce("getFeatureFlag", "`getFeatureFlag` is deprecated and will be removed in a future major version. Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.getFlag(key)` instead \u2014 this consolidates flag evaluation into a single `/flags` request per incoming request.");
+    const result = await this._getFeatureFlagResult(key, distinctId, {
+      ...options,
+      sendFeatureFlagEvents: options?.sendFeatureFlagEvents ?? this.options.sendFeatureFlagEvent ?? true
+    });
+    if (void 0 === result) return;
+    if (false === result.enabled) return false;
+    return result.variant ?? true;
+  }
+  async getFeatureFlagPayload(key, distinctId, matchValue, options) {
+    emitDeprecationWarningOnce("getFeatureFlagPayload", "`getFeatureFlagPayload` is deprecated and will be removed in a future major version. Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.getFlagPayload(key)` instead \u2014 this consolidates flag evaluation into a single `/flags` request per incoming request.");
+    if (void 0 !== this._payloadOverrides && key in this._payloadOverrides) return this._payloadOverrides[key];
+    const result = await this._getFeatureFlagResult(key, distinctId, {
+      ...options,
+      sendFeatureFlagEvents: false
+    }, matchValue);
+    if (void 0 === result) return;
+    return result.payload ?? null;
+  }
+  async getFeatureFlagResult(key, distinctIdOrOptions, options) {
+    const { distinctId: resolvedDistinctId, options: resolvedOptions } = this._resolveDistinctId(distinctIdOrOptions, options);
+    if (!resolvedDistinctId) return void this._logger.warn("[PostHog] distinctId is required \u2014 pass it explicitly or use withContext()");
+    return this._getFeatureFlagResult(key, resolvedDistinctId, {
+      ...resolvedOptions,
+      sendFeatureFlagEvents: resolvedOptions?.sendFeatureFlagEvents ?? this.options.sendFeatureFlagEvent ?? true
+    });
+  }
+  async getRemoteConfigPayload(flagKey) {
+    if (this.disabled) return void this._logger.warn("The client is disabled");
+    if (!this.options.personalApiKey) throw new Error("Personal API key is required for remote config payload decryption");
+    const response = await this._requestRemoteConfigPayload(flagKey);
+    if (!response) return;
+    const parsed = await response.json();
+    if ("string" == typeof parsed) try {
+      return JSON.parse(parsed);
+    } catch (e) {
+    }
+    return parsed;
+  }
+  async isFeatureEnabled(key, distinctId, options) {
+    emitDeprecationWarningOnce("isFeatureEnabled", "`isFeatureEnabled` is deprecated and will be removed in a future major version. Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.isEnabled(key)` instead \u2014 this consolidates flag evaluation into a single `/flags` request per incoming request.");
+    const result = await this._getFeatureFlagResult(key, distinctId, {
+      ...options,
+      sendFeatureFlagEvents: options?.sendFeatureFlagEvents ?? this.options.sendFeatureFlagEvent ?? true
+    });
+    if (void 0 === result) return;
+    if (false === result.enabled) return false;
+    const feat = result.variant ?? true;
+    return !!feat || false;
+  }
+  async getAllFlags(distinctIdOrOptions, options) {
+    const { distinctId: resolvedDistinctId, options: resolvedOptions } = this._resolveDistinctId(distinctIdOrOptions, options);
+    if (!resolvedDistinctId) {
+      this._logger.warn("[PostHog] distinctId is required to get feature flags \u2014 pass it explicitly or use withContext()");
+      return {};
+    }
+    const response = await this.getAllFlagsAndPayloads(resolvedDistinctId, resolvedOptions);
+    return response.featureFlags || {};
+  }
+  async getAllFlagsAndPayloads(distinctIdOrOptions, options) {
+    const { distinctId: resolvedDistinctId, options: resolvedOptions } = this._resolveDistinctId(distinctIdOrOptions, options);
+    if (!resolvedDistinctId) {
+      this._logger.warn("[PostHog] distinctId is required to get feature flags and payloads \u2014 pass it explicitly or use withContext()");
+      return {
+        featureFlags: {},
+        featureFlagPayloads: {}
+      };
+    }
+    if (this.disabled) {
+      this._logger.warn("The client is disabled");
+      return {
+        featureFlags: {},
+        featureFlagPayloads: {}
+      };
+    }
+    const { groups, disableGeoip, flagKeys } = resolvedOptions || {};
+    let { onlyEvaluateLocally, personProperties, groupProperties } = resolvedOptions || {};
+    const adjustedProperties = this.addLocalPersonAndGroupProperties(resolvedDistinctId, groups, personProperties, groupProperties);
+    personProperties = adjustedProperties.allPersonProperties;
+    groupProperties = adjustedProperties.allGroupProperties;
+    const evaluationContext = this.createFeatureFlagEvaluationContext(resolvedDistinctId, groups, this.personPropertiesForLocalEvaluation(resolvedDistinctId, personProperties), groupProperties);
+    if (void 0 == onlyEvaluateLocally) onlyEvaluateLocally = this.options.strictLocalEvaluation ?? false;
+    const localEvaluationResult = await this.featureFlagsPoller?.getAllFlagsAndPayloads(evaluationContext, flagKeys);
+    let featureFlags = {};
+    let featureFlagPayloads = {};
+    let fallbackToFlags = true;
+    if (localEvaluationResult) {
+      featureFlags = localEvaluationResult.response;
+      featureFlagPayloads = localEvaluationResult.payloads;
+      fallbackToFlags = localEvaluationResult.fallbackToFlags;
+    }
+    if (fallbackToFlags && !onlyEvaluateLocally) {
+      const remoteEvaluationResult = await super.getFeatureFlagsAndPayloadsStateless(evaluationContext.distinctId, evaluationContext.groups, personProperties, groupProperties, disableGeoip, flagKeys);
+      featureFlags = {
+        ...featureFlags,
+        ...remoteEvaluationResult.flags || {}
+      };
+      featureFlagPayloads = {
+        ...featureFlagPayloads,
+        ...remoteEvaluationResult.payloads || {}
+      };
+    }
+    if (void 0 !== this._flagOverrides) featureFlags = {
+      ...featureFlags,
+      ...this._flagOverrides
+    };
+    if (void 0 !== this._payloadOverrides) featureFlagPayloads = {
+      ...featureFlagPayloads,
+      ...this._payloadOverrides
+    };
+    return {
+      featureFlags,
+      featureFlagPayloads
+    };
+  }
+  async evaluateFlags(distinctIdOrOptions, options) {
+    const { distinctId: resolvedDistinctId, options: resolvedOptions } = this._resolveDistinctId(distinctIdOrOptions, options);
+    if (!resolvedDistinctId) {
+      this._logger.warn("[PostHog] distinctId is required to evaluate feature flags \u2014 pass it explicitly or use withContext()");
+      return new FeatureFlagEvaluations({
+        host: this._getFeatureFlagEvaluationsHost(),
+        distinctId: "",
+        flags: {}
+      });
+    }
+    if (this.disabled) {
+      this._logger.warn("The client is disabled");
+      return new FeatureFlagEvaluations({
+        host: this._getFeatureFlagEvaluationsHost(),
+        distinctId: resolvedDistinctId,
+        flags: {}
+      });
+    }
+    const { groups, disableGeoip } = resolvedOptions || {};
+    const flagKeys = resolvedOptions?.flagKeys ?? void 0;
+    if (flagKeys?.length === 0) return new FeatureFlagEvaluations({
+      host: this._getFeatureFlagEvaluationsHost(),
+      distinctId: resolvedDistinctId,
+      groups,
+      disableGeoip,
+      flags: {}
+    });
+    let { onlyEvaluateLocally, personProperties, groupProperties } = resolvedOptions || {};
+    const adjustedProperties = this.addLocalPersonAndGroupProperties(resolvedDistinctId, groups, personProperties, groupProperties);
+    personProperties = adjustedProperties.allPersonProperties;
+    groupProperties = adjustedProperties.allGroupProperties;
+    const evaluationContext = this.createFeatureFlagEvaluationContext(resolvedDistinctId, groups, this.personPropertiesForLocalEvaluation(resolvedDistinctId, personProperties), groupProperties);
+    if (void 0 == onlyEvaluateLocally) onlyEvaluateLocally = this.options.strictLocalEvaluation ?? false;
+    const requestedFlagKeys = flagKeys ? new Set(flagKeys) : void 0;
+    const records = {};
+    let requestId;
+    let evaluatedAt;
+    let errorsWhileComputing = false;
+    let quotaLimited = false;
+    const localResult = await this.featureFlagsPoller?.getAllFlagsAndPayloads(evaluationContext, flagKeys);
+    const locallyEvaluatedKeys = /* @__PURE__ */ new Set();
+    if (localResult) for (const [key, value] of Object.entries(localResult.response)) {
+      const flagDef = this.featureFlagsPoller?.featureFlagsByKey[key];
+      records[key] = {
+        key,
+        enabled: false !== value,
+        variant: "string" == typeof value ? value : void 0,
+        payload: localResult.payloads[key],
+        id: flagDef?.id,
+        version: void 0,
+        reason: "Evaluated locally",
+        locallyEvaluated: true,
+        hasExperiment: flagDef?.has_experiment
+      };
+      locallyEvaluatedKeys.add(key);
+    }
+    const requestedFlagMissingLocally = void 0 !== requestedFlagKeys && Array.from(requestedFlagKeys).some((key) => this.featureFlagsPoller?.featureFlagsByKey[key] === void 0);
+    const fallbackToFlags = localResult ? localResult.fallbackToFlags || requestedFlagMissingLocally : true;
+    if (fallbackToFlags && !onlyEvaluateLocally) {
+      const details = await super.getFeatureFlagDetailsStateless(evaluationContext.distinctId, evaluationContext.groups, personProperties, groupProperties, disableGeoip, flagKeys);
+      if (details) {
+        this._minimalFlagCalledEvents = true === details.minimalFlagCalledEvents;
+        requestId = details.requestId;
+        evaluatedAt = details.evaluatedAt;
+        errorsWhileComputing = Boolean(details.errorsWhileComputingFlags);
+        quotaLimited = Array.isArray(details.quotaLimited) && details.quotaLimited.includes("feature_flags");
+        for (const [key, detail] of Object.entries(details.flags)) {
+          if (locallyEvaluatedKeys.has(key)) continue;
+          let parsedPayload;
+          if (detail.metadata?.payload !== void 0) try {
+            parsedPayload = JSON.parse(detail.metadata.payload);
+          } catch {
+            parsedPayload = detail.metadata.payload;
+          }
+          records[key] = {
+            key,
+            enabled: detail.enabled,
+            variant: detail.variant,
+            payload: parsedPayload,
+            id: detail.metadata?.id,
+            version: detail.metadata?.version,
+            reason: detail.reason?.description ?? detail.reason?.code,
+            locallyEvaluated: false,
+            hasExperiment: detail.metadata?.has_experiment
+          };
+        }
+      }
+    }
+    if (void 0 !== this._flagOverrides) for (const [key, value] of Object.entries(this._flagOverrides)) {
+      if (void 0 === value) {
+        delete records[key];
+        continue;
+      }
+      const existing = records[key];
+      records[key] = {
+        key,
+        enabled: false !== value,
+        variant: "string" == typeof value ? value : void 0,
+        payload: existing?.payload,
+        id: existing?.id,
+        version: existing?.version,
+        reason: existing?.reason,
+        locallyEvaluated: existing?.locallyEvaluated ?? false,
+        hasExperiment: existing?.hasExperiment
+      };
+    }
+    if (void 0 !== this._payloadOverrides) for (const [key, payload] of Object.entries(this._payloadOverrides)) {
+      const existing = records[key];
+      if (existing) records[key] = {
+        ...existing,
+        payload
+      };
+    }
+    if (void 0 !== requestedFlagKeys) {
+      for (const key of Object.keys(records)) if (!requestedFlagKeys.has(key)) delete records[key];
+    }
+    return new FeatureFlagEvaluations({
+      host: this._getFeatureFlagEvaluationsHost(),
+      distinctId: resolvedDistinctId,
+      groups,
+      disableGeoip,
+      flags: records,
+      requestId,
+      evaluatedAt,
+      flagDefinitionsLoadedAt: this.featureFlagsPoller?.getFlagDefinitionsLoadedAt(),
+      errorsWhileComputing,
+      quotaLimited
+    });
+  }
+  _shouldSendMinimalFlagCalledEvent(event, properties) {
+    return "$feature_flag_called" === event && this._minimalFlagCalledEvents && false === properties.$feature_flag_has_experiment;
+  }
+  _captureFlagCalledEventIfNeeded(params) {
+    const { distinctId, key, response, groups, disableGeoip, properties } = params;
+    const groupSuffix = groups && Object.keys(groups).length > 0 ? `_${JSON.stringify(Object.entries(groups).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0))}` : "";
+    const featureFlagReportedKey = `${key}_${response}${groupSuffix}`;
+    if (distinctId in this.distinctIdHasSentFlagCalls && this.distinctIdHasSentFlagCalls[distinctId].has(featureFlagReportedKey)) return;
+    if (Object.keys(this.distinctIdHasSentFlagCalls).length >= this.maxCacheSize) this.distinctIdHasSentFlagCalls = {};
+    if (this.distinctIdHasSentFlagCalls[distinctId] instanceof Set) this.distinctIdHasSentFlagCalls[distinctId].add(featureFlagReportedKey);
+    else this.distinctIdHasSentFlagCalls[distinctId] = /* @__PURE__ */ new Set([
+      featureFlagReportedKey
+    ]);
+    this.capture({
+      distinctId,
+      event: "$feature_flag_called",
+      properties,
+      groups,
+      disableGeoip
+    });
+  }
+  _getFeatureFlagEvaluationsHost() {
+    if (!this._featureFlagEvaluationsHost) this._featureFlagEvaluationsHost = {
+      captureFlagCalledEventIfNeeded: (params) => this._captureFlagCalledEventIfNeeded(params),
+      logWarning: (message) => {
+        if (false !== this.options.featureFlagsLogWarnings) console.warn(`[PostHog] ${message}`);
+      }
+    };
+    return this._featureFlagEvaluationsHost;
+  }
+  groupIdentify({ groupType, groupKey, properties, distinctId, disableGeoip }) {
+    this._sendPreparedEvent("capture", {
+      distinctId: distinctId || `$${groupType}_${groupKey}`,
+      event: "$groupidentify",
+      properties: {
+        $group_type: groupType,
+        $group_key: groupKey,
+        $group_set: properties || {}
+      },
+      disableGeoip
+    }, false, {
+      includeContextProperties: false
+    });
+  }
+  async groupIdentifyImmediate({ groupType, groupKey, properties, distinctId, disableGeoip }) {
+    await this._sendPreparedEvent("capture", {
+      distinctId: distinctId || `$${groupType}_${groupKey}`,
+      event: "$groupidentify",
+      properties: {
+        $group_type: groupType,
+        $group_key: groupKey,
+        $group_set: properties || {}
+      },
+      disableGeoip
+    }, true, {
+      includeContextProperties: false
+    });
+  }
+  async reloadFeatureFlags() {
+    await this.featureFlagsPoller?.loadFeatureFlags(true);
+  }
+  overrideFeatureFlags(overrides) {
+    const flagArrayToRecord = (flags) => Object.fromEntries(flags.map((f) => [
+      f,
+      true
+    ]));
+    if (false === overrides) {
+      this._flagOverrides = void 0;
+      this._payloadOverrides = void 0;
+      return;
+    }
+    if (Array.isArray(overrides)) {
+      this._flagOverrides = flagArrayToRecord(overrides);
+      return;
+    }
+    if (this._isFeatureFlagOverrideOptions(overrides)) {
+      if ("flags" in overrides) {
+        if (false === overrides.flags) this._flagOverrides = void 0;
+        else if (Array.isArray(overrides.flags)) this._flagOverrides = flagArrayToRecord(overrides.flags);
+        else if (void 0 !== overrides.flags) this._flagOverrides = {
+          ...overrides.flags
+        };
+      }
+      if ("payloads" in overrides) {
+        if (false === overrides.payloads) this._payloadOverrides = void 0;
+        else if (void 0 !== overrides.payloads) this._payloadOverrides = {
+          ...overrides.payloads
+        };
+      }
+      return;
+    }
+    this._flagOverrides = {
+      ...overrides
+    };
+  }
+  _isFeatureFlagOverrideOptions(overrides) {
+    if ("object" != typeof overrides || null === overrides || Array.isArray(overrides)) return false;
+    const obj = overrides;
+    if ("flags" in obj) {
+      const flagsValue = obj["flags"];
+      if (false === flagsValue || Array.isArray(flagsValue) || "object" == typeof flagsValue && null !== flagsValue) return true;
+    }
+    if ("payloads" in obj) {
+      const payloadsValue = obj["payloads"];
+      if (false === payloadsValue || "object" == typeof payloadsValue && null !== payloadsValue) return true;
+    }
+    return false;
+  }
+  withContext(data, fn, options) {
+    if (!this.context) return fn();
+    return this.context.run(data, fn, options);
+  }
+  getContext() {
+    return this.context?.get();
+  }
+  enterContext(data, options) {
+    this.context?.enter(data, options);
+  }
+  async _shutdown(shutdownTimeoutMs) {
+    const shutdownDeadlineMs = Date.now() + (shutdownTimeoutMs ?? 3e4);
+    const resolve2 = this._consumeWaitUntilCycle();
+    await this.featureFlagsPoller?.stopPoller(shutdownTimeoutMs);
+    this.errorTracking.shutdown();
+    if (this._metrics) {
+      await raceWithTimeout(this._metrics.flush().catch(() => {
+      }), Math.max(0, shutdownDeadlineMs - Date.now()));
+      this._metrics.reset();
+    }
+    if (this._traces) {
+      await raceWithTimeout(this._traces.flush().catch(() => {
+      }), Math.max(0, shutdownDeadlineMs - Date.now()));
+      this._traces.reset();
+    }
+    try {
+      return await super._shutdown(Math.max(0, shutdownDeadlineMs - Date.now()));
+    } finally {
+      this.distinctIdHasSentFlagCalls = {};
+      resolve2?.();
+    }
+  }
+  async _requestRemoteConfigPayload(flagKey) {
+    if (this.disabled || !this.apiKey || !this.options.personalApiKey) return;
+    const url = `${this.host}/api/projects/@current/feature_flags/${flagKey}/remote_config?token=${encodeURIComponent(this.apiKey)}`;
+    const options = {
+      method: "GET",
+      headers: {
+        ...this.getCustomHeaders(),
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.options.personalApiKey}`
+      }
+    };
+    let abortTimeout = null;
+    if (this.options.requestTimeout && "number" == typeof this.options.requestTimeout) {
+      const controller = new AbortController();
+      abortTimeout = safeSetTimeout(() => {
+        controller.abort();
+      }, this.options.requestTimeout);
+      options.signal = controller.signal;
+    }
+    try {
+      return await this.fetch(url, options);
+    } catch (error2) {
+      this._events.emit("error", error2);
+      return;
+    } finally {
+      if (abortTimeout) clearTimeout(abortTimeout);
+    }
+  }
+  extractPropertiesFromEvent(eventProperties, groups) {
+    if (!eventProperties) return {
+      personProperties: {},
+      groupProperties: {}
+    };
+    const personProperties = {};
+    const groupProperties = {};
+    for (const [key, value] of Object.entries(eventProperties)) if (isPlainObject3(value) && groups && key in groups) {
+      const groupProps = {};
+      for (const [groupKey, groupValue] of Object.entries(value)) groupProps[String(groupKey)] = String(groupValue);
+      groupProperties[String(key)] = groupProps;
+    } else personProperties[String(key)] = String(value);
+    return {
+      personProperties,
+      groupProperties
+    };
+  }
+  async getFeatureFlagsForEvent(distinctId, groups, disableGeoip, sendFeatureFlagsOptions) {
+    if (this.disabled || !this.apiKey) return void this._logger.warn("The client is disabled");
+    const finalPersonProperties = sendFeatureFlagsOptions?.personProperties || {};
+    const finalGroupProperties = sendFeatureFlagsOptions?.groupProperties || {};
+    const flagKeys = sendFeatureFlagsOptions?.flagKeys;
+    const onlyEvaluateLocally = sendFeatureFlagsOptions?.onlyEvaluateLocally ?? this.options.strictLocalEvaluation ?? false;
+    if (onlyEvaluateLocally) if (!((this.featureFlagsPoller?.featureFlags?.length || 0) > 0)) return {};
+    else {
+      const groupsWithStringValues = {};
+      for (const [key, value] of Object.entries(groups || {})) groupsWithStringValues[key] = String(value);
+      return await this.getAllFlags(distinctId, {
+        groups: groupsWithStringValues,
+        personProperties: finalPersonProperties,
+        groupProperties: finalGroupProperties,
+        disableGeoip,
+        onlyEvaluateLocally: true,
+        flagKeys
+      });
+    }
+    if ((this.featureFlagsPoller?.featureFlags?.length || 0) > 0) {
+      const groupsWithStringValues = {};
+      for (const [key, value] of Object.entries(groups || {})) groupsWithStringValues[key] = String(value);
+      return await this.getAllFlags(distinctId, {
+        groups: groupsWithStringValues,
+        personProperties: finalPersonProperties,
+        groupProperties: finalGroupProperties,
+        disableGeoip,
+        onlyEvaluateLocally: true,
+        flagKeys
+      });
+    }
+    return (await super.getFeatureFlagsStateless(distinctId, groups, finalPersonProperties, finalGroupProperties, disableGeoip)).flags;
+  }
+  addLocalPersonAndGroupProperties(distinctId, groups, personProperties, groupProperties) {
+    const allPersonProperties = {
+      ...personProperties || {}
+    };
+    const allGroupProperties = {};
+    if (groups) for (const groupName of Object.keys(groups)) allGroupProperties[groupName] = {
+      $group_key: groups[groupName],
+      ...groupProperties?.[groupName] || {}
+    };
+    return {
+      allPersonProperties,
+      allGroupProperties
+    };
+  }
+  personPropertiesForLocalEvaluation(distinctId, personProperties) {
+    return {
+      distinct_id: distinctId,
+      ...personProperties || {}
+    };
+  }
+  createFeatureFlagEvaluationContext(distinctId, groups, personProperties, groupProperties) {
+    return {
+      distinctId,
+      groups: groups || {},
+      personProperties: personProperties || {},
+      groupProperties: groupProperties || {},
+      evaluationCache: {}
+    };
+  }
+  captureException(error2, distinctId, additionalProperties, uuid2, flags) {
+    if (!error_tracking_default.isPreviouslyCapturedError(error2)) {
+      const syntheticException = new Error("PostHog syntheticException");
+      this.addPendingPromise(error_tracking_default.buildEventMessage(this.getErrorPropertiesBuilder(), error2, {
+        syntheticException
+      }, distinctId, additionalProperties).then((msg) => this._capturePreparedEvent({
+        ...msg,
+        uuid: uuid2,
+        flags
+      }, false)));
+    }
+  }
+  async captureExceptionImmediate(error2, distinctId, additionalProperties, flags) {
+    if (!error_tracking_default.isPreviouslyCapturedError(error2)) {
+      const syntheticException = new Error("PostHog syntheticException");
+      return this.addPendingPromise(error_tracking_default.buildEventMessage(this.getErrorPropertiesBuilder(), error2, {
+        syntheticException
+      }, distinctId, additionalProperties).then((msg) => this.captureImmediate({
+        ...msg,
+        flags
+      })));
+    }
+  }
+  async prepareEventMessage(props) {
+    return this._prepareEventMessage(props);
+  }
+  async _prepareEventMessage(props, options = {}) {
+    const { distinctId, event, properties, groups, flags, sendFeatureFlags, timestamp, disableGeoip, uuid: uuid2 } = props;
+    const contextData = this.context?.get();
+    const includeContextProperties = options.includeContextProperties ?? true;
+    let mergedDistinctId = distinctId || contextData?.distinctId;
+    const mergedProperties = includeContextProperties ? {
+      ...this.props,
+      ...contextData?.properties || {},
+      ...properties || {}
+    } : {
+      ...properties || {}
+    };
+    if (!mergedDistinctId) {
+      mergedDistinctId = uuidv7();
+      mergedProperties.$process_person_profile = false;
+    }
+    if (includeContextProperties && contextData?.sessionId && !mergedProperties.$session_id) mergedProperties.$session_id = contextData.sessionId;
+    const finalProperties = this._shouldSendMinimalFlagCalledEvent(event, mergedProperties) ? minimizeFlagCalledEventProperties(mergedProperties) : mergedProperties;
+    const eventMessage = this._runBeforeSend({
+      distinctId: mergedDistinctId,
+      event,
+      properties: finalProperties,
+      groups,
+      flags,
+      sendFeatureFlags,
+      timestamp,
+      disableGeoip,
+      uuid: uuid2
+    });
+    if (!eventMessage) return Promise.reject(null);
+    const eventProperties = await Promise.resolve().then(async () => {
+      if (flags) {
+        if (sendFeatureFlags) console.warn("[PostHog] Both `flags` and `sendFeatureFlags` were passed to capture(); using `flags` and ignoring `sendFeatureFlags`.");
+        return flags._getEventProperties();
+      }
+      if (sendFeatureFlags) {
+        emitDeprecationWarningOnce("sendFeatureFlags", "`sendFeatureFlags` is deprecated and will be removed in a future major version. Pass a `flags` snapshot from `posthog.evaluateFlags(...)` instead \u2014 it avoids a second `/flags` request per capture and guarantees the event carries the exact flag values your code branched on.");
+        const sendFeatureFlagsOptions = "object" == typeof sendFeatureFlags ? sendFeatureFlags : void 0;
+        const flagValues = await this.getFeatureFlagsForEvent(eventMessage.distinctId, groups, disableGeoip, sendFeatureFlagsOptions);
+        return buildFlagEventProperties(flagValues);
+      }
+      return {};
+    }).catch(() => ({})).then((additionalProperties) => {
+      const resolvedGroups = eventMessage.groups || groups;
+      return {
+        ...additionalProperties,
+        ...eventMessage.properties || {},
+        ...void 0 !== resolvedGroups && Object.keys(resolvedGroups).length > 0 ? {
+          $groups: resolvedGroups
+        } : {}
+      };
+    });
+    if ("$pageview" === eventMessage.event && this.options.__preview_capture_bot_pageviews && "string" == typeof eventProperties.$raw_user_agent) {
+      if (isBlockedUA(eventProperties.$raw_user_agent, this.options.custom_blocked_useragents || [])) {
+        eventMessage.event = "$bot_pageview";
+        eventProperties.$browser_type = "bot";
+      }
+    }
+    return {
+      distinctId: eventMessage.distinctId,
+      event: eventMessage.event,
+      properties: eventProperties,
+      options: {
+        timestamp: eventMessage.timestamp,
+        disableGeoip: eventMessage.disableGeoip,
+        uuid: eventMessage.uuid
+      }
+    };
+  }
+  _runBeforeSend(eventMessage) {
+    const beforeSend = this.options.before_send;
+    if (!beforeSend) return eventMessage;
+    const fns = Array.isArray(beforeSend) ? beforeSend : [
+      beforeSend
+    ];
+    let result = eventMessage;
+    for (const fn of fns) try {
+      result = fn(result);
+      if (!result) {
+        this._logger.info(`Event '${eventMessage.event}' was rejected in beforeSend function`);
+        return null;
+      }
+      if (!result.properties || 0 === Object.keys(result.properties).length) {
+        const message = `Event '${result.event}' has no properties after beforeSend function, this is likely an error.`;
+        this._logger.warn(message);
+      }
+    } catch (error2) {
+      this._logger.error(`Error in before_send function for event '${eventMessage.event}':`, error2);
+      return null;
+    }
+    return result;
+  }
+};
+
+// ../../node_modules/posthog-node/dist/extensions/context/context.mjs
+var import_node_async_hooks = require("node:async_hooks");
+var PostHogContext = class {
+  constructor() {
+    this.storage = new import_node_async_hooks.AsyncLocalStorage();
+  }
+  get() {
+    return this.storage.getStore();
+  }
+  run(context, fn, options) {
+    return this.storage.run(this.resolve(context, options), fn);
+  }
+  enter(context, options) {
+    this.storage.enterWith(this.resolve(context, options));
+  }
+  resolve(context, options) {
+    if (options?.fresh === true) return context;
+    const current = this.get() || {};
+    return {
+      distinctId: context.distinctId ?? current.distinctId,
+      sessionId: context.sessionId ?? current.sessionId,
+      properties: {
+        ...current.properties || {},
+        ...context.properties || {}
+      }
+    };
+  }
+};
+
+// ../../node_modules/posthog-node/dist/extensions/context/span-context.node.mjs
+var import_node_async_hooks2 = require("node:async_hooks");
+var AsyncLocalStorageSpanContextManager = class {
+  active() {
+    return this._storage.getStore();
+  }
+  with(span, fn) {
+    return this._storage.run(span, fn);
+  }
+  constructor() {
+    this._storage = new import_node_async_hooks2.AsyncLocalStorage();
+  }
+};
+
+// ../../node_modules/posthog-node/dist/gzip.node.mjs
+var import_node_zlib = require("node:zlib");
+var import_node_util = require("node:util");
+var gzipAsync = (0, import_node_util.promisify)(import_node_zlib.gzip);
+async function gzipCompress2(input, isDebug = true) {
+  try {
+    const compressed = await gzipAsync(input);
+    return new Uint8Array(compressed);
+  } catch (error2) {
+    if (isDebug) console.error("Failed to gzip compress data", error2);
+    return null;
+  }
+}
+
+// ../../node_modules/posthog-node/dist/host-os.node.mjs
+var import_node_os3 = require("node:os");
+function hostOsResourceAttributes() {
+  let osName;
+  let osVersion;
+  try {
+    osName = (0, import_node_os3.platform)();
+    osVersion = (0, import_node_os3.release)();
+  } catch {
+  }
+  return osResourceAttributes(osName, osVersion);
+}
+
+// ../../node_modules/posthog-node/dist/extensions/sentry-integration.mjs
+var NAME = "posthog-node";
+function createEventProcessor(_posthog, { organization, projectId, prefix, severityAllowList = [
+  "error"
+], sendExceptionsToPostHog = true } = {}) {
+  return (event) => {
+    const shouldProcessLevel = "*" === severityAllowList || severityAllowList.includes(event.level);
+    if (!shouldProcessLevel) return event;
+    if (!event.tags) event.tags = {};
+    const userId = event.tags[PostHogSentryIntegration.POSTHOG_ID_TAG];
+    if (void 0 === userId) return event;
+    const uiHost = _posthog.options.host ?? "https://us.i.posthog.com";
+    const personUrl = new URL(`/project/${_posthog.apiKey}/person/${userId}`, uiHost).toString();
+    event.tags["PostHog Person URL"] = personUrl;
+    const exceptions = event.exception?.values || [];
+    const exceptionList = exceptions.map((exception) => ({
+      ...exception,
+      stacktrace: exception.stacktrace ? {
+        ...exception.stacktrace,
+        type: "raw",
+        frames: (exception.stacktrace.frames || []).map((frame) => ({
+          ...frame,
+          platform: "node:javascript"
+        }))
+      } : void 0
+    }));
+    const properties = {
+      $exception_message: exceptions[0]?.value || event.message,
+      $exception_type: exceptions[0]?.type,
+      $exception_level: event.level,
+      $exception_list: exceptionList,
+      $sentry_event_id: event.event_id,
+      $sentry_exception: event.exception,
+      $sentry_exception_message: exceptions[0]?.value || event.message,
+      $sentry_exception_type: exceptions[0]?.type,
+      $sentry_tags: event.tags
+    };
+    const injectedReleaseId = error_tracking_exports.getInjectedReleaseId();
+    if (injectedReleaseId) properties.$release_id = injectedReleaseId;
+    if (organization && projectId) properties["$sentry_url"] = (prefix || "https://sentry.io/organizations/") + organization + "/issues/?project=" + projectId + "&query=" + event.event_id;
+    if (sendExceptionsToPostHog) _posthog.capture({
+      event: "$exception",
+      distinctId: userId,
+      properties
+    });
+    return event;
+  };
+}
+var PostHogSentryIntegration = class {
+  static {
+    this.POSTHOG_ID_TAG = "posthog_distinct_id";
+  }
+  constructor(_posthog, organization, prefix, severityAllowList, sendExceptionsToPostHog) {
+    this.name = NAME;
+    this.name = NAME;
+    this.setupOnce = function(addGlobalEventProcessor, getCurrentHub) {
+      const projectId = getCurrentHub()?.getClient()?.getDsn()?.projectId;
+      addGlobalEventProcessor(createEventProcessor(_posthog, {
+        organization,
+        projectId,
+        prefix,
+        severityAllowList,
+        sendExceptionsToPostHog: sendExceptionsToPostHog ?? true
+      }));
+    };
+  }
+};
+
+// ../../node_modules/posthog-node/dist/entrypoints/index.node.mjs
+var PostHog = class extends PostHogBackendClient {
+  getLibraryId() {
+    return "posthog-node";
+  }
+  compressPayload(payload) {
+    return gzipCompress2(payload, this.isDebug);
+  }
+  initializeContext() {
+    return new PostHogContext();
+  }
+  initializeSpanContextManager() {
+    return new AsyncLocalStorageSpanContextManager();
+  }
+  hostResourceAttributes() {
+    return hostOsResourceAttributes();
+  }
+  createErrorPropertiesBuilder() {
+    return new error_tracking_exports.ErrorPropertiesBuilder([
+      new error_tracking_exports.EventCoercer(),
+      new error_tracking_exports.ErrorCoercer(),
+      new error_tracking_exports.ObjectCoercer(),
+      new error_tracking_exports.StringCoercer(),
+      new error_tracking_exports.PrimitiveCoercer()
+    ], error_tracking_exports.createStackParser("node:javascript", error_tracking_exports.nodeStackLineParser), [
+      createModulerModifier(),
+      (frames) => addSourceContext(frames, void 0, this._logger),
+      createRelativePathModifier()
+    ]);
+  }
+};
+
+// ../../node_modules/@posthog/mcp/dist/index.mjs
+function instrument(server, posthog, options = {}) {
+  const logger = createLogger2(options?.logger);
+  validateServerBuild(options?.serverBuild);
+  const feedbackOptions = resolveCollectFeedbackOptions(options?.collectFeedback);
+  if (feedbackOptions) getFeedbackToolDescriptor(feedbackOptions);
+  try {
+    if (!posthog) logger("Warning: No PostHog client passed to instrument(). Events will not be sent anywhere.");
+    const validatedServer = isCompatibleServerType(server, logger);
+    const lowLevelServer = getLowLevelServer(validatedServer);
+    const existingData = getServerTrackingData(lowLevelServer);
+    if (existingData) {
+      existingData.logger("instrument() - Server already instrumented, skipping initialization");
+      return createAnalyticsHandle(lowLevelServer);
+    }
+    if (posthog) applyMcpLibIdentity(posthog);
+    const sink = posthog ? new McpEventSink(posthog, logger) : void 0;
+    const mcpAnalyticsData = buildTrackingData(lowLevelServer, options, sink, logger);
+    setServerTrackingData(lowLevelServer, mcpAnalyticsData);
+    setupTrackedServer(validatedServer, lowLevelServer, logger);
+    return createAnalyticsHandle(lowLevelServer);
+  } catch (error2) {
+    logger(`Warning: Failed to instrument server - ${error2}`);
+    return {
+      capture: async () => void 0
+    };
+  }
+}
+function createAnalyticsHandle(lowLevelServer) {
+  return {
+    capture: (eventData) => captureCustomEvent(lowLevelServer, eventData)
+  };
+}
+function getLowLevelServer(server) {
+  return isHighLevelServer(server) ? server.server : server;
+}
+var DEFAULT_OPTIONS = {
+  reportMissing: false,
+  collectFeedback: false,
+  enableConversationId: true,
+  captureModel: true
+};
+function buildTrackingData(lowLevelServer, options, sink, logger) {
+  return {
+    sink,
+    logger,
+    sessionId: newSessionId(),
+    lastActivity: /* @__PURE__ */ new Date(),
+    identifiedSessions: new IdentityCache(),
+    toolAnalyticsParameterOwnership: /* @__PURE__ */ new Map(),
+    toolCategories: /* @__PURE__ */ new Map(),
+    toolDescriptions: /* @__PURE__ */ new Map(),
+    toolInputSchemas: new BoundedCache(),
+    sessionInfo: getSessionInfo(lowLevelServer, void 0),
+    options: {
+      ...DEFAULT_OPTIONS,
+      ...Object.fromEntries(Object.entries(options).filter(([, value]) => void 0 !== value))
+    },
+    sessionSource: "generated"
+  };
+}
+function setupTrackedServer(validatedServer, lowLevelServer, logger) {
+  if (isHighLevelServer(validatedServer)) {
+    const highLevelServer = validatedServer;
+    instrumentHighLevelServer(highLevelServer, logger);
+    return;
+  }
+  try {
+    instrumentLowLevelServer(lowLevelServer, logger);
+  } catch (error2) {
+    logger(`Warning: Failed to setup tool call instrumentation - ${error2}`);
+  }
+}
+async function captureCustomEvent(lowLevelServer, eventData) {
+  if (!eventData || "string" != typeof eventData.event || 0 === eventData.event.length) throw new Error('`capture` requires an `event` name, e.g. analytics.capture({ event: "feedback_submitted" })');
+  const trackingData = getServerTrackingData(lowLevelServer);
+  if (!trackingData) return;
+  const event = {
+    sessionId: trackingData.sessionId,
+    eventType: MCPAnalyticsEventType.custom,
+    eventName: eventData.event,
+    timestamp: /* @__PURE__ */ new Date(),
+    properties: eventData.properties
+  };
+  await captureEvent(lowLevelServer, event, trackingData.logger);
+  trackingData.logger(`Captured event "${eventData.event}" for session ${trackingData.sessionId}`);
+}
+
+// src/mcp-analytics.ts
+var US_POSTHOG_INGEST_HOST = "https://us.i.posthog.com";
+var clients = /* @__PURE__ */ new Map();
+var analyticsClosed = false;
+function firstProjectToken(...values) {
+  for (const value of values) {
+    const token = value?.trim() ?? "";
+    if (token.startsWith("phc_")) return token;
+  }
+  return "";
+}
+function analyticsDisabled(env) {
+  return ["1", "true", "yes", "on"].includes(
+    String(env.NEXT_PUBLIC_ASKTHEW_DISABLE_POSTHOG ?? "").trim().toLowerCase()
+  );
+}
+function ingestHost(env) {
+  const host = env.NEXT_PUBLIC_POSTHOG_HOST?.trim().replace(/\/+$/, "") ?? "";
+  return host.startsWith("https://") ? host : US_POSTHOG_INGEST_HOST;
+}
+function clientFor(env) {
+  if (analyticsClosed || analyticsDisabled(env)) return null;
+  const token = firstProjectToken(
+    env.NEXT_PUBLIC_POSTHOG_TOKEN,
+    env.NEXT_PUBLIC_POSTHOG_KEY,
+    env.POSTHOG_PROJECT_API_KEY
+  );
+  if (!token) return null;
+  const host = ingestHost(env);
+  const key = `${host}\0${token}`;
+  const existing = clients.get(key);
+  if (existing) return existing;
+  const created = new PostHog(token, { host });
+  clients.set(key, created);
+  return created;
+}
+function instrumentMcpAnalytics(server, env) {
+  const posthog = clientFor(env);
+  if (!posthog) return;
+  instrument(server, posthog, { logger() {
+  } });
+}
+async function shutdownMcpAnalytics() {
+  if (analyticsClosed) return;
+  analyticsClosed = true;
+  const pending = [...clients.values()];
+  clients.clear();
+  await Promise.all(
+    pending.map(async (posthog) => {
+      try {
+        await posthog.shutdown();
+      } catch {
+      }
+    })
+  );
+}
+
 // src/index.ts
 var import_meta2 = {};
 var requirePackageJson = (0, import_node_module2.createRequire)(typeof __filename !== "undefined" ? __filename : import_meta2.url);
@@ -22685,10 +35132,14 @@ var codingSessionSignalSchema = external_exports.object({
   commandsRun: external_exports.array(external_exports.string().min(1).max(500)).default([]),
   metadata: external_exports.record(external_exports.string(), external_exports.unknown()).default({})
 });
+var oauthSessionSignalSchema = codingSessionSignalSchema.omit({ clientId: true, sessionId: true, sequence: true }).extend({
+  sessionId: external_exports.string().min(1).optional(),
+  sequence: external_exports.number().int().nonnegative().optional()
+});
 var decisionSchema = external_exports.object({
   content: external_exports.string().min(1).max(4e3),
   captureIntent: external_exports.literal("explicit_user_request").describe(
-    "Required. Set only when the user explicitly asks Ask The W to capture or record this as a decision. Use capture_session_signal for routine coding work."
+    "Required. Set only when the user explicitly asks Ask The W to capture or record this as a decision."
   ),
   originatingPrompt: external_exports.string().min(1).max(4e3).describe(
     "Short quote or paraphrase of the user's explicit Ask The W capture-decision request."
@@ -22717,20 +35168,31 @@ var claimWorkSchema = external_exports.object({
 });
 var heartbeatWorkSchema = external_exports.object({
   runId: workRunIdSchema,
+  leaseToken: external_exports.string().min(1).optional(),
   progressNote: external_exports.string().max(4e3).optional(),
   ...workScopeShape
 });
 var completeWorkSchema = external_exports.object({
   runId: workRunIdSchema,
+  leaseToken: external_exports.string().min(1).optional(),
   summary: external_exports.string().min(1).max(4e3),
   filesTouched: external_exports.array(external_exports.string().min(1).max(500)).default([]),
   checks: external_exports.record(external_exports.string(), external_exports.unknown()).default({}),
   commitRef: external_exports.string().max(200).optional(),
+  prUrls: external_exports.array(external_exports.string().min(1).max(500)).max(12).optional(),
+  doneWhen: external_exports.array(external_exports.object({
+    id: external_exports.string().min(1).max(80).optional(),
+    text: external_exports.string().max(180).optional(),
+    ticked: external_exports.boolean().optional(),
+    note: external_exports.string().max(280).optional()
+  })).max(12).optional(),
+  stack: external_exports.string().trim().min(1).max(120).optional(),
   idempotencyKey: providedIdempotencyKeySchema.optional(),
   ...workScopeShape
 });
 var releaseWorkSchema = external_exports.object({
   runId: workRunIdSchema,
+  leaseToken: external_exports.string().min(1).optional(),
   outcome: external_exports.enum(["requeue", "failed"]).default("requeue"),
   reason: external_exports.string().max(4e3).optional(),
   ...workScopeShape
@@ -22769,12 +35231,20 @@ var PROJECT_CONTEXT_RESOURCES = {
   decisions: "askthew://project-context/decisions"
 };
 var READ_TOOL_OUTPUT_SCHEMA = external_exports.object({
-  ok: external_exports.boolean().optional()
+  ok: external_exports.boolean().optional(),
+  source: external_exports.object({
+    from: external_exports.literal("Ask The W"),
+    project: external_exports.string().optional(),
+    url: external_exports.string().optional()
+  }).optional()
 }).passthrough();
 var DEVICE_ONLY_TOOLS = /* @__PURE__ */ new Set([
   "write_project_doc",
   "request_world_analysis",
   "request_whiteboard_map",
+  "read_market",
+  "strategy_direction",
+  "strategy_angles",
   "list_ready_work",
   "claim_work",
   "heartbeat_work",
@@ -22783,7 +35253,10 @@ var DEVICE_ONLY_TOOLS = /* @__PURE__ */ new Set([
   "file_request",
   "draft_wire_message",
   "askthew_start_workspace_bind",
-  "askthew_check_workspace_bind"
+  "askthew_check_workspace_bind",
+  "list_projects",
+  "choose_project",
+  "create_project"
 ]);
 var PROJECT_WRITE_TOOLS = /* @__PURE__ */ new Set([
   "capture_session_signal",
@@ -22791,6 +35264,9 @@ var PROJECT_WRITE_TOOLS = /* @__PURE__ */ new Set([
   "write_project_doc",
   "request_world_analysis",
   "request_whiteboard_map",
+  "read_market",
+  "strategy_direction",
+  "strategy_angles",
   "claim_work",
   "heartbeat_work",
   "complete_work",
@@ -22813,34 +35289,36 @@ function parseArtifactResourceUri(uri) {
   const artifactId = at === -1 ? last : last.slice(0, at);
   const versionRaw = at === -1 ? "" : last.slice(at + 1);
   if (!artifactId) return null;
-  const version2 = /^[1-9][0-9]*$/.test(versionRaw) ? Number(versionRaw) : void 0;
-  return version2 ? { artifactId, version: version2 } : { artifactId };
+  const version4 = /^[1-9][0-9]*$/.test(versionRaw) ? Number(versionRaw) : void 0;
+  return version4 ? { artifactId, version: version4 } : { artifactId };
 }
-var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "For authorized Ask The W project installs, send compact session signals to the connected Ask The W project for meaningful verification, final summaries, and explicit product-relevant direction changes. Routine setup, checkpoints, and implementation chatter should stay local/internal. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references before queueing or sending.";
+var CAPTURE_SESSION_SIGNAL_DESCRIPTION = "Push one compact update to the connected Ask The W project only when the user explicitly asks to push an update. Use one implementation_update or final_summary. Never call this automatically at session start. Do not invent a push_update tool. The MCP package redacts credential patterns, sensitive metadata keys, local paths, and sensitive file references.";
 var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W project binding for this coding agent. Returns a confirmation URL and display code. Open the URL while signed in to Ask The W, confirm the code, and choose a paid project. Do not ask the user for an email or a six-digit code. Does not send project content.";
 var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W project binding status for a display code. When completed, stores the project binding and consent receipt locally.";
-var LIST_SIGNALS_DESCRIPTION = "Read existing Ask The W signal history for the connected project or scope. Does not modify project state.";
-var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record only when the user explicitly asks Ask The W to capture or record a decision. Routine coding work must use capture_session_signal instead.";
-var LIST_DECISIONS_DESCRIPTION = "Read existing Ask The W decision history only when the user explicitly asks for it. Does not modify project state.";
-var LIST_OUTCOMES_DESCRIPTION = "Read active Ask The W outcomes only when the user explicitly asks for them. Does not modify project state.";
-var LIST_PROJECT_DOCS_DESCRIPTION = "List current kept files in the bound Ask The W Project library. AGENTS.md and CLAUDE.md are how to work in the repo; PRD.md is the product brief when present. Read-only. Safe for a session-start check.";
-var READ_PROJECT_DOC_DESCRIPTION = "Read one bound Project library file at an exact version. Returns grounded text and a versioned artifact ref, plus human_maintained, which says whether a person owns the file. Safe for a session-start check. Does not modify project state.";
-var WRITE_PROJECT_DOC_DESCRIPTION = "Write one bound Project library file as markdown, only when the user explicitly asks. The write appends a new version authored by this agent and replaces nothing; naming a path that does not exist yet creates the file. A file whose human_maintained flag is true is refused: read, quote and cite it instead.";
-var GET_PROJECT_CONTEXT_DESCRIPTION = "Read the bound project's compact context pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. Safe for a session-start check. This is the project view. Recap is the install session trail and also returns this pack plus an install-trail appendix for older hosts. Does not modify project state.";
-var REQUEST_WORLD_ANALYSIS_DESCRIPTION = "Request World by Ask The W competitive analysis for the bound project, only when the user explicitly asks. Uses the same refresh path as the World UI, so the result appears there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
-var REQUEST_WHITEBOARD_MAP_DESCRIPTION = "Request Whiteboard by Ask The W to map or cluster the bound project, only when the user explicitly asks. Uses the same refresh path as the Whiteboard UI, so the board updates there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
-var RECAP_DESCRIPTION = "Install-trail summary for this coding-agent install. Prefer get_project_context / askthew://project-context for the project view. This tool still returns the project pack first, then a clearly named install_trail appendix, so hosts that call recap get the project. Only when the user explicitly asks for a recap. Does not modify project state.";
-var COACH_DESCRIPTION = "Read on-demand server-backed coaching and next-step guidance only when the user explicitly asks for guidance. Not part of routine setup, checkpoint, or final-summary cadence. Does not modify project state.";
-var NEXT_MOVES_DESCRIPTION = "Read prioritized Ask The W project Next Moves only when the user explicitly asks for next moves. This is separate from coach tips and does not modify project state.";
+var LIST_PROJECTS_DESCRIPTION = "List the Ask The W projects this person can connect. The current project for this repo is marked. Use choose_project to switch. Does not open a browser confirmation.";
+var CHOOSE_PROJECT_DESCRIPTION = "Switch this repo to another Ask The W project. Pass projectId from list_projects, or title when it matches one project. Later tools use the chosen project. Does not open a browser confirmation.";
+var CREATE_PROJECT_DESCRIPTION = "Create an Ask The W project only when the user explicitly asks to create a project. Why, What, and Who are filled from the user's words when that is enough. If the result includes questions, ask the user those questions and call again with the answers in wCard.fields. Do not invent an answer. Autopilot is on unless you pass false. autopilot true means every agent starts without asking again, up to the monthly ceiling, and work over the ceiling waits for next month. If the result asks you to choose an organization, call again with organizationId from that result.";
+var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record only when the user explicitly asks Ask The W to capture or record a decision.";
+var LIST_PROJECT_DOCS_DESCRIPTION = "List the Project files a coding agent reads to build the working preview. Foundation files come first. Files for the included outcomes appear when written. Read-only. Safe to read when a conversation starts.";
+var READ_PROJECT_DOC_DESCRIPTION = "Read one Project library file at an exact version. Returns grounded text and a versioned artifact ref, plus human_maintained, which says whether a person owns the file. Safe to read when a conversation starts. Does not modify project state.";
+var WRITE_PROJECT_DOC_DESCRIPTION = "Write one Project library file as markdown, only when the user explicitly asks. The write appends a new version authored by this agent and replaces nothing; naming a path that does not exist yet creates the file. A file whose human_maintained flag is true is refused: read, quote and cite it instead.";
+var GET_PROJECT_CONTEXT_DESCRIPTION = "Read this project's compact context pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. This is the project view. Safe to read when a conversation starts. When a project is already connected, answer from this pack and from results_status. Do not ask Why, What, or Who again when those fields are already on the W Card. Call list_project_docs, read_project_doc, and list_ready_work. Does not modify project state.";
+var REQUEST_WORLD_ANALYSIS_DESCRIPTION = "Request World by Ask The W competitive analysis for this project, only when the user explicitly asks. Uses the same refresh path as the World UI, so the result appears there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
+var READ_MARKET_DESCRIPTION = "Create strategy in Wizard by Ask The W, only when the user explicitly asks. This is the same birth Autopilot runs. Pass verb get to open a saved strategy. get never starts a new read. Pass verb run and confirm true only after the person agrees to create it. This is not Competitive analysis. Directions and Angles are separate tools.";
+var STRATEGY_DIRECTION_DESCRIPTION = "Write Directions in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Pass verb get to open Directions when they are already written. Pass verb run and confirm true only after the person agrees. Run does not write them again when they are already saved.";
+var STRATEGY_ANGLES_DESCRIPTION = "Write Angles for one W in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Pass wKey as why, what, who, where, when, or how. Pass verb get to open a saved page. Pass verb run and confirm true only after the person agrees. This does not choose an alternative.";
+var REQUEST_WHITEBOARD_MAP_DESCRIPTION = "Request Whiteboard by Ask The W to map or cluster this project, only when the user explicitly asks. Uses the same refresh path as the Whiteboard UI, so the board updates there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
+var NEXT_MOVES_DESCRIPTION = "List the queued moves on the plan, the same list the Way board shows, only when the user explicitly asks what to do next. Each move includes open_url. Does not modify project state.";
 var LIST_READY_WORK_DESCRIPTION = "Read the OKed coding-agent queue for this bound project, not W-product runs. Safe for a session-start check; does not claim or start work.";
-var CLAIM_WORK_DESCRIPTION = "Explicitly claim one approved terminal work item after the human chooses it. Claiming starts the run and returns the full fenced brief.";
+var CLAIM_WORK_DESCRIPTION = "Explicitly claim one approved terminal work item after the human chooses it. Claiming starts the run and returns the full fenced brief and a leaseToken. Pass that leaseToken to heartbeat_work, complete_work, and release_work.";
 var HEARTBEAT_WORK_DESCRIPTION = "Renew the lease for a claimed terminal work item and optionally attach a short progress note.";
-var COMPLETE_WORK_DESCRIPTION = "Complete a claimed terminal work item with a receipt: summary, files touched, checks run, and optional commit ref.";
+var COMPLETE_WORK_DESCRIPTION = "Complete a claimed terminal work item with a receipt: summary, files touched, checks run, optional Done when ticks with a one-line note each, optional commit ref, and optional stack from the repo markers.";
 var RELEASE_WORK_DESCRIPTION = "Release a claimed terminal work item back to waiting work, or mark it failed with a reason.";
-var FILE_REQUEST_DESCRIPTION = "File a new project request from this coding session. This records intake only; it does not create, approve, claim, or execute work.";
+var FILE_REQUEST_DESCRIPTION = "File a new project request. This records intake only; it does not create, approve, claim, or execute work.";
 var DRAFT_WIRE_MESSAGE_DESCRIPTION = "Draft a strict internal Wire message action only when the user explicitly asks. This files a Project request for human review; it never sends, publishes, addresses recipients, invokes a connector, or performs external delivery.";
 var READ_WORKSPACE_ANNOTATIONS = {
   readOnlyHint: true,
+  destructiveHint: false,
   openWorldHint: false
 };
 var ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS = {
@@ -22861,6 +35339,10 @@ var IDEMPOTENT_WORK_WRITE_ANNOTATIONS = {
   idempotentHint: true,
   openWorldHint: false
 };
+function toolTitle(name) {
+  const words = name.replace(/^askthew_/, "").split("_").join(" ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 function verifyTokenWithTimeout(input) {
   return Promise.race([
     verifyToken(input),
@@ -22870,16 +35352,25 @@ function verifyTokenWithTimeout(input) {
     })
   ]);
 }
+function isResultRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function withResultSource(value, source = { from: "Ask The W" }) {
+  if (!isResultRecord(value)) return { value, source };
+  if (isResultRecord(value.source)) return value;
+  if (typeof value.grounding === "string" && value.grounding.length > 0) return value;
+  return { ...value, source };
+}
 function toolJson(value, options = {}) {
-  const structuredContent = value && typeof value === "object" && !Array.isArray(value) ? value : { value };
+  const payload = withResultSource(value, options.source);
   return {
     content: [
       {
         type: "text",
-        text: JSON.stringify(value, null, 2)
+        text: JSON.stringify(payload, null, 2)
       }
     ],
-    structuredContent,
+    structuredContent: payload,
     ...options.isError ? { isError: true } : {}
   };
 }
@@ -22890,12 +35381,13 @@ function toolResult(result) {
   return toolJson(result.body, { isError: !result.ok || isFailureBody(result.body) });
 }
 function resourceJson(uri, value) {
+  const payload = withResultSource(value);
   return {
     contents: [
       {
         uri: uri.href,
         mimeType: "application/json",
-        text: JSON.stringify(value, null, 2)
+        text: JSON.stringify(payload, null, 2)
       }
     ]
   };
@@ -22942,8 +35434,49 @@ function validIdempotencyKey(value) {
 function fallbackIdempotencyKey() {
   return import_node_crypto.default.randomUUID();
 }
+function oauthCaptureIdentity(payload, resourceAuth) {
+  if (resourceAuth) {
+    return {
+      sessionId: `chatgpt-${import_node_crypto.default.randomUUID()}`,
+      sequence: 0
+    };
+  }
+  return {
+    sessionId: String(payload.sessionId ?? "").trim(),
+    sequence: typeof payload.sequence === "number" ? payload.sequence : 0
+  };
+}
 function resolveWriteIdempotencyKey(value) {
   return validIdempotencyKey(value) ? String(value) : fallbackIdempotencyKey();
+}
+function currentGitHead() {
+  try {
+    const result = (0, import_node_child_process.spawnSync)("git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+    const head = result.stdout?.trim();
+    return result.status === 0 && head ? head : void 0;
+  } catch {
+    return void 0;
+  }
+}
+function advanceLastPullCursor(env, scopeKey) {
+  try {
+    const gitHead = currentGitHead();
+    writePrivateJson(lastPullPath(env), {
+      pulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+      scopeKey,
+      ...gitHead ? { gitHead } : {}
+    });
+  } catch {
+  }
+}
+function clearLastPullCursor(env) {
+  try {
+    import_node_fs5.default.rmSync(lastPullPath(env), { force: true });
+  } catch {
+  }
 }
 function captureCadenceFeedback(sessions, signal, nowMs = Date.now()) {
   const previous = sessions.get(signal.sessionId);
@@ -22969,32 +35502,44 @@ var heldWorkByRunId = /* @__PURE__ */ new Map();
 function rememberHeldWork(body, scopeKey) {
   const claimed = body;
   const runId = typeof claimed?.work?.runId === "string" ? claimed.work.runId : null;
-  if (claimed?.ok !== false && runId) heldWorkByRunId.set(runId, scopeKey);
+  const leaseToken = typeof claimed?.work?.leaseToken === "string" ? claimed.work.leaseToken : null;
+  if (claimed?.ok !== false && runId) heldWorkByRunId.set(runId, { scopeKey, leaseToken });
 }
 function forgetHeldWork(runId) {
   heldWorkByRunId.delete(runId);
 }
+function heldLeaseToken(runId, presented) {
+  return presented || heldWorkByRunId.get(runId)?.leaseToken || void 0;
+}
 async function releaseHeldWork(input) {
-  const held = Array.from(heldWorkByRunId.entries());
+  const heldEntries = Array.from(heldWorkByRunId.entries());
   heldWorkByRunId.clear();
-  for (const [runId, scopeKey] of held) {
+  for (const [runId, held] of heldEntries) {
     try {
-      await input.client.releaseWork({ runId, outcome: "requeue", reason: input.reason, scopeKey });
+      await input.client.releaseWork({
+        runId,
+        outcome: "requeue",
+        reason: input.reason,
+        scopeKey: held.scopeKey,
+        leaseToken: held.leaseToken
+      });
     } catch {
     }
   }
-  return held.length;
+  return heldEntries.length;
 }
 function createAskTheWMcpServer(options = {}) {
-  const server = new McpServer({
-    name: "Ask The W MCP",
-    version: packageVersion()
-  });
-  const outbox = options.outbox ?? new Outbox();
+  const server = new McpServer(
+    { name: "Ask The W MCP", version: packageVersion() },
+    options.instructions ? { instructions: options.instructions } : void 0
+  );
+  const resourceAuth = options.resourceAuth;
+  const outbox = resourceAuth ? null : options.outbox ?? new Outbox();
   const signalCadenceBySession = /* @__PURE__ */ new Map();
   const runtimeEnv = options.env ?? process.env;
+  instrumentMcpAnalytics(server, runtimeEnv);
   let tokenInvalidReason = null;
-  if (options.verifyTokenOnStart) {
+  if (options.verifyTokenOnStart && !resourceAuth) {
     verifyTokenWithTimeout({ apiUrl: options.apiUrl, fetcher: options.fetcher, env: runtimeEnv }).then((result) => {
       if (result.stale) tokenInvalidReason = result.reason;
     }).catch(() => {
@@ -23002,10 +35547,12 @@ function createAskTheWMcpServer(options = {}) {
   }
   const client = () => new AskTheWCloudClient({
     apiUrl: options.apiUrl,
+    token: resourceAuth?.accessToken,
     fetcher: options.fetcher,
     env: runtimeEnv
   });
   const cloudGuard = (currentClient, input = {}) => {
+    if (resourceAuth) return currentClient.hasToken() ? null : needsReauth("token_malformed");
     if (!currentClient.hasToken()) return needsPaidWorkspace();
     if (tokenInvalidReason) return needsReauth(tokenInvalidReason);
     if (input.requirePaid !== false && requiresPaidWorkspace(runtimeEnv)) {
@@ -23014,8 +35561,10 @@ function createAskTheWMcpServer(options = {}) {
     }
     return null;
   };
+  const resolveScopeKey = (value) => value || resourceAuth?.defaultScopeKey || defaultScopeKey(runtimeEnv);
   const bindingStatus = () => projectBindingStatus(process.cwd(), runtimeEnv);
   const blockedOutsideProject = () => {
+    if (resourceAuth) return null;
     const status = bindingStatus();
     if (status.allowed) return null;
     return toolJson(
@@ -23030,8 +35579,34 @@ function createAskTheWMcpServer(options = {}) {
       { isError: true }
     );
   };
+  const savePaidProjectOnToken = (projectId, scopeKey) => {
+    const tokenFile = loadCloudToken(runtimeEnv);
+    if (!tokenFile) return;
+    saveCloudToken({
+      ...tokenFile,
+      tier: "paid",
+      project_id: projectId,
+      api_url: options.apiUrl ?? tokenFile.api_url
+    }, runtimeEnv);
+    const hostType = defaultClientId(runtimeEnv);
+    if (hostType) {
+      writeSignalAuthorizationReceipt({
+        hostType,
+        projectId,
+        source: "mcp_workspace_bind",
+        scopeKey,
+        env: runtimeEnv
+      });
+    }
+  };
   const advertisedTools = () => server._registeredTools ?? {};
   const syncAdvertisedTools = () => {
+    if (resourceAuth) {
+      for (const tool of Object.values(advertisedTools())) {
+        tool.enable();
+      }
+      return;
+    }
     const tokenFile = loadCloudToken(runtimeEnv);
     const purpose = tokenFile?.token_purpose === "conversation" ? "conversation" : "device";
     const hasToken = Boolean(tokenFile?.token);
@@ -23046,80 +35621,217 @@ function createAskTheWMcpServer(options = {}) {
     }
   };
   server.tool(
-    "askthew_start_workspace_bind",
-    START_WORKSPACE_BIND_DESCRIPTION,
+    "create_project",
+    CREATE_PROJECT_DESCRIPTION,
     {
-      reason: external_exports.string().max(500).optional()
-    },
-    ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
-    async () => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      if (tokenInvalidReason) {
-        archiveCloudToken(tokenInvalidReason, runtimeEnv);
-        tokenInvalidReason = null;
-      }
-      const currentClient = client();
-      if (currentClient.hasToken()) {
-        const unavailable = cloudGuard(currentClient, { requirePaid: false });
-        if (unavailable) return unavailable;
-      }
-      const result = await currentClient.startPaidBind({
-        clientHint: defaultClientId(runtimeEnv)
-      });
-      const body = result.body && typeof result.body === "object" ? { ...result.body } : result.body;
-      if (body && typeof body === "object" && "token" in body) {
-        delete body.token;
-      }
-      if (result.ok) tokenInvalidReason = null;
-      syncAdvertisedTools();
-      return toolJson(body, { isError: !result.ok || isFailureBody(body) });
-    }
-  );
-  server.tool(
-    "askthew_check_workspace_bind",
-    CHECK_WORKSPACE_BIND_DESCRIPTION,
-    {
-      codeDisplay: external_exports.string().min(3).max(32)
+      title: external_exports.string().trim().min(1).max(200),
+      wCard: external_exports.object({
+        title: external_exports.string().trim().min(1).max(100).optional(),
+        siteUrl: external_exports.string().trim().max(220).optional(),
+        fields: external_exports.object({
+          why: external_exports.string().optional(),
+          what: external_exports.string().optional(),
+          where: external_exports.string().optional(),
+          when: external_exports.string().optional(),
+          who: external_exports.string().optional(),
+          how: external_exports.string().optional()
+        }).optional(),
+        stage: external_exports.string().trim().max(64).optional()
+      }).optional(),
+      autopilot: external_exports.boolean().default(true),
+      organizationId: external_exports.string().uuid().optional(),
+      originatingPrompt: external_exports.string().trim().min(1).max(4e3).describe(
+        "Short quote or paraphrase of the user's explicit request to create a project."
+      ),
+      scopeKey: external_exports.string().min(1).optional(),
+      idempotencyKey: providedIdempotencyKeySchema.optional()
     },
     IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
       if (blocked) return blocked;
       const currentClient = client();
-      const unavailable = cloudGuard(currentClient, { requirePaid: false });
+      const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      const result = await currentClient.paidBindStatus({ codeDisplay: payload.codeDisplay });
+      const scopeKey = resolveScopeKey(payload.scopeKey);
+      const title = payload.title.trim();
+      const result = await currentClient.createProject({
+        title,
+        wCard: {
+          title: payload.wCard?.title?.trim() || title,
+          siteUrl: payload.wCard?.siteUrl,
+          fields: payload.wCard?.fields,
+          stage: payload.wCard?.stage
+        },
+        autopilot: payload.autopilot ?? true,
+        originatingPrompt: payload.originatingPrompt,
+        organizationId: payload.organizationId,
+        scopeKey,
+        idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
+      });
       const body = result.body;
-      if (result.ok && body.status === "completed") {
-        const tokenFile = loadCloudToken(runtimeEnv);
-        if (tokenFile) {
-          const projectId = typeof body.project_id === "string" ? body.project_id : tokenFile.project_id ?? null;
-          saveCloudToken({
-            ...tokenFile,
-            tier: "paid",
-            project_id: projectId,
-            api_url: options.apiUrl ?? tokenFile.api_url
-          }, runtimeEnv);
-          const hostType = defaultClientId(runtimeEnv);
-          if (hostType) {
-            writeSignalAuthorizationReceipt({
-              hostType,
-              projectId,
-              source: "mcp_workspace_bind",
-              env: runtimeEnv
-            });
-          }
+      if (result.ok && !isFailureBody(body)) {
+        const createdProjectId = typeof body.projectId === "string" ? body.projectId : null;
+        if (createdProjectId) {
+          savePaidProjectOnToken(createdProjectId, scopeKey);
+          heldWorkByRunId.clear();
+          clearLastPullCursor(runtimeEnv);
         }
         syncAdvertisedTools();
       }
       return toolResult(result);
     }
   );
+  if (!resourceAuth) {
+    server.tool(
+      "askthew_start_workspace_bind",
+      START_WORKSPACE_BIND_DESCRIPTION,
+      {
+        reason: external_exports.string().max(500).optional()
+      },
+      ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+      async () => {
+        const blocked = blockedOutsideProject();
+        if (blocked) return blocked;
+        if (tokenInvalidReason) {
+          archiveCloudToken(tokenInvalidReason, runtimeEnv);
+          tokenInvalidReason = null;
+        }
+        const currentClient = client();
+        if (currentClient.hasToken()) {
+          const unavailable = cloudGuard(currentClient, { requirePaid: false });
+          if (unavailable) return unavailable;
+        }
+        const result = await currentClient.startPaidBind({
+          clientHint: defaultClientId(runtimeEnv)
+        });
+        const body = result.body && typeof result.body === "object" ? { ...result.body } : result.body;
+        if (body && typeof body === "object" && "token" in body) {
+          delete body.token;
+        }
+        if (result.ok) tokenInvalidReason = null;
+        syncAdvertisedTools();
+        return toolJson(body, { isError: !result.ok || isFailureBody(body) });
+      }
+    );
+    server.tool(
+      "askthew_check_workspace_bind",
+      CHECK_WORKSPACE_BIND_DESCRIPTION,
+      {
+        codeDisplay: external_exports.string().min(3).max(32)
+      },
+      IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS,
+      async (payload) => {
+        const blocked = blockedOutsideProject();
+        if (blocked) return blocked;
+        const currentClient = client();
+        const unavailable = cloudGuard(currentClient, { requirePaid: false });
+        if (unavailable) return unavailable;
+        const result = await currentClient.paidBindStatus({ codeDisplay: payload.codeDisplay });
+        const body = result.body;
+        if (result.ok && body.status === "completed") {
+          const tokenFile = loadCloudToken(runtimeEnv);
+          if (tokenFile) {
+            const projectId = typeof body.project_id === "string" ? body.project_id : tokenFile.project_id ?? null;
+            saveCloudToken({
+              ...tokenFile,
+              tier: "paid",
+              project_id: projectId,
+              api_url: options.apiUrl ?? tokenFile.api_url
+            }, runtimeEnv);
+            const hostType = defaultClientId(runtimeEnv);
+            if (hostType) {
+              writeSignalAuthorizationReceipt({
+                hostType,
+                projectId,
+                source: "mcp_workspace_bind",
+                env: runtimeEnv
+              });
+            }
+          }
+          syncAdvertisedTools();
+        }
+        return toolResult(result);
+      }
+    );
+    server.registerTool(
+      "list_projects",
+      {
+        description: LIST_PROJECTS_DESCRIPTION,
+        inputSchema: {
+          scopeKey: external_exports.string().min(1).optional()
+        },
+        outputSchema: READ_TOOL_OUTPUT_SCHEMA,
+        annotations: READ_WORKSPACE_ANNOTATIONS
+      },
+      async (payload) => {
+        const blocked = blockedOutsideProject();
+        if (blocked) return blocked;
+        const currentClient = client();
+        const unavailable = cloudGuard(currentClient);
+        if (unavailable) return unavailable;
+        const result = await currentClient.listProjects({
+          scopeKey: resolveScopeKey(payload.scopeKey)
+        });
+        return toolResult(result);
+      }
+    );
+    server.tool(
+      "choose_project",
+      CHOOSE_PROJECT_DESCRIPTION,
+      {
+        projectId: external_exports.string().min(1).max(200).optional(),
+        title: external_exports.string().min(1).max(200).optional(),
+        scopeKey: external_exports.string().min(1).optional()
+      },
+      IDEMPOTENT_LOCAL_BIND_WRITE_ANNOTATIONS,
+      async (payload) => {
+        const blocked = blockedOutsideProject();
+        if (blocked) return blocked;
+        const currentClient = client();
+        const unavailable = cloudGuard(currentClient);
+        if (unavailable) return unavailable;
+        const projectId = payload.projectId?.trim() ?? "";
+        const title = payload.title?.trim() ?? "";
+        if (!projectId && !title) {
+          return toolJson(
+            {
+              ok: false,
+              code: "project_required",
+              message: "Pass projectId from list_projects, or the project title."
+            },
+            { isError: true }
+          );
+        }
+        const scopeKey = resolveScopeKey(payload.scopeKey);
+        const heldWork = Array.from(heldWorkByRunId.entries()).map(([runId, held]) => ({
+          runId,
+          leaseToken: held.leaseToken
+        }));
+        const result = await currentClient.chooseProject({
+          projectId,
+          title,
+          scopeKey,
+          heldWork
+        });
+        const body = result.body;
+        if (result.ok && !isFailureBody(body)) {
+          const chosenProjectId = typeof body.projectId === "string" ? body.projectId : null;
+          if (chosenProjectId) savePaidProjectOnToken(chosenProjectId, scopeKey);
+          if (body.unchanged !== true) {
+            heldWorkByRunId.clear();
+            clearLastPullCursor(runtimeEnv);
+          }
+          syncAdvertisedTools();
+        }
+        return toolResult(result);
+      }
+    );
+  }
   server.tool(
     "capture_session_signal",
     CAPTURE_SESSION_SIGNAL_DESCRIPTION,
-    codingSessionSignalSchema.shape,
+    resourceAuth ? oauthSessionSignalSchema.shape : codingSessionSignalSchema.shape,
     ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
     async (payload) => {
       const blocked = blockedOutsideProject();
@@ -23129,8 +35841,9 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const parsed = codingSessionSignalSchema.safeParse({
         ...payload,
+        ...oauthCaptureIdentity(payload, Boolean(resourceAuth)),
         clientId: payload.clientId ?? defaultClientId(runtimeEnv),
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: validIdempotencyKey(payload.idempotencyKey) ? payload.idempotencyKey : fallbackIdempotencyKey()
       });
       if (!parsed.success) {
@@ -23145,10 +35858,33 @@ function createAskTheWMcpServer(options = {}) {
       }
       const sanitized = redactSignalPayload(parsed.data, { env: runtimeEnv });
       const feedback = captureCadenceFeedback(signalCadenceBySession, parsed.data);
+      if (!outbox) {
+        const result2 = await currentClient.captureSignal(sanitized);
+        if (result2.ok && !isFailureBody(result2.body)) {
+          const body = result2.body;
+          return toolJson({
+            ok: true,
+            queued: false,
+            id: body.id,
+            sequence: body.sequence ?? sanitized.sequence,
+            ...feedback
+          });
+        }
+        return toolJson(
+          {
+            ok: false,
+            code: result2.body?.code ?? `http_${result2.status}`,
+            message: result2.body?.message ?? "Could not send this update.",
+            ...feedback
+          },
+          { isError: true }
+        );
+      }
       const localOutboxId = outbox.append(sanitized);
       const result = await sendOutboxPayload(currentClient, sanitized);
       if (result.kind === "sent") {
         outbox.markSent(localOutboxId);
+        advanceLastPullCursor(runtimeEnv, sanitized.scopeKey);
         const body = result.body;
         return toolJson({
           ok: true,
@@ -23180,34 +35916,6 @@ function createAskTheWMcpServer(options = {}) {
       });
     }
   );
-  server.registerTool(
-    "list_signals",
-    {
-      description: LIST_SIGNALS_DESCRIPTION,
-      inputSchema: {
-        sessionId: external_exports.string().optional(),
-        since: external_exports.string().optional(),
-        limit: external_exports.number().int().min(1).max(100).default(50),
-        cursor: external_exports.string().min(1).optional(),
-        scopeKey: external_exports.string().min(1).optional(),
-        allScopes: external_exports.boolean().optional()
-      },
-      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
-      annotations: READ_WORKSPACE_ANNOTATIONS
-    },
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const currentClient = client();
-      const unavailable = cloudGuard(currentClient);
-      if (unavailable) return unavailable;
-      const result = await currentClient.listSignals({
-        ...payload,
-        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
-      });
-      return toolResult(result);
-    }
-  );
   server.tool(
     "create_decision",
     CREATE_DECISION_DESCRIPTION,
@@ -23219,60 +35927,15 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
+      const scopeKey = resolveScopeKey(payload.scopeKey);
       const result = await currentClient.createDecision({
         ...payload,
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey),
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey
       });
-      return toolResult(result);
-    }
-  );
-  server.registerTool(
-    "list_decisions",
-    {
-      description: LIST_DECISIONS_DESCRIPTION,
-      inputSchema: {
-        ...manualRequestShape,
-        limit: external_exports.number().int().min(1).max(200).default(50),
-        cursor: external_exports.string().min(1).optional(),
-        scopeKey: external_exports.string().min(1).optional(),
-        allScopes: external_exports.boolean().optional()
-      },
-      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
-      annotations: READ_WORKSPACE_ANNOTATIONS
-    },
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const currentClient = client();
-      const unavailable = cloudGuard(currentClient);
-      if (unavailable) return unavailable;
-      const result = await currentClient.listDecisions({
-        ...payload,
-        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
-      });
-      return toolResult(result);
-    }
-  );
-  server.tool(
-    "list_outcomes",
-    LIST_OUTCOMES_DESCRIPTION,
-    {
-      ...manualRequestShape,
-      limit: external_exports.number().int().min(1).max(500).optional(),
-      scopeKey: external_exports.string().min(1).optional()
-    },
-    READ_WORKSPACE_ANNOTATIONS,
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const currentClient = client();
-      const unavailable = cloudGuard(currentClient);
-      if (unavailable) return unavailable;
-      const result = await currentClient.listOutcomes({
-        ...payload,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
-      });
+      if (!resourceAuth && result.ok && !isFailureBody(result.body)) {
+        advanceLastPullCursor(runtimeEnv, scopeKey);
+      }
       return toolResult(result);
     }
   );
@@ -23295,7 +35958,7 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.listProjectDocs({
         limit: payload.limit,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       return toolResult(result);
     }
@@ -23326,7 +35989,7 @@ function createAskTheWMcpServer(options = {}) {
         artifactId: payload.artifactId,
         path: payload.path,
         version: payload.version,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       return toolResult(result);
     }
@@ -23354,7 +36017,7 @@ function createAskTheWMcpServer(options = {}) {
         markdown: payload.markdown,
         requestIntent: payload.requestIntent,
         originatingPrompt: payload.originatingPrompt,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
@@ -23376,9 +36039,13 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
+      const scopeKey = resolveScopeKey(payload.scopeKey);
       const result = await currentClient.getProjectContext({
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey
       });
+      if (!resourceAuth && result.ok && !isFailureBody(result.body)) {
+        advanceLastPullCursor(runtimeEnv, scopeKey);
+      }
       return toolResult(result);
     }
   );
@@ -23400,7 +36067,7 @@ function createAskTheWMcpServer(options = {}) {
       const result = await currentClient.requestWorldAnalysis({
         requestIntent: payload.requestIntent,
         originatingPrompt: payload.originatingPrompt,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
@@ -23424,75 +36091,54 @@ function createAskTheWMcpServer(options = {}) {
       const result = await currentClient.requestWhiteboardMap({
         requestIntent: payload.requestIntent,
         originatingPrompt: payload.originatingPrompt,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
     }
   );
-  server.registerTool(
-    "recap",
-    {
-      description: RECAP_DESCRIPTION,
-      inputSchema: {
-        ...manualRequestShape,
-        since: external_exports.string().optional(),
-        maxSignals: external_exports.number().int().min(1).max(200).optional(),
-        scopeKey: external_exports.string().min(1).optional(),
-        allScopes: external_exports.boolean().optional()
-      },
-      outputSchema: READ_TOOL_OUTPUT_SCHEMA,
-      annotations: READ_WORKSPACE_ANNOTATIONS
-    },
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const currentClient = client();
-      const unavailable = cloudGuard(currentClient);
-      if (unavailable) return unavailable;
-      const scopeKey = payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv);
-      const [packResult, trailResult] = await Promise.all([
-        currentClient.getProjectContext({ scopeKey }),
-        currentClient.recap({ ...payload, scopeKey })
-      ]);
-      const packBody = packResult.body;
-      const trailBody = trailResult.body;
-      if (!trailResult.ok || isFailureBody(trailBody)) {
-        return toolResult(trailResult);
+  const askWActionSchema = {
+    ...manualRequestShape,
+    verb: external_exports.enum(["get", "run", "refresh"]).default("get"),
+    confirm: external_exports.boolean().optional(),
+    subjectKind: external_exports.enum(["idea", "draft", "project"]).optional(),
+    subjectId: external_exports.string().min(1).optional(),
+    wKey: external_exports.enum(["why", "what", "who", "where", "when", "how"]).optional(),
+    idempotencyKey: providedIdempotencyKeySchema.optional(),
+    scopeKey: external_exports.string().min(1).optional()
+  };
+  for (const [name, description] of [
+    ["read_market", READ_MARKET_DESCRIPTION],
+    ["strategy_direction", STRATEGY_DIRECTION_DESCRIPTION],
+    ["strategy_angles", STRATEGY_ANGLES_DESCRIPTION]
+  ]) {
+    server.tool(
+      name,
+      description,
+      askWActionSchema,
+      ADDITIVE_WORKSPACE_WRITE_ANNOTATIONS,
+      async (payload) => {
+        const blocked = blockedOutsideProject();
+        if (blocked) return blocked;
+        const currentClient = client();
+        const unavailable = cloudGuard(currentClient);
+        if (unavailable) return unavailable;
+        const result = await currentClient.runAskWAction({
+          actionId: name,
+          verb: payload.verb,
+          confirm: payload.confirm,
+          subjectKind: payload.subjectKind,
+          subjectId: payload.subjectId,
+          wKey: payload.wKey,
+          requestIntent: payload.requestIntent,
+          originatingPrompt: payload.originatingPrompt,
+          scopeKey: resolveScopeKey(payload.scopeKey),
+          idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
+        });
+        return toolResult(result);
       }
-      return toolJson({
-        ...trailBody,
-        pack: packResult.ok && !isFailureBody(packBody) ? packBody.pack ?? packBody : null,
-        pack_error: packResult.ok && !isFailureBody(packBody) ? void 0 : packBody,
-        install_trail: trailBody.recap ?? trailBody
-      });
-    }
-  );
-  server.tool(
-    "coach",
-    COACH_DESCRIPTION,
-    {
-      ...manualRequestShape,
-      focus: external_exports.string().max(1e3).optional(),
-      cursor: external_exports.string().optional(),
-      limit: external_exports.number().int().min(1).max(50).optional(),
-      scopeKey: external_exports.string().min(1).optional(),
-      allScopes: external_exports.boolean().optional()
-    },
-    READ_WORKSPACE_ANNOTATIONS,
-    async (payload) => {
-      const blocked = blockedOutsideProject();
-      if (blocked) return blocked;
-      const currentClient = client();
-      const unavailable = cloudGuard(currentClient);
-      if (unavailable) return unavailable;
-      const result = await currentClient.coach({
-        ...payload,
-        scopeKey: payload.allScopes ? void 0 : payload.scopeKey || defaultScopeKey(runtimeEnv)
-      });
-      return toolResult(result);
-    }
-  );
+    );
+  }
   server.registerTool(
     "next_moves",
     {
@@ -23513,7 +36159,7 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.nextMoves({
         ...payload,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       return toolResult(result);
     }
@@ -23531,7 +36177,7 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.listReadyWork({
         limit: payload.limit,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       return toolResult(result);
     }
@@ -23547,12 +36193,12 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
-      const scopeKey = payload.scopeKey || defaultScopeKey(runtimeEnv);
+      const scopeKey = resolveScopeKey(payload.scopeKey);
       const result = await currentClient.claimWork({
         runId: payload.runId,
         scopeKey
       });
-      rememberHeldWork(result.body, scopeKey);
+      if (!resourceAuth) rememberHeldWork(result.body, scopeKey);
       return toolResult(result);
     }
   );
@@ -23569,8 +36215,9 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.heartbeatWork({
         runId: payload.runId,
+        leaseToken: heldLeaseToken(payload.runId, payload.leaseToken),
         progressNote: payload.progressNote,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       return toolResult(result);
     }
@@ -23586,16 +36233,24 @@ function createAskTheWMcpServer(options = {}) {
       const currentClient = client();
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
+      const scopeKey = resolveScopeKey(payload.scopeKey);
       const result = await currentClient.completeWork({
         runId: payload.runId,
+        leaseToken: heldLeaseToken(payload.runId, payload.leaseToken),
         summary: payload.summary,
         filesTouched: payload.filesTouched,
         checks: payload.checks,
         commitRef: payload.commitRef,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        prUrls: payload.prUrls,
+        doneWhen: payload.doneWhen,
+        stack: payload.stack || (resourceAuth ? void 0 : reportRepoStack(runtimeEnv.ASKTHEW_REPO_ROOT || process.cwd()) || void 0),
+        scopeKey,
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       forgetHeldWork(payload.runId);
+      if (result.ok && !isFailureBody(result.body)) {
+        advanceLastPullCursor(runtimeEnv, scopeKey);
+      }
       return toolResult(result);
     }
   );
@@ -23612,9 +36267,10 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const result = await currentClient.releaseWork({
         runId: payload.runId,
+        leaseToken: heldLeaseToken(payload.runId, payload.leaseToken),
         outcome: payload.outcome,
         reason: payload.reason,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey(payload.scopeKey)
       });
       forgetHeldWork(payload.runId);
       return toolResult(result);
@@ -23635,7 +36291,7 @@ function createAskTheWMcpServer(options = {}) {
         title: payload.title,
         body: payload.body,
         metadata: payload.metadata,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
@@ -23658,7 +36314,7 @@ function createAskTheWMcpServer(options = {}) {
         body: payload.body,
         channelKey: payload.channelKey,
         threadId: payload.threadId,
-        scopeKey: payload.scopeKey || defaultScopeKey(runtimeEnv),
+        scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
       });
       return toolResult(result);
@@ -23671,14 +36327,14 @@ function createAskTheWMcpServer(options = {}) {
     const unavailable = cloudGuard(currentClient);
     if (unavailable) return { ok: false, body: JSON.parse(unavailable.content[0].text) };
     return currentClient.getProjectContext({
-      scopeKey: defaultScopeKey(runtimeEnv)
+      scopeKey: resolveScopeKey()
     });
   };
   server.registerResource(
     "project-context",
     PROJECT_CONTEXT_RESOURCES.pack,
     {
-      description: "Compact bound-project pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. Attach at session start. Recap is the install trail, not this pack.",
+      description: "Compact project pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. Attach when a conversation starts.",
       mimeType: "application/json"
     },
     async (uri) => {
@@ -23690,7 +36346,7 @@ function createAskTheWMcpServer(options = {}) {
     "project-w-card",
     PROJECT_CONTEXT_RESOURCES.wCard,
     {
-      description: "Current W Card from the bound project pack. First-class pack field; no wcard:// citation kind.",
+      description: "Current W Card from this project pack. First-class pack field; no wcard:// citation kind.",
       mimeType: "application/json"
     },
     async (uri) => {
@@ -23703,7 +36359,7 @@ function createAskTheWMcpServer(options = {}) {
     "project-north-star",
     PROJECT_CONTEXT_RESOURCES.northStar,
     {
-      description: "Canonical North Star from the bound project pack. First-class pack field; no northstar:// citation kind.",
+      description: "Canonical North Star from this project pack. First-class pack field; no northstar:// citation kind.",
       mimeType: "application/json"
     },
     async (uri) => {
@@ -23716,7 +36372,7 @@ function createAskTheWMcpServer(options = {}) {
     "project-outcomes",
     PROJECT_CONTEXT_RESOURCES.outcomes,
     {
-      description: "Active Way outcomes from the bound project pack, cited with outcome:// ids.",
+      description: "Active Way outcomes from this project pack, cited with outcome:// ids.",
       mimeType: "application/json"
     },
     async (uri) => {
@@ -23729,7 +36385,7 @@ function createAskTheWMcpServer(options = {}) {
     "project-decisions",
     PROJECT_CONTEXT_RESOURCES.decisions,
     {
-      description: "Open Way decisions from the bound project pack, cited with decision:// ids. This is the project record, not the install-scoped list_decisions trail.",
+      description: "Open Way decisions from this project pack, cited with decision:// ids.",
       mimeType: "application/json"
     },
     async (uri) => {
@@ -23762,11 +36418,33 @@ function createAskTheWMcpServer(options = {}) {
       const result = await currentClient.readProjectDoc({
         artifactId: parsed.artifactId,
         version: parsed.version,
-        scopeKey: defaultScopeKey(runtimeEnv)
+        scopeKey: resolveScopeKey()
       });
       return resourceJson(uri, result.body);
     }
   );
+  for (const extra of options.extraTools ?? []) {
+    advertisedTools()[extra.name]?.remove();
+    server.registerTool(
+      extra.name,
+      {
+        description: extra.description,
+        inputSchema: external_exports.object({}).passthrough(),
+        annotations: {
+          readOnlyHint: extra.readOnly,
+          destructiveHint: extra.destructive === true,
+          openWorldHint: false
+        }
+      },
+      async (args) => {
+        const body = await extra.run(args);
+        return toolJson(body, { isError: isFailureBody(body) });
+      }
+    );
+  }
+  for (const [name, tool] of Object.entries(advertisedTools())) {
+    if (!tool.title) tool.update({ title: toolTitle(name) });
+  }
   syncAdvertisedTools();
   return server;
 }
@@ -23790,11 +36468,13 @@ async function runStdioServer(options = {}) {
   const sdkOnClose = transport.onclose?.bind(transport);
   transport.onclose = () => {
     sdkOnClose?.();
-    void releaseOnSessionEnd();
+    void releaseOnSessionEnd().finally(() => {
+      void shutdownMcpAnalytics();
+    });
   };
   for (const signal of ["SIGINT", "SIGTERM"]) {
     process.once(signal, () => {
-      void releaseOnSessionEnd().finally(() => process.exit(0));
+      void releaseOnSessionEnd().finally(() => shutdownMcpAnalytics()).finally(() => process.exit(0));
     });
   }
 }
@@ -23849,7 +36529,7 @@ function usage() {
     "  askthew-mcp session-start [--scope-key <scope>] [--limit <n>] [--json]",
     "  askthew-mcp --version",
     "",
-    "Install from the Claude Code or Codex marketplace. Project connection uses MCP tools, not this CLI."
+    "Install from the Claude Code or Codex marketplace. Claude Code signs in through the browser. Codex project connection uses MCP tools, not this CLI."
   ].join("\n");
 }
 function parseArgs(argv) {
@@ -23952,9 +36632,9 @@ async function sessionStartCommand(argv = []) {
     console.log("Read current ones with read_project_doc before answering from memory.");
     for (const [index, entry] of docs.entries()) {
       const item = entry && typeof entry === "object" ? entry : {};
-      const path5 = String(item.path ?? item.title ?? "Untitled doc");
+      const path6 = String(item.path ?? item.title ?? "Untitled doc");
       const reasons = Array.isArray(item.staleReasons) ? item.staleReasons.map(String) : [];
-      console.log(`${index + 1}. ${path5}${reasons.length ? ` - stale: ${reasons.join("; ")}` : ""}`);
+      console.log(`${index + 1}. ${path6}${reasons.length ? ` - stale: ${reasons.join("; ")}` : ""}`);
     }
   }
   if (work.length === 0) {
@@ -23976,7 +36656,7 @@ async function sessionStartCommand(argv = []) {
 async function main() {
   const [command, ...argv] = process.argv.slice(2);
   if (!command) {
-    await runStdioServer();
+    await runStdioServer({ instructions: mcpToolBehaviorInstructions });
     return;
   }
   if (command === "--help" || command === "-h" || command === "help") {
@@ -23995,7 +36675,7 @@ async function main() {
     }
     if (REMOVED_COMMANDS.has(command)) {
       throw usageError(
-        `${command} was removed. Install Ask The W from the Claude Code or Codex marketplace, then use the MCP tools for signup and project connection.`,
+        `${command} was removed. Install Ask The W from the Claude Code or Codex marketplace. Claude Code signs in through the browser. Codex uses the MCP tools to bind this project.`,
         "removed_command"
       );
     }
@@ -24018,3 +36698,15 @@ main().catch((error2) => {
   console.error(error2 instanceof Error ? error2.message : String(error2));
   process.exitCode = EXIT_CODE.internal;
 });
+/*! Bundled license information:
+
+@posthog/core/dist/vendor/uuidv7.mjs:
+  (*! LICENSE: uuidv7.mjs.LICENSE.txt *)
+  (**
+   * uuidv7: An experimental implementation of the proposed UUID Version 7
+   *
+   * @license Apache-2.0
+   * @copyright 2021-2023 LiosK
+   * @packageDocumentation
+   *)
+*/

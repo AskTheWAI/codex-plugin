@@ -4,7 +4,7 @@
     "name": "Ask The W",
     "url": "https://askthew.com"
   },
-  "description": "Paid Ask The W MCP tools link Codex to your account for decisions, outcomes, recaps, and server-side next moves.",
+  "description": "Paid Ask The W plugin for Codex. Bind a project, pull context, and write decisions or next moves when asked.",
   "homepage": "https://askthew.com/plugin",
   "interface": {
     "brandColor": "#0B5FFF",
@@ -22,19 +22,22 @@
     "developerName": "Ask The W",
     "displayName": "Ask The W",
     "logo": "./assets/logo.png",
-    "longDescription": "Use the paid Ask The W Codex plugin after install and workspace binding to send authorized, compact coding-session signals to your Ask The W account: capture setup, checkpoints, direction changes, implementation updates, verification results, and final summaries; push durable decisions; review scoped signal, decision, and outcome context; request server-backed recaps; retrieve next moves from Ask The W; and open the workspace to review analytics and connected sources. Signals are sanitized by the MCP package before queueing or sending: no transcripts, secrets, credentials, private tokens, or large copied content. Examples: push a product or architecture decision made in Codex; pull the outcomes and next moves already tracked in your Ask The W workspace; open Ask The W when you want the broader dashboard view.",
+    "longDescription": "Use the paid Ask The W Codex plugin after install and workspace binding. Bind a paid project, then pull project context: the W Card, North Star, outcomes, decisions, and moves. Write a decision, complete a move, or push one update only when the user asks. The plugin does not capture automatically and does not upload transcripts. Examples: bind the folder you have open; pull the current project context; push a product or architecture decision when the user asks.",
     "privacyPolicyURL": "https://askthew.com/privacy",
     "screenshots": [
       "./assets/brand/social/product-preview.png"
     ],
-    "shortDescription": "Account-linked Codex decisions, recaps, and server-side next moves.",
+    "shortDescription": "Bind a project, pull context, and write decisions or next moves when asked.",
     "termsOfServiceURL": "https://askthew.com/terms",
     "websiteURL": "https://askthew.com"
   },
   "keywords": [
-    "observability",
+    "askthew",
+    "paid",
     "decisions",
-    "signals"
+    "next-moves",
+    "mcp",
+    "codex"
   ],
   "license": "MIT",
   "mcpServers": "./.mcp.json",
