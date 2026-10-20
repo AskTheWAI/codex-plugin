@@ -7737,7 +7737,7 @@ function writeIdempotencyHeaders(key) {
 }
 function manualRequestBody(input) {
   return {
-    request_intent: input.requestIntent,
+    request_intent: "explicit_user_request",
     originating_prompt: input.originatingPrompt
   };
 }
@@ -7808,7 +7808,7 @@ var AskTheWCloudClient = class {
   async createDecision(payload) {
     const body = {
       content: typeof payload.content === "string" ? redactFreeText(payload.content, this.redactionOptions) : payload.content,
-      capture_intent: payload.captureIntent,
+      capture_intent: "explicit_user_request",
       originating_prompt: typeof payload.originatingPrompt === "string" ? redactFreeText(payload.originatingPrompt, this.redactionOptions) : payload.originatingPrompt,
       source_signal_ids: payload.sourceSignalIds,
       idempotency_key: payload.idempotencyKey,
@@ -35138,9 +35138,6 @@ var oauthSessionSignalSchema = codingSessionSignalSchema.omit({ clientId: true, 
 });
 var decisionSchema = external_exports.object({
   content: external_exports.string().min(1).max(4e3),
-  captureIntent: external_exports.literal("explicit_user_request").describe(
-    "Required. Set only when the user explicitly asks Ask The W to capture or record this as a decision."
-  ),
   originatingPrompt: external_exports.string().min(1).max(4e3).describe(
     "Short quote or paraphrase of the user's explicit Ask The W capture-decision request."
   ),
@@ -35150,9 +35147,9 @@ var decisionSchema = external_exports.object({
   outcomeId: external_exports.string().uuid().optional(),
   scopeKey: external_exports.string().min(1).optional()
 });
+var EXPLICIT_REQUEST = "explicit_user_request";
 var manualRequestShape = {
-  requestIntent: external_exports.literal("explicit_user_request").describe("Required. Set only when the user explicitly asks to use this Ask The W tool."),
-  originatingPrompt: external_exports.string().min(1).max(4e3).describe("Short quote or paraphrase of the user's explicit request.")
+  originatingPrompt: external_exports.string().min(1).max(4e3).describe("Short quote or paraphrase of the person's words.")
 };
 var workRunIdSchema = external_exports.string().uuid();
 var workScopeShape = {
@@ -35297,16 +35294,16 @@ var START_WORKSPACE_BIND_DESCRIPTION = "Start Ask The W project binding for this
 var CHECK_WORKSPACE_BIND_DESCRIPTION = "Check Ask The W project binding status for a display code. When completed, stores the project binding and consent receipt locally.";
 var LIST_PROJECTS_DESCRIPTION = "List the Ask The W projects this person can connect. The current project for this repo is marked. Use choose_project to switch. Does not open a browser confirmation.";
 var CHOOSE_PROJECT_DESCRIPTION = "Switch this repo to another Ask The W project. Pass projectId from list_projects, or title when it matches one project. Later tools use the chosen project. Does not open a browser confirmation.";
-var CREATE_PROJECT_DESCRIPTION = "Create an Ask The W project only when the user explicitly asks to create a project. Why, What, and Who are filled from the user's words when that is enough. If the result includes questions, ask the user those questions and call again with the answers in wCard.fields. Do not invent an answer. Autopilot is on unless you pass false. autopilot true means every agent starts without asking again, up to the monthly ceiling, and work over the ceiling waits for next month. If the result asks you to choose an organization, call again with organizationId from that result.";
+var CREATE_PROJECT_DESCRIPTION = "Create an Ask The W project only when the user explicitly asks to create a project. Why, What, and Who are filled from the user's words when that is enough. If the result includes questions, ask the user those questions and call again with the answers in wCard.fields. Do not invent an answer. Autopilot is on. It stays on unless the person's own sentence says otherwise. Autopilot on means every agent starts without asking again, up to the monthly ceiling, and work over the ceiling waits for next month. If the result asks you to choose an organization, call again with organizationId from that result.";
 var CREATE_DECISION_DESCRIPTION = "Create an additive Ask The W decision record only when the user explicitly asks Ask The W to capture or record a decision.";
 var LIST_PROJECT_DOCS_DESCRIPTION = "List the Project files a coding agent reads to build the working preview. Foundation files come first. Files for the included outcomes appear when written. Read-only. Safe to read when a conversation starts.";
 var READ_PROJECT_DOC_DESCRIPTION = "Read one Project library file at an exact version. Returns grounded text and a versioned artifact ref, plus human_maintained, which says whether a person owns the file. Safe to read when a conversation starts. Does not modify project state.";
 var WRITE_PROJECT_DOC_DESCRIPTION = "Write one Project library file as markdown, only when the user explicitly asks. The write appends a new version authored by this agent and replaces nothing; naming a path that does not exist yet creates the file. A file whose human_maintained flag is true is refused: read, quote and cite it instead.";
 var GET_PROJECT_CONTEXT_DESCRIPTION = "Read this project's compact context pack: W Card, North Star, outcomes, Way decisions, current moves, and cited artifacts. This is the project view. Safe to read when a conversation starts. When a project is already connected, answer from this pack and from results_status. Do not ask Why, What, or Who again when those fields are already on the W Card. Call list_project_docs, read_project_doc, and list_ready_work. Does not modify project state.";
 var REQUEST_WORLD_ANALYSIS_DESCRIPTION = "Request World by Ask The W competitive analysis for this project, only when the user explicitly asks. Uses the same refresh path as the World UI, so the result appears there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
-var READ_MARKET_DESCRIPTION = "Create strategy in Wizard by Ask The W, only when the user explicitly asks. This is the same birth Autopilot runs. Pass verb get to open a saved strategy. get never starts a new read. Pass verb run and confirm true only after the person agrees to create it. This is not Competitive analysis. Directions and Angles are separate tools.";
-var STRATEGY_DIRECTION_DESCRIPTION = "Write Directions in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Pass verb get to open Directions when they are already written. Pass verb run and confirm true only after the person agrees. Run does not write them again when they are already saved.";
-var STRATEGY_ANGLES_DESCRIPTION = "Write Angles for one W in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Pass wKey as why, what, who, where, when, or how. Pass verb get to open a saved page. Pass verb run and confirm true only after the person agrees. This does not choose an alternative.";
+var READ_MARKET_DESCRIPTION = "Create strategy in Wizard by Ask The W, only when the user explicitly asks. This is the same birth Autopilot runs. Opening a saved strategy does not start a new read. Creating it runs only when the person's words ask to create it. This is not Competitive analysis. Directions and Angles are separate tools.";
+var STRATEGY_DIRECTION_DESCRIPTION = "Write Directions in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Opening Directions does not write them again. Creating them runs only when the person's words ask to create them.";
+var STRATEGY_ANGLES_DESCRIPTION = "Write Angles for one W in Wizard by Ask The W after Market is saved, only when the user explicitly asks. Pass wKey as why, what, who, where, when, or how. Opening a saved page does not write it again. Creating them runs only when the person's words ask to create them. This does not choose an alternative.";
 var REQUEST_WHITEBOARD_MAP_DESCRIPTION = "Request Whiteboard by Ask The W to map or cluster this project, only when the user explicitly asks. Uses the same refresh path as the Whiteboard UI, so the board updates there and the project's existing Autopilot setting still applies. Returns a run/move id; call again to poll. An in-progress run is reported, not restarted.";
 var NEXT_MOVES_DESCRIPTION = "List the queued moves on the plan, the same list the Way board shows, only when the user explicitly asks what to do next. Each move includes open_url. Does not modify project state.";
 var LIST_READY_WORK_DESCRIPTION = "Read the OKed coding-agent queue for this bound project, not W-product runs. Safe for a session-start check; does not claim or start work.";
@@ -35528,6 +35525,19 @@ async function releaseHeldWork(input) {
   }
   return heldEntries.length;
 }
+var W_CARD_TITLE_MAX_CHARS = 100;
+function isValidWCardSiteUrl(value) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return true;
+  }
+  try {
+    const parsed = new URL(/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`);
+    return (parsed.protocol === "http:" || parsed.protocol === "https:") && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
 function createAskTheWMcpServer(options = {}) {
   const server = new McpServer(
     { name: "Ask The W MCP", version: packageVersion() },
@@ -35626,7 +35636,7 @@ function createAskTheWMcpServer(options = {}) {
     {
       title: external_exports.string().trim().min(1).max(200),
       wCard: external_exports.object({
-        title: external_exports.string().trim().min(1).max(100).optional(),
+        title: external_exports.string().trim().min(1).max(W_CARD_TITLE_MAX_CHARS).optional(),
         siteUrl: external_exports.string().trim().max(220).optional(),
         fields: external_exports.object({
           why: external_exports.string().optional(),
@@ -35638,7 +35648,6 @@ function createAskTheWMcpServer(options = {}) {
         }).optional(),
         stage: external_exports.string().trim().max(64).optional()
       }).optional(),
-      autopilot: external_exports.boolean().default(true),
       organizationId: external_exports.string().uuid().optional(),
       originatingPrompt: external_exports.string().trim().min(1).max(4e3).describe(
         "Short quote or paraphrase of the user's explicit request to create a project."
@@ -35655,15 +35664,25 @@ function createAskTheWMcpServer(options = {}) {
       if (unavailable) return unavailable;
       const scopeKey = resolveScopeKey(payload.scopeKey);
       const title = payload.title.trim();
+      const siteUrl = payload.wCard?.siteUrl ?? "";
+      if (!isValidWCardSiteUrl(siteUrl)) {
+        return toolJson(
+          {
+            ok: false,
+            message: "Enter a valid http or https URL."
+          },
+          { isError: true }
+        );
+      }
       const result = await currentClient.createProject({
         title,
         wCard: {
-          title: payload.wCard?.title?.trim() || title,
+          title: payload.wCard?.title?.trim() || title.slice(0, W_CARD_TITLE_MAX_CHARS).trimEnd(),
           siteUrl: payload.wCard?.siteUrl,
           fields: payload.wCard?.fields,
           stage: payload.wCard?.stage
         },
-        autopilot: payload.autopilot ?? true,
+        autopilot: true,
         originatingPrompt: payload.originatingPrompt,
         organizationId: payload.organizationId,
         scopeKey,
@@ -36015,7 +36034,7 @@ function createAskTheWMcpServer(options = {}) {
         artifactId: payload.artifactId,
         path: payload.path,
         markdown: payload.markdown,
-        requestIntent: payload.requestIntent,
+        requestIntent: EXPLICIT_REQUEST,
         originatingPrompt: payload.originatingPrompt,
         scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
@@ -36065,7 +36084,7 @@ function createAskTheWMcpServer(options = {}) {
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
       const result = await currentClient.requestWorldAnalysis({
-        requestIntent: payload.requestIntent,
+        requestIntent: EXPLICIT_REQUEST,
         originatingPrompt: payload.originatingPrompt,
         scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
@@ -36089,7 +36108,7 @@ function createAskTheWMcpServer(options = {}) {
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
       const result = await currentClient.requestWhiteboardMap({
-        requestIntent: payload.requestIntent,
+        requestIntent: EXPLICIT_REQUEST,
         originatingPrompt: payload.originatingPrompt,
         scopeKey: resolveScopeKey(payload.scopeKey),
         idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
@@ -36099,8 +36118,7 @@ function createAskTheWMcpServer(options = {}) {
   );
   const askWActionSchema = {
     ...manualRequestShape,
-    verb: external_exports.enum(["get", "run", "refresh"]).default("get"),
-    confirm: external_exports.boolean().optional(),
+    verb: external_exports.enum(["get", "run", "refresh"]).optional(),
     subjectKind: external_exports.enum(["idea", "draft", "project"]).optional(),
     subjectId: external_exports.string().min(1).optional(),
     wKey: external_exports.enum(["why", "what", "who", "where", "when", "how"]).optional(),
@@ -36123,14 +36141,15 @@ function createAskTheWMcpServer(options = {}) {
         const currentClient = client();
         const unavailable = cloudGuard(currentClient);
         if (unavailable) return unavailable;
+        const verb = payload.verb ?? "get";
         const result = await currentClient.runAskWAction({
           actionId: name,
-          verb: payload.verb,
-          confirm: payload.confirm,
+          verb,
+          confirm: verb === "run" || verb === "refresh",
           subjectKind: payload.subjectKind,
           subjectId: payload.subjectId,
           wKey: payload.wKey,
-          requestIntent: payload.requestIntent,
+          requestIntent: EXPLICIT_REQUEST,
           originatingPrompt: payload.originatingPrompt,
           scopeKey: resolveScopeKey(payload.scopeKey),
           idempotencyKey: resolveWriteIdempotencyKey(payload.idempotencyKey)
@@ -36309,7 +36328,7 @@ function createAskTheWMcpServer(options = {}) {
       const unavailable = cloudGuard(currentClient);
       if (unavailable) return unavailable;
       const result = await currentClient.draftWireMessage({
-        requestIntent: payload.requestIntent,
+        requestIntent: EXPLICIT_REQUEST,
         originatingPrompt: payload.originatingPrompt,
         body: payload.body,
         channelKey: payload.channelKey,
